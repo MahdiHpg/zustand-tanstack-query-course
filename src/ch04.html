@@ -1,0 +1,169 @@
+<section class="chapter part-zustand" id="ch04">
+  <div class="pgmark">CHAPTER-04</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۴</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand</div>
+      <h1>Selectors و بهینه‌سازی رندر</h1>
+      <p class="ch-desc">سلکتور قلب کارایی Zustand است. در این فصل یاد می‌گیرید دقیقاً چه چیزی باعث رندر می‌شود، چرا برگرداندن شیءِ جدید از سلکتور خطرناک است و با useShallow و Transient Updates چطور حرفه‌ای بنویسیم.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>مکانیزم subscribe و مقایسهٔ <code>Object.is</code></li>
+      <li>چرا <code>(s) =&gt; ({ a: s.a, b: s.b })</code> باگ رندر می‌سازد؟</li>
+      <li>استفادهٔ صحیح از <code>useShallow</code></li>
+      <li>Transient Updates: خواندن و اجرا بدون رندر</li>
+    </ul>
+  </div>
+
+  <h2>چه چیزی باعث رندر می‌شود؟</h2>
+  <p>وقتی می‌نویسید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">مکانیزم سلکتور</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">const price = useProductStore((s) =&gt; s.price)</code></pre>
+  </div>
+  <p>پشت صحنه این اتفاق می‌افتد: کامپوننت در استور <strong>subscribe</strong> می‌شود. هر بار استور تغییر می‌کند، Zustand سلکتور شما را با State جدید دوباره اجرا می‌کند و نتیجه را با نتیجهٔ قبلی مقایسه می‌کند — با <code>Object.is</code>. اگر برابر باشند، <strong>رندری در کار نیست</strong>. اگر متفاوت باشند، کامپوننت رندر می‌شود.</p>
+  <p>پس قانون کارایی Zustand یک جمله است: <strong>سلکتور شما باید برای دادهٔ تغییرنکرده، همیشه «همان مقدار» (برابر از نظر Object.is) را برگرداند.</strong></p>
+
+  <h3>مقادیر اولیه امن‌اند؛ مقادیر مرجعی خطر</h3>
+  <table class="tbl">
+    <thead><tr><th>سلکتور</th><th>نوع خروجی</th><th>هر تغییر استور باعث رندر؟</th></tr></thead>
+    <tbody>
+      <tr><td><code>(s) =&gt; s.count</code></td><td>عدد/رشته/بولین</td><td>فقط وقتی خودش عوض شود — امن</td></tr>
+      <tr><td><code>(s) =&gt; s.user.name</code></td><td>رشته</td><td>فقط وقتی name عوض شود — امن</td></tr>
+      <tr><td><code>(s) =&gt; s.items</code></td><td>مرجع آرایه</td><td>فقط وقتی مرجع آرایه عوض شود — امن</td></tr>
+      <tr><td><code>(s) =&gt; s.items.map(...)</code></td><td><b>آرایهٔ جدید</b></td><td><b>همیشه!</b> — باگ رندر</td></tr>
+      <tr><td><code>(s) =&gt; ({ a: s.a, b: s.b })</code></td><td><b>شیء جدید</b></td><td><b>همیشه!</b> — باگ رندر</td></tr>
+    </tbody>
+  </table>
+  <p>مقایسهٔ <code>Object.is</code> برای اعداد و رشته‌ها «ارزشی» است، اما برای آرایه و شیء «مرجعی»: هر اجرای <code>s.items.map(...)</code> یک آرایهٔ <em>جدید</em> در حافظه می‌سازد که هرگز با قبلی برابر نیست؛ پس هر تغییر استور (حتی تغییر یک فیلد بی‌ربط) رندر می‌گیرد. بدتر: چون خود State هم هر بار عوض می‌شود، در برخی سناریوها حلقهٔ بی‌نهایت رندر می‌سازد.</p>
+
+  <h2>راه‌حل ۱: سلکتورهای کوچک و متعدد</h2>
+  <p>به‌جای یک سلکتورِ شیءساز، چند سلکتور مجزا:</p>
+  <div class="compare">
+    <div class="codeblock bad">
+      <div class="cb-head"><span class="cb-file">بد — شیء جدید در هر رندر</span><span class="cb-lang">jsx</span></div>
+      <pre><code class="language-jsx">const { name, email } = useUserStore(
+  (s) =&gt; ({ name: s.user.name, email: s.user.email })
+)</code></pre>
+    </div>
+    <div class="codeblock good">
+      <div class="cb-head"><span class="cb-file">خوب — دو subscribe مستقل</span><span class="cb-lang">jsx</span></div>
+      <pre><code class="language-jsx">const name = useUserStore((s) =&gt; s.user.name)
+const email = useUserStore((s) =&gt; s.user.email)</code></pre>
+    </div>
+  </div>
+  <p>فراتر از درستی: این شکل هم دقیق‌تر است (فقط تغییر name رندر می‌گیرد، نه تغییر email) هم خواناتر.</p>
+
+  <h2>راه‌حل ۲: useShallow — مقایسهٔ سطحی</h2>
+  <p>گاهی واقعاً چند فیلد را یک‌جا می‌خواهید (مثلاً در یک map یا بازگشت از یک تابع کمکی). برای این موارد Zustand یک هوک کمکی دارد که خروجی سلکتور را <em>سطحی</em> مقایسه می‌کند: کلیدها و مقادیر اولیهٔ برابر = برابر.</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useCartStore.js و کامپوننت</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useShallow } from 'zustand/react/shallow'
+import { useCartStore } from './useCartStore'
+
+function CartSummary() {
+  const { items, coupon } = useCartStore(
+    useShallow((s) =&gt; ({ items: s.items, coupon: s.coupon }))
+  )
+  // فقط وقتی مرجعِ items یا مقدار coupon عوض شود رندر می‌گیرد
+  return &lt;span&gt;{items.length} قلم — کوپن: {coupon}&lt;/span&gt;
+}</code></pre>
+  </div>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — shallow یعنی سطحی، نه عمیق</div><p><code>useShallow</code> فقط یک سطح مقایسه می‌کند. اگر سلکتور هر بار <em>محتوای جدیدی</em> بسازد (مثل <code>s.items.map(i =&gt; i.id * 2)</code>) که عناصرش آرایه/شیء تازه‌اند، باز هم هر بار متفاوت است. برای دادهٔ محاسبه‌شدهٔ سنگین، راه‌حل درست <code>useMemo</code> در کامپوننت یا سلکتورِ ذخیره‌شده در استور است.</p></div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته — تفاوت با نسخهٔ ۴</div><p>در نسخهٔ ۴ آرگومان دوم هوک را برابر <code>shallow</code> می‌گذاشتند: <code>useStore(selector, shallow)</code>. این API در نسخهٔ ۵ حذف شده و به‌جایش <code>useShallow</code> دور سلکتور پیچیده می‌شود. در مصاحبه‌ها هم می‌پرسند!</p></div>
+
+  <h2>محاسبات مشتق‌شده: کجا انجام شود؟</h2>
+  <p>مجموع قیمت سبد از دادهٔ خام مشتق می‌شود. سه جای ممکن:</p>
+  <ul>
+    <li><strong>در استور، هنگام هر mutation</strong> (نگه‌داشتن <code>total</code> در State): سریع ولی تکرار اطلاعات و ریسک ناهماهنگی — معمولاً نه.</li>
+    <li><strong>در سلکتور</strong>: <code>(s) =&gt; s.items.reduce(...)</code> — هر اجرا عدد جدیدی «ارزشی» می‌سازد پس رندر مشکل شیء را ندارد؛ اما محاسبه در هر تغییر استور اجرا می‌شود.</li>
+    <li><strong>در کامپوننت با <code>useMemo</code></strong>: فقط وقتی مرجع <code>items</code> عوض شود محاسبه می‌شود — انتخاب پیش‌فرض برای محاسبات سنگین.</li>
+  </ul>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/CartTotal.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useMemo } from 'react'
+import { useCartStore } from './store/useCartStore'
+
+export default function CartTotal() {
+  const items = useCartStore((s) =&gt; s.items)
+
+  // فقط وقتی آرایهٔ items عوض شود دوباره حساب می‌شود
+  const total = useMemo(
+    () =&gt; items.reduce((sum, i) =&gt; sum + i.price * i.qty, 0),
+    [items]
+  )
+
+  return &lt;div&gt;جمع کل: {total.toLocaleString('fa-IR')} تومان&lt;/div&gt;
+}</code></pre>
+  </div>
+
+  <h2>Transient Updates: بدون رندر با State کار کن</h2>
+  <p>گاهی State تغییری می‌کند که اصلاً نباید UI را رندر کند: موقعیت موس، مقدار اسکرول، تایمر... برای این‌ها subscribe و getState بدون هوک استفاده می‌شود:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/MousePad.jsx — رندر صفر در هر حرکت</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useRef, useEffect } from 'react'
+import { useMouseStore } from './store/useMouseStore'
+
+export default function MousePad() {
+  const ref = useRef(null)
+
+  useEffect(() =&gt; {
+    // ۱) نوشتن: هر حرکت موس را در استور ذخیره کن — بدون setState در React
+    const onMove = (e) =&gt; useMouseStore.setState({ x: e.clientX, y: e.clientY })
+    window.addEventListener('mousemove', onMove)
+
+    // ۲) خواندن: DOM را مستقیم آپدیت کن، نه با رندر React
+    const unsubscribe = useMouseStore.subscribe((s) =&gt; {
+      if (ref.current) {
+        ref.current.style.transform = `translate(${s.x}px, ${s.y}px)`
+      }
+    })
+
+    return () =&gt; {
+      window.removeEventListener('mousemove', onMove)
+      unsubscribe()
+    }
+  }, [])
+
+  return &lt;div ref={ref} className="cursor-dot" /&gt;
+}</code></pre>
+  </div>
+  <p>و اگر فقط در یک رویداد به مقدار لحظه‌ای نیاز دارید، اصلاً subscribe لازم نیست:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">خواندن در لحظهٔ نیاز</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">const handleSave = () =&gt; {
+  const { draft } = useEditorStore.getState() // بدون رندر، بدون سلکتور
+  saveToServer(draft)
+}</code></pre>
+  </div>
+
+  <h2>چک‌لیست کارایی سلکتورها</h2>
+  <ul class="checklist">
+    <li>پیش‌فرض: سلکتورِ مقدار اولیهٔ تکی — <code>(s) =&gt; s.a.b</code>.</li>
+    <li>هیچ‌وقت شیء/آرایهٔ تازه داخل سلکتور نسازید.</li>
+    <li>چند فیلد؟ یا چند سلکتور، یا <code>useShallow</code> — نه object literal خام.</li>
+    <li>محاسبهٔ سنگین؟ <code>useMemo</code> در کامپوننت روی مرجعِ پایدار.</li>
+    <li>State پرتغییر و بی‌نیاز از رندر؟ Transient pattern با <code>setState/subscribe</code>.</li>
+    <li>برای راستی‌آزمایی، از tab «Profiler» در React DevTools استفاده کنید و تعداد رندرها را ببینید.</li>
+  </ul>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>رندر وقتی اتفاق می‌افتد که خروجی سلکتور با <code>Object.is</code> تغییر کرده باشد.</li>
+      <li>شیء/آرایهٔ تازه در سلکتور = رندر اضافه = باگ کلاسیک Zustand.</li>
+      <li><code>useShallow</code> از <code>zustand/react/shallow</code> مقایسهٔ سطحی می‌دهد؛ در v5 جایگزین آرگومان دوم هوک است.</li>
+      <li>محاسبات مشتق‌شده را با <code>useMemo</code> در کامپوننت انجام دهید.</li>
+      <li>Transient Updates برای دادهٔ پرتغییرِ بی‌نیاز از رندر: <code>getState</code> و <code>setState</code> مستقیم.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۴</div>
+    <p>در پروژهٔ تمرینی یک استور بسازید که هر ۱۰۰ میلی‌ثانیه یک شمارنده را افزایش دهد (با <code>setInterval</code> و <code>setState</code>). دو کامپوننت بسازید: یکی با سلکتور معمولی مقدار شمارنده (که رندر می‌شود) و یکی که با Transient pattern فقط عدد را داخل <code>ref</code> آپدیت می‌کند. با React DevTools Profiler تفاوت تعداد رندرها را ثبت کنید و در یک پاراگراف توضیح دهید هر کدام کجا مناسب است.</p>
+  </div>
+</section>

@@ -1,0 +1,220 @@
+<section class="chapter part-tq" id="ch09">
+  <div class="pgmark">CHAPTER-09</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۹</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش دوم · TanStack Query</div>
+      <h1>useQuery — خواندن داده از سرور</h1>
+      <p class="ch-desc">هوکی که جای همهٔ loading/error/useEffectهای دستی می‌نشیند: تعریف query، شناخت وضعیت‌ها، کنترل تازگی با staleTime و تنظیمات عملی retry و cancellation.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>نوشتن اولین <code>useQuery</code> با <code>queryKey</code> و <code>queryFn</code></li>
+      <li>تفکیک <code>status</code> و <code>fetchStatus</code> و رندر بر اساس آن‌ها</li>
+      <li>رفتار کش در عمل: dedup، refetch خودکار و staleTime</li>
+      <li>سلکت‌کردن و تبدیل داده با <code>select</code>، کوئری‌های وابسته با <code>enabled</code></li>
+    </ul>
+  </div>
+
+  <h2>اولین useQuery</h2>
+  <p>قرارداد پروژه: یک لایهٔ API جدا نگه می‌داریم تا queryFnها فقط «فراخوانی» باشند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/lib/api.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">const BASE = 'https://jsonplaceholder.typicode.com'
+
+export async function getJSON(path) {
+  const res = await fetch(BASE + path)
+  if (!res.ok) throw new Error(`API error ${res.status}`)
+  return res.json()
+}
+
+export const api = {
+  posts: (params = '') =&gt; getJSON(`/posts${params}`),
+  post: (id) =&gt; getJSON(`/posts/${id}`),
+  users: () =&gt; getJSON('/users'),
+}</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/PostsList.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useQuery } from '@tanstack/react-query'
+import { api } from '../lib/api'
+
+export default function PostsList() {
+  const { data, isPending, isError, error } = useQuery({
+    queryKey: ['posts'],
+    queryFn: () =&gt; api.posts('?_limit=10'),
+  })
+
+  if (isPending) return &lt;p&gt;در حال بارگذاری پست‌ها...&lt;/p&gt;
+  if (isError) return &lt;p&gt;خطا: {error.message}&lt;/p&gt;
+
+  return (
+    &lt;ul&gt;
+      {data.map((post) =&gt; (
+        &lt;li key={post.id}&gt;
+          &lt;b&gt;{post.id}. {post.title}&lt;/b&gt;
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  )
+}</code></pre>
+  </div>
+  <p>دو ورودی، همه‌چیز:</p>
+  <ul>
+    <li><strong><code>queryKey</code></strong>: هویت این داده در کش. آرایه است و از چپ به راست «از عمومی به خاص» خوانده می‌شود: <code>['posts']</code> لیست پست‌ها، <code>['posts', 5]</code> پست شمارهٔ ۵، <code>['posts', { page: 2, q: 'react' }</code> لیست با پارامترها. هر تغییر در محتوای آرایه = یک دادهٔ متفاوت.</li>
+    <li><strong><code>queryFn</code></strong>: تابعی که Promise داده را برمی‌گرداند. اگر reject شود، Query به status خطا می‌رود و بعد از retryها خطا در <code>error</code> است.</li>
+  </ul>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — queryFn باید واقعاً throw کند</div><p>اگر در queryFn خطای HTTP را با <code>if (!res.ok) return null</code> «بلعید»، TanStack Query فکر می‌کند همه‌چیز موفق بوده و UI شما رندر خالی می‌شود. همیشه خطا را پرتاب کنید (همان کاری که <code>getJSON</code> بالا می‌کند).</p></div>
+
+  <h2>وضعیت‌ها: status در برابر fetchStatus</h2>
+  <p>مهم‌ترین نکتهٔ مفهومی فصل. هر Query دو چراغ دارد:</p>
+  <table class="tbl tbl-t">
+    <thead><tr><th style="width:22%">چراغ</th><th>مقادیر</th><th>سؤالی که جواب می‌دهد</th></tr></thead>
+    <tbody>
+      <tr><td><code>status</code> / هوک‌های <code>isPending · isError · isSuccess</code></td><td><code>pending / error / success</code></td><td>«آیا اصلاً داده‌ای داریم؟» — دربارهٔ خودِ داده</td></tr>
+      <tr><td><code>fetchStatus</code> / <code>isFetching</code></td><td><code>fetching / idle / paused</code></td><td>«همین الان درخواستی در جریان است؟» — دربارهٔ فرآیند شبکه</td></tr>
+    </tbody>
+  </table>
+  <p>ترکیب‌های معنادار:</p>
+  <ul>
+    <li><code>isPending &amp;&amp; isFetching</code>: بارگذاری اولیه؛ صفحهٔ loading نشان بدهید. (این ترکیب همان <code>isLoading</code> است.)</li>
+    <li><code>isSuccess &amp;&amp; isFetching</code>: دادهٔ قدیمی روی صفحه + رفرش در پس‌زمینه؛ یک ایندیکاتور کوچک نشان دهید، صفحه را خالی نکنید!</li>
+    <li><code>isSuccess &amp;&amp; !isFetching</code>: داده تازه و آرام.</li>
+    <li><code>isError</code>: خطا — اما دادهٔ قبلی ممکن است هنوز در <code>data</code> باشد.</li>
+  </ul>
+  <div class="callout co-danger"><div class="co-title"><span class="dot"></span>ممنوع — خالی کردن صفحه هنگام رفرش</div><p><code>if (isFetching) return &lt;Spinner /&gt;</code> یعنی هر برگشت کاربر به تب، کل صفحه به اسپینر تبدیل شود. برای رفرش پس‌زمینه فقط <code>isFetching</code> را به یک نشانگر کوچک وصل کنید؛ <code>isPending</code> مال صفحهٔ loading اولیه است.</p></div>
+
+  <h2>رفتار کش در عمل: dedup و refetch</h2>
+  <p>سه کامپوننت مختلف، همان کلید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">سه observer، یک درخواست</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">// در سه کامپوننت مختلف:
+const { data } = useQuery({ queryKey: ['users'], queryFn: api.users })
+// فقط «یک» درخواست شبکه زده می‌شود و هر سه همان data را می‌گیرند.
+// به این می‌گویند Request Deduplication.</code></pre>
+  </div>
+  <p>وقتی داده برمی‌گردد، کش آن را با کلید <code>['users']</code> ذخیره می‌کند. بعداً اگر کامپوننت دیگری mount شود، فوراً دادهٔ کش را می‌گیرد (<code>isSuccess</code> از اول) و Query طبق قوانین refetch تصمیم می‌گیرد دوباره بگیرد یا نه. رفرش خودکار سه‌گانه:</p>
+  <ul>
+    <li><code>refetchOnWindowFocus</code> (پیش‌فرض روشن): برگشت به تب اپ → اگر داده stale است، رفرش پس‌زمینه.</li>
+    <li><code>refetchOnMount</code> (پیش‌فرض روشن): mount دوباره → اگر stale است، رفرش.</li>
+    <li><code>refetchOnReconnect</code> (پیش‌فرض روشن): برگشتن اینترنت → رفرش.</li>
+  </ul>
+  <p>همهٔ این‌ها با <code>staleTime</code> کنترل می‌شوند: تا داده «تازه» است، هیچ‌کدام اضافه‌کاری نمی‌کنند. تنظیم پیشنهادی تیمی: داده‌های کم‌تغییر (کشورها، لیست دسته‌ها) staleTime بالا (ساعت‌ها)، داده‌های زنده (قیمت، اعلان) staleTime کوتاه یا ۰.</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">تنظیمات سطح یک Query</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">const { data: notifications } = useQuery({
+  queryKey: ['notifications'],
+  queryFn: () =&gt; api.get('/notifications'),
+  staleTime: 10_000,          // بازنویسیِ پیش‌فرض فقط برای همین Query
+  refetchInterval: 30_000,    // polling: هر ۳۰ ثانیه
+  refetchIntervalInBackground: false, // در تب پنهان poll نکن
+})</code></pre>
+  </div>
+
+  <h2>retry — تلاش مجدد هوشمند</h2>
+  <p>پیش‌فرض: <strong>۳ بار</strong> با تأخیر نمایی (۱ ثانیه، ۲، ۴). کنترل آن:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">retry سفارشی</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">useQuery({
+  queryKey: ['posts'],
+  queryFn: () =&gt; api.posts(),
+  retry: 2,
+  // یا تابعی: خطای ۴۰۴ را نگیر (منبع واقعاً نیست)، بقیه را بگیر
+  retry: (failureCount, error) =&gt; {
+    if (error.message.includes('404')) return false
+    return failureCount &lt; 3
+  },
+  retryDelay: (attempt) =&gt; Math.min(1000 * 2 ** attempt, 30_000),
+})</code></pre>
+  </div>
+
+  <h2>لغو درخواست: signal</h2>
+  <p>TanStack Query به هر queryFn یک <code>signal</code> (همان AbortController مرورگر) می‌دهد؛ وقتی Query بی‌observer شود، درخواست لغو می‌شود و شبکه اشغال نمی‌ماند. برای استفاده، signal را به fetch بدهید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/lib/api.js — نسخهٔ کامل</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">export const api = {
+  posts: (params = '', signal) =&gt; getJSON(`/posts${params}`, signal),
+  post: (id, signal) =&gt; getJSON(`/posts/${id}`, signal),
+}
+
+async function getJSON(path, signal) {
+  const res = await fetch(BASE + path, { signal })
+  if (!res.ok) throw new Error(`API error ${res.status}`)
+  return res.json()
+}
+
+// در useQuery:
+queryFn: ({ signal }) =&gt; api.posts('?_limit=10', signal)</code></pre>
+  </div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته</div><p>هر بار که کلید عوض شود (مثلاً کاربر سریع بین صفحات می‌زند)، درخواست قبلی به‌طور خودکار بی‌ارزش می‌شود؛ با signal، لغو هم واقعی می‌شود. رقابت پاسخ‌ها (race condition) در TanStack Query اساساً وجود ندارد: هر پاسخ فقط به کلید خودش ثبت می‌شود.</p></div>
+
+  <h2>select: تبدیل داده در سطح کش</h2>
+  <p>اگر فقط بخشی از داده لازم دارید (مثلاً نام کاربران از آرایهٔ کامل)، <code>select</code> درست‌کار است — فقط هنگام تغییرِ «خروجی سلکت‌شده» رندر می‌گیرد:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">select + memo خودکار</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">function UserNames() {
+  const names = useQuery({
+    queryKey: ['users'],
+    queryFn: api.users,
+    select: (users) =&gt; users.map((u) =&gt; u.name), // خروجی تبدیل‌شده
+  })
+  // select در نسخهٔ ۵ به‌صورت داخلی memo می‌شود؛
+  // اگر تابع select را بیرون تعریف کردید، با useMemo پایدارش کنید.
+  return &lt;ul&gt;{names.data?.map((n) =&gt; &lt;li key={n}&gt;{n}&lt;/li&gt;)}&lt;/ul&gt;
+}</code></pre>
+  </div>
+
+  <h2>کوئری‌های وابسته: enabled</h2>
+  <p>کلاسیک‌ترین سناریو: «اول کاربر را بگیر، بعد پست‌های همان کاربر». تا id کاربر نیامده، کوئری دوم نباید اجرا شود:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/UserPosts.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useQuery } from '@tanstack/react-query'
+import { api } from '../lib/api'
+
+export default function UserPosts({ email }) {
+  // ۱) کاربر از روی ایمیل
+  const { data: user } = useQuery({
+    queryKey: ['user', email],
+    queryFn: ({ signal }) =&gt; api.findUserByEmail(email, signal),
+  })
+
+  const userId = user?.id
+
+  // ۲) پست‌ها — فقط وقتی userId آماده است
+  const postsQuery = useQuery({
+    queryKey: ['posts', { userId }],
+    queryFn: ({ signal }) =&gt; api.posts(`?userId=${userId}`, signal),
+    enabled: !!userId, // تا userId نباشد، fetch ممنوع
+  })
+
+  if (!user) return &lt;p&gt;در حال پیدا کردن کاربر...&lt;/p&gt;
+  return &lt;PostList data={postsQuery.data ?? []} /&gt;
+}</code></pre>
+  </div>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — کلید، فقط دادهٔ پایدار</div><p>در queryKey هر چیزی که serialize‌شدنی است می‌گذارید (عدد، رشته، شیء ساده، آرایه). تابع یا کلاس نگذارید. کلیدهای به‌هم‌ریخته یعنی کشِ به‌هم‌ریخته — فصل ۱۱ کل ادبیات کلیدها را ساختار می‌دهد.</p></div>
+
+  <h2>دو ابزار آخر این فصل: placeholderData و initialData</h2>
+  <ul>
+    <li><strong><code>initialData</code></strong>: دادهٔ اولیهٔ قطعی — Query از همان لحظهٔ اول «success» است (مثلاً دادهٔ SSR یا پیش‌فرض ثابت). فقط وقتی واقعاً از صحتش مطمئنید.</li>
+    <li><strong><code>placeholderData</code></strong>: دادهٔ «نمایشی» تا fetch واقعی بیاید؛ status می‌ماند pending و <code>isPlaceholderData: true</code>. کاربرد ستاره‌ای‌اش در صفحه‌بندی است (فصل ۱۲): <code>placeholderData: keepPreviousData</code> یعنی «تا دادهٔ صفحهٔ بعد نیامده، صفحهٔ قبل را نشان بده».</li>
+  </ul>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li><code>useQuery({ queryKey, queryFn })</code>؛ کلید = هویت در کش، queryFn = Promise که throw می‌کند.</li>
+      <li><code>status</code> دربارهٔ داده است (pending/error/success)، <code>fetchStatus</code> دربارهٔ شبکه (fetching/idle).</li>
+      <li>dedup خودکار، refetch خودکار با فوکوس/ری‌کانکت و کنترل با staleTime.</li>
+      <li><code>signal</code> را به fetch بدهید تا لغو واقعی داشته باشید؛ race condition حذف می‌شود.</li>
+      <li><code>select</code> برای تبدیل، <code>enabled</code> برای وابستگی، <code>placeholderData</code> و <code>initialData</code> برای تجربهٔ نرم.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۹</div>
+    <p>کامپوننت <code>PostsList</code> را ارتقا دهید: ۱) سلکتور کاربر، آرایهٔ پست‌ها را بر اساس ورودی جستجو فیلتر کند و با <code>select</code> خروجی فیلترشده بگیرد. ۲) کوئری دوم بسازید که با کلید <code>['post', id]</code> جزئیات یک پست را بگیرد و با کلیک روی هر پست نمایش دهد (با <code>enabled</code>). ۳) در DevTools ببینید وقتی دو بار روی همان پست کلیک می‌کنید، درخواست جدیدی زده نمی‌شود — چرا؟ (staleTime پیش‌فرض ۶۰ ثانیهٔ App را یادتان هست؟)</p>
+  </div>
+</section>

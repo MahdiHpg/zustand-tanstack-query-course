@@ -1,0 +1,207 @@
+<section class="chapter part-tq" id="ch10">
+  <div class="pgmark">CHAPTER-10</div>
+  <header class="ch-banner">
+    <div class="ch-num">۱۰</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش دوم · TanStack Query</div>
+      <h1>useMutation — تغییر داده و به‌روزرسانی کش</h1>
+      <p class="ch-desc">ساخت، حذف و ویرایش روی سرور؛ چرخهٔ mutation، اینولیدیشن به‌عنوان راهبرد اصلی sync، و به‌روزرسانی خوش‌بینانه با rollback — الگویی که در مصاحبه‌ها پرسیده می‌شود.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>تعریف <code>useMutation</code> با <code>mutationFn</code> و فراخوانی با <code>variables</code></li>
+      <li>چرخهٔ onMutate → onSuccess / onError → onSettled</li>
+      <li>الگوی به‌روزرسانی خوش‌بینانه کامل با snapshot و rollback</li>
+      <li>انتخاب بین invalidation و setQueryData</li>
+    </ul>
+  </div>
+
+  <h2>آناتومی یک mutation</h2>
+  <p>بر خلاف useQuery که هنگام mount خودش اجرا می‌شود، mutation <strong>دستی</strong> اجرا می‌شود — وقتی کاربر دکمه را زد:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/lib/api.js — اضافه شدن writeها</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">async function sendJSON(path, method, body) {
+  const res = await fetch(BASE + path, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error(`API error ${res.status}`)
+  return res.json()
+}
+
+export const api = {
+  // ...پایین همان getهای فصل ۹
+  addPost: (post) =&gt; sendJSON('/posts', 'POST', post),
+  updatePost: (id, patch) =&gt; sendJSON(`/posts/${id}`, 'PATCH', patch),
+  deletePost: (id) =&gt; sendJSON(`/posts/${id}`, 'DELETE').then(() =&gt; true),
+}</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/NewPostForm.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '../lib/api'
+
+export default function NewPostForm() {
+  const [title, setTitle] = useState('')
+  const queryClient = useQueryClient()
+
+  const addPost = useMutation({
+    mutationFn: (variables) =&gt; api.addPost(variables),
+    onSuccess: (data, variables) =&gt; {
+      // ۱) لیست پست‌ها را stale کن تا از سرور تازه شود
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      setTitle('')
+    },
+    onError: (error, variables) =&gt; {
+      alert('ذخیره نشد: ' + error.message)
+    },
+  })
+
+  return (
+    &lt;form
+      onSubmit={(e) =&gt; {
+        e.preventDefault()
+        addPost.mutate({ title, body: '...', userId: 1 })
+      }}
+    &gt;
+      &lt;input value={title} onChange={(e) =&gt; setTitle(e.target.value)} /&gt;
+      &lt;button disabled={addPost.isPending}&gt;
+        {addPost.isPending ? 'در حال ذخیره...' : 'انتشار'}
+      &lt;/button&gt;
+      {addPost.isError &amp;&amp; &lt;p className="err"&gt;{addPost.error.message}&lt;/p&gt;}
+    &lt;/form&gt;
+  )
+}</code></pre>
+  </div>
+  <table class="tbl tbl-t">
+    <thead><tr><th style="width:26%">قطعه</th><th>نقش</th></tr></thead>
+    <tbody>
+      <tr><td><code>mutationFn</code></td><td>تنها آرگومان اجباری؛ Promise که سرور را تغییر می‌دهد.</td></tr>
+      <tr><td><code>mutate(variables)</code></td><td>اجرای mutation؛ هر داده‌ای (فرم، id، فایل) به‌عنوان variables به mutationFn و کالبک‌ها می‌رسد.</td></tr>
+      <tr><td><code>isPending / isError / error / data</code></td><td>وضعیت‌ها مثل useQuery — <code>isPending</code> یعنی درخواست در جریان است.</td></tr>
+      <tr><td><code>useQueryClient()</code></td><td>دسترسی به client برای invalidate و setQueryData بعد از تغییر.</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — mutate یا mutateAsync؟</div><p><code>mutate()</code> هیچ Promiseای برنمی‌گرداند و خطاها را به onError می‌سپارد — انتخاب پیش‌فرض. اگر منطق بعد از اتمام را «آوانس‌محور» می‌خواهید (مثلاً navigate بعد از موفقیت)، از <code>const res = await mutateAsync(vars)</code> داخل try/catch استفاده کنید. هرگز <code>mutateAsync</code> را بدون try/catch صدا نزنید؛ unhandled rejection می‌گیرید.</p></div>
+
+  <h2>چرخهٔ کامل کالبک‌ها</h2>
+  <div class="flow">
+    <div class="fnode" style="border-color:var(--t)"><b>onMutate</b>قبل از درخواست — جای optimistic update</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--t)"><b>mutationFn</b>درخواست شبکه</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:#15803D"><b>onSuccess</b>پاسخ موفق</div>
+    <div class="fnode" style="border-color:var(--danger)"><b>onError</b>خطا (بعد از retryها)</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode"><b>onSettled</b>در هر دو حالت — پاک‌سازی</div>
+  </div>
+  <p>ترتیب اجرا: کالبک‌های <em>خود mutation</em> اول اجرا می‌شوند و بعد کالبک‌های component-level همان فراخوانی (اگر در <code>mutate(vars, { onSuccess })</code> داده باشید). در تمرین‌های تیمی معمولاً منطق اصلی را در هوک می‌گذاریم و موارد UI-محلی (toast، بستن مودال) را در متد mutate.</p>
+
+  <h2>invalidation: بعد از تغییر، داده را «کهنه» کن</h2>
+  <p>دو راه برای به‌روز نگه‌داشتن کش بعد از mutation:</p>
+  <ol>
+    <li><strong>Invalidation (پیش‌فرض حرفه‌ای):</strong> بگو «دادهٔ X دیگر قابل اعتماد نیست». Queryهای متناظر stale می‌شوند و اگر observer فعال داشته باشند بلافاصله refetch می‌گیرند.</li>
+    <li><strong>setQueryData دستی:</strong> پاسخ سرور را مستقیم در کش بنویس — سریع اما مسئولیت شکل‌دادن به داده با شماست.</li>
+  </ol>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">دو الگو، پهلو به پهلو</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">// الگوی ۱: invalidation — ساده، همیشه درست
+onSuccess: () =&gt; {
+  queryClient.invalidateQueries({ queryKey: ['posts'] })
+}
+
+// الگوی ۲: نوشتن مستقیم پاسخ سرور در کش
+onSuccess: (saved) =&gt; {
+  queryClient.setQueryData(['post', saved.id], saved)
+  queryClient.invalidateQueries({ queryKey: ['posts'] }) // لیست همچنان refetch
+}</code></pre>
+  </div>
+  <p>انتخاب: برای «لیست‌ها» invalidation (سرور منبع حقیقت است)، برای «جزئیات همان آیتم» می‌توانید setQueryData (پاسخ را دارید، چرا دوباره بگیریم؟). ترکیب هر دو رایج و سالم است.</p>
+
+  <h2>به‌روزرسانی خوش‌بینانه (Optimistic Update)</h2>
+  <p>ایده: تغییر را فوراً در کش بنویس (خوش‌بین باش) تا UI آنی شود؛ اگر سرور جواب خطا داد، به حالت قبل برگرد. الگوی رسمی نسخهٔ ۵:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/PostRow.jsx — حذف خوش‌بینانه</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '../lib/api'
+
+export default function DeletePostButton({ id }) {
+  const queryClient = useQueryClient()
+
+  const removePost = useMutation({
+    mutationFn: (id) =&gt; api.deletePost(id),
+
+    // ۱) قبل از درخواست: نسخهٔ فعلی را ذخیره کن و کش را آپدیت کن
+    onMutate: async (id) =&gt; {
+      await queryClient.cancelQueries({ queryKey: ['posts'] }) // refetch در جریان را متوقف کن
+      const previous = queryClient.getQueryData(['posts'])      // snapshot
+      queryClient.setQueryData(['posts'], (old) =&gt;
+        old?.filter((p) =&gt; p.id !== id) ?? old
+      )
+      return { previous } // به context کالبک‌های بعدی می‌رسد
+    },
+
+    // ۲) خطا: برگرد به snapshot
+    onError: (err, id, context) =&gt; {
+      queryClient.setQueryData(['posts'], context.previous)
+      alert('حذف ناموفق بود؛ بازگردانی شد.')
+    },
+
+    // ۳) در هر حالت: همیشه با سرور sync کن
+    onSettled: () =&gt; {
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    },
+  })
+
+  return (
+    &lt;button disabled={removePost.isPending} onClick={() =&gt; removePost.mutate(id)}&gt;
+      {removePost.isPending ? '...' : 'حذف'}
+    &lt;/button&gt;
+  )
+}</code></pre>
+  </div>
+  <p>سه گام طلایی که حفظ کنید:</p>
+  <ol>
+    <li><strong>onMutate:</strong> cancel + snapshot + setQueryData + برگرداندن <code>{ previous }</code>.</li>
+    <li><strong>onError:</strong> بازگردانی از <code>context.previous</code>.</li>
+    <li><strong>onSettled:</strong> invalidation برای همگام‌شدن با حقیقتِ سرور.</li>
+  </ol>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — cancelQueries را حذف نکنید</div><p>اگر قبل از setQueryData، یک refetch در جریان باشد، وقتی تمام شود دادهٔ قدیمی را روی تغییر خوش‌بینانه‌تان می‌نویسد و حذفِ آیتم «برمی‌گردد». اول cancel، بعد snapshot، بعد set.</p></div>
+
+  <h2>mutationهای هماهنگ با هم: useMutationState</h2>
+  <p>برای نمایش وضعیت‌های جهانی (مثلاً badge «N تغییر در حال ذخیره») لازم نیست وضعیت را جابه‌جا کنید؛ Query خودش همهٔ mutationها را نگه می‌دارد:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">شمارش mutationهای در جریان</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useMutationState } from '@tanstack/react-query'
+
+function SavingBadge() {
+  const saving = useMutationState({
+    filters: { status: 'pending' },
+    select: (m) =&gt; m,
+  })
+  if (saving.length === 0) return null
+  return &lt;span className="badge"&gt;{saving.length} تغییر ذخیره می‌شود...&lt;/span&gt;
+}</code></pre>
+  </div>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>mutation دستی اجرا می‌شود: <code>useMutation({ mutationFn })</code> + <code>.mutate(variables)</code>.</li>
+      <li>چرخه: onMutate → mutationFn → onSuccess/onError → onSettled.</li>
+      <li>بعد از هر mutation: invalidation (پیش‌فرض) یا setQueryData (پاسخ قطعی).</li>
+      <li>الگوی خوش‌بینانه: cancelQueries + getQueryData/setQueryData + rollback در onError + invalidate در onSettled.</li>
+      <li><code>useMutationState</code> وضعیت‌های سراسری را بدون state اضافه می‌دهد.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۱۰</div>
+    <p>۱) فرم ویرایش پست بسازید (PATCH با api.updatePost) که بعد از موفقیت، هم جزئیات <code>['post', id]</code> را با setQueryData آپدیت کند و هم لیست را invalidate کند. ۲) افزودن پست را خوش‌بینانه کنید: اول با id موقت (مثلاً <code>Date.now()</code>) در لیست بگذارید و بعد از موفقیت invalidate کنید. ۳) با DevTools ببینید بعد از هر mutation، Queryهای stale چطور دوباره fetch می‌شوند.</p>
+  </div>
+</section>

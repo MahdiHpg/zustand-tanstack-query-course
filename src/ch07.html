@@ -1,0 +1,257 @@
+<section class="chapter part-zustand" id="ch07">
+  <div class="pgmark">CHAPTER-07</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۷</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand — پروژهٔ عملی</div>
+      <h1>پروژهٔ عملی ۱ — سبد خرید کامل با Zustand</h1>
+      <p class="ch-desc">همهٔ آموخته‌های پنج فصل را در یک پروژهٔ واقعی جمع می‌کنیم: فروشگاه کوچکی با گرید محصولات، سبد خرید کشویی، کد تخفیف، محاسبات مشتق‌شده و persist.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>طراحی استور برای یک دامنهٔ واقعی قبل از نوشتن حتی یک خط UI</li>
+      <li>جداسازی State داده از State UI</li>
+      <li>محاسبات مشتق‌شده (جمع، تخفیف، نهایی) بدون تکرار داده</li>
+      <li>اتصال persist و مدیریت hydration در یک پروژهٔ کامل</li>
+    </ul>
+  </div>
+
+  <h2>طراحی قبل از کد</h2>
+  <p>درخواست محصول: «کاربر محصولات را می‌بیند، به سبد اضافه می‌کند، تعداد را تغییر می‌دهد، کد تخفیف می‌زند و جمع نهایی را می‌بیند. سبد بعد از رفرش باقی بماند.» قبل از هر کدی، State را طراحی می‌کنیم:</p>
+  <table class="tbl tbl-z">
+    <thead><tr><th>داده</th><th>جایگاه</th><th>دلیل</th></tr></thead>
+    <tbody>
+      <tr><td><code>products</code> (کاتالوگ)</td><td>فایل ثابت <code>data/products.js</code></td><td>دادهٔ نمایشی؛ بعداً (فصل ۱۳) می‌شود Server State</td></tr>
+      <tr><td><code>items</code>، <code>coupon</code></td><td><code>useCartStore</code></td><td>Client Data State — مالکش مرورگر است</td></tr>
+      <tr><td><code>cartOpen</code>، <code>toast</code></td><td><code>useShopUIStore</code></td><td>UI State — با دادهٔ سبد بی‌ربط</td></tr>
+      <tr><td>جمع‌ها و تخفیف</td><td>هیچ‌جا ذخیره نمی‌شود</td><td>مشتق است؛ با useMemo در کامپوننت حساب می‌شود</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکتهٔ طراحی</div><p>در <code>items</code> فقط <code>id</code> و <code>qty</code> نگه می‌داریم، نه کل شیء محصول. اگر قیمت در کاتالوگ عوض شود، سبد خودکار با قیمت جدید حساب می‌شود و داده تکراری نمی‌ماند. (همان اصل Normalization در دیتابیس‌ها!)</p></div>
+
+  <h2>۱) دادهٔ کاتالوگ</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/data/products.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">export const PRODUCTS = [
+  { id: 1, name: 'هدفون بی‌سیم Pro', price: 2_450_000, emoji: '🎧' },
+  { id: 2, name: 'کیبورد مکانیکال ۶۸٪', price: 1_890_000, emoji: '⌨️' },
+  { id: 3, name: 'ماوس ارگونومیک M5', price: 980_000, emoji: '🖱️' },
+  { id: 4, name: 'پایهٔ لپ‌تاپ آلومینیومی', price: 720_000, emoji: '💻' },
+]
+
+export const COUPONS = {
+  YALDA10: { type: 'percent', value: 10, min: 2_000_000 },  // ۱۰٪ اگر بالای ۲ میلیون
+  SHIP500: { type: 'fixed', value: 500_000, min: 1_000_000 }, // ۵۰۰ هزار تومان کمتر
+}</code></pre>
+  </div>
+
+  <h2>۲) استور سبد — قلب پروژه</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useCartStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import { COUPONS } from '../data/products'
+
+const initialState = { items: [], couponCode: null, _hasHydrated: false }
+
+export const useCartStore = create(
+  persist(
+    (set, get) =&gt; ({
+      ...initialState,
+
+      addItem: (id) =&gt;
+        set((s) =&gt; {
+          const found = s.items.find((i) =&gt; i.id === id)
+          if (found) {
+            return { items: s.items.map((i) =&gt; (i.id === id ? { ...i, qty: i.qty + 1 } : i)) }
+          }
+          return { items: [...s.items, { id, qty: 1 }] }
+        }),
+
+      setQty: (id, qty) =&gt;
+        set((s) =&gt; ({
+          items:
+            qty &lt;= 0
+              ? s.items.filter((i) =&gt; i.id !== id)
+              : s.items.map((i) =&gt; (i.id === id ? { ...i, qty } : i)),
+        })),
+
+      removeItem: (id) =&gt; set((s) =&gt; ({ items: s.items.filter((i) =&gt; i.id !== id) })),
+
+      applyCoupon: (code) =&gt; {
+        const coupon = COUPONS[code.trim().toUpperCase()]
+        if (!coupon) return { ok: false, message: 'کد تخفیف نامعتبر است' }
+        const subtotal = get().items.reduce((sum, i) =&gt; sum + i.qty * priceOf(i.id), 0)
+        if (subtotal &lt; coupon.min) {
+          return { ok: false, message: 'حداقل مبلغ برای این کد برآورده نشده' }
+        }
+        set({ couponCode: code.trim().toUpperCase() })
+        return { ok: true, message: 'کد تخفیف اعمال شد' }
+      },
+
+      removeCoupon: () =&gt; set({ couponCode: null }),
+      clearCart: () =&gt; set({ items: [], couponCode: null }),
+      setHasHydrated: (v) =&gt; set({ _hasHydrated: v }),
+    }),
+    {
+      name: 'shop-cart',
+      partialize: (s) =&gt; ({ items: s.items, couponCode: s.couponCode }),
+      onRehydrateStorage: () =&gt; (state) =&gt; state?.setHasHydrated(true),
+    }
+  )
+)
+
+// کمکی: قیمت محصول از کاتالوگ (منبع واحد حقیقت)
+import { PRODUCTS } from '../data/products'
+const priceOf = (id) =&gt; PRODUCTS.find((p) =&gt; p.id === id)?.price ?? 0</code></pre>
+  </div>
+  <p>به <code>applyCoupon</code> دقت کنید: از <code>get()</code> برای خواندن جمع فعلی استفاده کرد و «نتیجهٔ اعتبارسنجی» را به‌صورت مقدار برگرداند — کامپوننت می‌تواند بر اساس آن پیام نشان دهد؛ به‌جای اینکه منطق پیام‌ها داخل استور بنشیند.</p>
+
+  <h2>۳) استور UI</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useShopUIStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+
+export const useShopUIStore = create((set) =&gt; ({
+  cartOpen: false,
+  openCart: () =&gt; set({ cartOpen: true }),
+  closeCart: () =&gt; set({ cartOpen: false }),
+}))</code></pre>
+  </div>
+
+  <h2>۴) کامپوننت‌ها</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/ProductGrid.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { PRODUCTS } from '../data/products'
+import { useCartStore } from '../store/useCartStore'
+import { useShopUIStore } from '../store/useShopUIStore'
+
+export default function ProductGrid() {
+  const addItem = useCartStore((s) =&gt; s.addItem)
+  const openCart = useShopUIStore((s) =&gt; s.openCart)
+
+  const handleAdd = (id) =&gt; {
+    addItem(id)
+    openCart()
+  }
+
+  return (
+    &lt;div className="grid"&gt;
+      {PRODUCTS.map((p) =&gt; (
+        &lt;div key={p.id} className="card"&gt;
+          &lt;span className="emoji"&gt;{p.emoji}&lt;/span&gt;
+          &lt;h3&gt;{p.name}&lt;/h3&gt;
+          &lt;p&gt;{p.price.toLocaleString('fa-IR')} تومان&lt;/p&gt;
+          &lt;button onClick={() =&gt; handleAdd(p.id)}&gt;افزودن به سبد&lt;/button&gt;
+        &lt;/div&gt;
+      ))}
+    &lt;/div&gt;
+  )
+}</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/CartDrawer.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useMemo, useState } from 'react'
+import { PRODUCTS } from '../data/products'
+import { useCartStore } from '../store/useCartStore'
+import { useShopUIStore } from '../store/useShopUIStore'
+
+const byId = Object.fromEntries(PRODUCTS.map((p) =&gt; [p.id, p]))
+
+export default function CartDrawer() {
+  const cartOpen = useShopUIStore((s) =&gt; s.cartOpen)
+  const closeCart = useShopUIStore((s) =&gt; s.closeCart)
+  const items = useCartStore((s) =&gt; s.items)
+  const couponCode = useCartStore((s) =&gt; s.couponCode)
+  const setQty = useCartStore((s) =&gt; s.setQty)
+  const removeItem = useCartStore((s) =&gt; s.removeItem)
+  const clearCart = useCartStore((s) =&gt; s.clearCart)
+  const applyCoupon = useCartStore((s) =&gt; s.applyCoupon)
+  const removeCoupon = useCartStore((s) =&gt; s.removeCoupon)
+  const hasHydrated = useCartStore((s) =&gt; s._hasHydrated)
+
+  const [code, setCode] = useState('')
+  const [msg, setMsg] = useState(null)
+
+  // محاسبات مشتق‌شده — فقط وقتی items یا couponCode عوض شود
+  const totals = useMemo(() =&gt; {
+    const subtotal = items.reduce((sum, i) =&gt; sum + byId[i.id].price * i.qty, 0)
+    let discount = 0
+    if (couponCode === 'YALDA10') discount = Math.round(subtotal * 0.1)
+    if (couponCode === 'SHIP500') discount = 500_000
+    return { subtotal, discount, payable: subtotal - discount }
+  }, [items, couponCode])
+
+  if (!cartOpen) return null
+
+  return (
+    &lt;aside className="drawer"&gt;
+      &lt;header&gt;
+        &lt;h2&gt;سبد خرید ({items.length.toLocaleString('fa-IR')})&lt;/h2&gt;
+        &lt;button onClick={closeCart}&gt;بستن&lt;/button&gt;
+      &lt;/header&gt;
+
+      {!hasHydrated &amp;&amp; &lt;p&gt;در حال بازیابی سبد...&lt;/p&gt;}
+
+      {items.map((i) =&gt; (
+        &lt;div key={i.id} className="row"&gt;
+          &lt;span&gt;{byId[i.id].emoji} {byId[i.id].name}&lt;/span&gt;
+          &lt;span&gt;
+            &lt;button onClick={() =&gt; setQty(i.id, i.qty - 1)}&gt;−&lt;/button&gt;
+            {' '}{i.qty.toLocaleString('fa-IR')}{' '}
+            &lt;button onClick={() =&gt; setQty(i.id, i.qty + 1)}&gt;+&lt;/button&gt;
+          &lt;/span&gt;
+          &lt;button onClick={() =&gt; removeItem(i.id)}&gt;حذف&lt;/button&gt;
+        &lt;/div&gt;
+      ))}
+
+      {msg &amp;&amp; &lt;p className={msg.ok ? 'ok' : 'err'}&gt;{msg.message}&lt;/p&gt;}
+
+      {couponCode ? (
+        &lt;button onClick={removeCoupon}&gt;حذف کد {couponCode}&lt;/button&gt;
+      ) : (
+        &lt;div className="coupon"&gt;
+          &lt;input value={code} onChange={(e) =&gt; setCode(e.target.value)} placeholder="کد تخفیف" /&gt;
+          &lt;button onClick={() =&gt; setMsg(applyCoupon(code))}&gt;اعمال&lt;/button&gt;
+        &lt;/div&gt;
+      )}
+
+      &lt;footer&gt;
+        &lt;div&gt;جمع: {totals.subtotal.toLocaleString('fa-IR')}&lt;/div&gt;
+        &lt;div&gt;تخفیف: {totals.discount.toLocaleString('fa-IR')}&lt;/div&gt;
+        &lt;div&gt;قابل پرداخت: &lt;b&gt;{totals.payable.toLocaleString('fa-IR')}&lt;/b&gt;&lt;/div&gt;
+        &lt;button disabled={items.length === 0} onClick={clearCart}&gt;پرداخت و خالی کردن سبد&lt;/button&gt;
+      &lt;/footer&gt;
+    &lt;/aside&gt;
+  )
+}</code></pre>
+  </div>
+
+  <h2>نقاط آموزشی پروژه</h2>
+  <ul>
+    <li><strong>دو استور، دو دنیا:</strong> <code>useCartStore</code> داده است و <code>useShopUIStore</code> فقط نمایش. کامپوننت گرید محصول از دومی فقط «باز کردن» می‌گیرد؛ از محتوای سبد خبر ندارد.</li>
+    <li><strong>سلکتور تکی همه‌جا:</strong> هر خط <code>useXStore((s) =&gt; ...)</code> یک فیلد است — دقیقاً همان که فصل ۴ گفت.</li>
+    <li><strong>مرجع پایدار برای useMemo:</strong> چون <code>items</code> فقط هنگام mutation جدید می‌شود، <code>totals</code> کم محاسبه می‌شود.</li>
+    <li><strong>hydration فلگ:</strong> پیام «در حال بازیابی» تا تمام شدن rehydrate رندر می‌شود و بعد لیست واقعی.</li>
+  </ul>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — مرحلهٔ بعدی همان تلهٔ کلاسیک است</div><p>اگر همین پروژه بخواهد «موجودی واقعی» را از سرور بگیرد، اولین وسوسه این است که موجودی را در <code>useCartStore</code> ذخیره کنیم! از فصل ۸ می‌بینیم چرا دادهٔ سرور باید در کشِ TanStack Query برود و Zustand فقط «سبدِ خود کاربر» را نگه دارد.</p></div>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>اول State را روی کاغذ طراحی کنید؛ بعد UI را بنویسید.</li>
+      <li>در سبد فقط id و qty نگه دارید؛ جزئیات را از منبع اصلی بخوانید.</li>
+      <li>محاسبات مشتق‌شده ذخیره نمی‌شوند؛ با useMemo در کامپوننت حساب می‌شوند.</li>
+      <li>اعتبارسنجی (کد تخفیف) داخل اکشن با <code>get()</code> و برگرداندن نتیجه به کامپوننت.</li>
+      <li>persist با partialize + فلگ hydration برای تجربهٔ بدون فلش.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۷ — سه ارتقا</div>
+    <p>۱) قابلیت «ذخیره برای بعد» اضافه کنید: لیست علاقه‌مندی‌ها (wishlist) در استور جدا با persist مشترک؟ نه — استور مستقل با نام کلید خودش. ۲) دکمهٔ «خالی کردن» با تأیید دو مرحله‌ای (State <code>confirming</code> در UI استور). ۳) کد تخفیف جدید بنویسید که اگر تعداد کل آیتم‌ها از ۵ بیشتر بود ۱۵٪ بدهد — سرنخ: در <code>applyCoupon</code> به <code>items.length</code> نیاز دارید.</p>
+  </div>
+</section>

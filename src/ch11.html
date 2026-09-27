@@ -1,0 +1,172 @@
+<section class="chapter part-tq" id="ch11">
+  <div class="pgmark">CHAPTER-11</div>
+  <header class="ch-banner">
+    <div class="ch-num">۱۱</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش دوم · TanStack Query</div>
+      <h1>Query Keys و مدیریت کش</h1>
+      <p class="ch-desc">کلید، شناسنامهٔ داده در کش است. در این فصل الگوی رسمی Query Key Factory، اینولیدیشن هدفمند با فیلترها، prefetch و ابزارهای دستوری QueryClient را یاد می‌گیرید.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>قواعد ساخت کلید و چرا ترتیب عناصر مهم است</li>
+      <li>الگوی <code>Query Key Factory</code> + هوک <code>queryOptions</code> برای تایپ ایمن</li>
+      <li>invalidate با تطبیق جزئی/دقیق و predicate</li>
+      <li><code>prefetchQuery</code>، <code>ensureQueryData</code>، <code>cancelQueries</code> و بقیهٔ ابزارها</li>
+    </ul>
+  </div>
+
+  <h2>قواعد کلیدنویسی</h2>
+  <p>کلید آرایه است و از چپ به راست، از عمومی به خاص:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">سلسله‌مراتب کلید</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">['posts']                         // همهٔ پست‌ها
+['posts', 'list']                 // لیست
+['posts', 'list', { page: 2, q: 'react' }]  // لیست با پارامتر
+['posts', 'detail', 5]            // جزئیات پست ۵
+['posts', 'detail', 5, 'comments']// کامنت‌های پست ۵</code></pre>
+  </div>
+  <p>سه قاعده:</p>
+  <ul>
+    <li><strong>متجانس و سلسله‌مراتبی:</strong> هر بخش، پدرِ بخش بعدی است تا تطبیق جزئی (بعداً) معنا داشته باشد.</li>
+    <li><strong>serialize‌پذیر:</strong> فقط رشته/عدد/بولین/آرایه/شیء ساده. کلید <code>{ page: 2, q: 'react' }</code> با <code>{ q: 'react', page: 2 }</code> برابر است (هش پایدار با ترتیب کلیدهای مرتب‌شده).</li>
+    <li><strong>متغیرها داخل کلید:</strong> هر چیزی که خروجی را تغییر می‌دهد (پارامترها، زبان، نقش کاربر) باید در کلید باشد.</li>
+  </ul>
+  <div class="callout co-danger"><div class="co-title"><span class="dot"></span>ممنوع — کلید بی‌پارامتر برای دادهٔ پارامتری</div><p>اگر جستجوی کاربر را در State نگه دارید ولی کلید ثابت <code>['posts']</code> باشد، همهٔ جستجوها روی یک داده نوشته می‌شوند! پارامتر باید در کلید باشد: <code>['posts', 'list', { q }]</code>.</p></div>
+
+  <h2>الگوی Query Key Factory</h2>
+  <p>رشته‌های تکراری در کل پروژه = تلهٔ غلط املایی. راه‌حل رسمی مستندات، یک آبجکت کارخانه برای هر دامنه:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/features/posts/keys.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">export const postKeys = {
+  all: ['posts'],
+  lists: () =&gt; [...postKeys.all, 'list'],
+  list: (filters) =&gt; [...postKeys.lists(), filters],
+  details: () =&gt; [...postKeys.all, 'detail'],
+  detail: (id) =&gt; [...postKeys.details(), id],
+  comments: (id) =&gt; [...postKeys.detail(id), 'comments'],
+}
+
+// مصرف:
+queryKey: postKeys.list({ page: 1, q: 'react' })   // ['posts','list',{...}]
+queryKey: postKeys.detail(5)                        // ['posts','detail',5]</code></pre>
+  </div>
+  <p>جادوی این ساختار در invalidate است — از عمومی به خاص، هر سطحی را می‌توانید هدف بگیرید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">قدرت سلسله‌مراتب</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">qc.invalidateQueries({ queryKey: postKeys.all })       // همهٔ چیزِ پست‌ها
+qc.invalidateQueries({ queryKey: postKeys.lists() })   // فقط لیست‌ها، نه جزئیات
+qc.invalidateQueries({ queryKey: postKeys.detail(5) }) // فقط پست ۵ (+کامنت‌هایش)</code></pre>
+  </div>
+
+  <h3>queryOptions: کلید + queryFn در یک جا (نسخهٔ ۵)</h3>
+  <p>هوک کمکی <code>queryOptions</code> تعریف کوئری را به یک آبجکت قابل استفاده در همهٔ هوک‌ها تبدیل می‌کند و تایپ data را هم حفظ می‌کند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/features/posts/queries.js — TS</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { queryOptions } from '@tanstack/react-query'
+import { postKeys } from './keys'
+
+export const postQueries = {
+  list: (filters: { page: number; q?: string }) =&gt;
+    queryOptions({
+      queryKey: postKeys.list(filters),
+      queryFn: ({ signal }) =&gt; api.posts(filters, signal),
+      staleTime: 30_000,
+    }),
+
+  detail: (id: number) =&gt;
+    queryOptions({
+      queryKey: postKeys.detail(id),
+      queryFn: ({ signal }) =&gt; api.post(id, signal),
+    }),
+}
+
+// مصرف — تایپ data دقیقاً Post[] است، بدون تعریف دستی:
+const { data } = useQuery(postQueries.list({ page: 1 }))
+qc.invalidateQueries({ queryKey: postKeys.all })</code></pre>
+  </div>
+
+  <h2>invalidateQueries و فیلترها</h2>
+  <table class="tbl tbl-t">
+    <thead><tr><th style="width:38%">فراخوانی</th><th>اثر</th></tr></thead>
+    <tbody>
+      <tr><td><code>invalidateQueries({ queryKey: postKeys.all })</code></td><td>همهٔ Queryهایی که کلیدشان با <code>['posts']</code> <b>شروع</b> می‌شود.</td></tr>
+      <tr><td><code>invalidateQueries({ queryKey: postKeys.lists(), exact: true })</code></td><td>فقط کلید دقیقاً برابر — بدون زیرمجموعه‌ها.</td></tr>
+      <tr><td><code>invalidateQueries({ predicate: (q) =&gt; q.queryKey[0] === 'posts' &amp;&amp; q.state.dataUpdatedAt &gt; hourAgo })</code></td><td>فیلتر کامل با تابع — برای شرایط پیچیده.</td></tr>
+      <tr><td><code>refetchQueries({ queryKey: postKeys.all })</code></td><td>بدون stale کردن، مستقیم refetch.</td></tr>
+    </tbody>
+  </table>
+  <p>invalidate یعنی: stale کن + اگر observer فعال دارد فوراً refetch، وگرنه فقط برای mount بعدی آمادهٔ refetch باش. به یاد داشته باشید: invalidate هیچ چیز را حذف نمی‌کند؛ دادهٔ قدیمی تا refetch بعدی همان‌جاست.</p>
+
+  <h2>ابزارهای دستوری QueryClient</h2>
+  <table class="tbl tbl-t">
+    <thead><tr><th style="width:34%">متد</th><th>کاربرد واقعی</th></tr></thead>
+    <tbody>
+      <tr><td><code>getQueryData(key)</code></td><td>خواندن کش (مثلاً snapshot در onMutate)</td></tr>
+      <tr><td><code>setQueryData(key, updater)</code></td><td>نوشتن کش — updater مثل setState تابعی است و <code>undefined</code> را نگه می‌دارد</td></tr>
+      <tr><td><code>prefetchQuery({ queryKey, queryFn })</code></td><td>گرفتن قبل از نیاز (hover روی لینک، mount والد) — خطاها بی‌صدا رد می‌شوند</td></tr>
+      <tr><td><code>ensureQueryData(key)</code></td><td>اگر تازه در کش نیست بگیر و Promise بده — در لودرهای روتر عالی است</td></tr>
+      <tr><td><code>cancelQueries(filters)</code></td><td>لغو درخواست‌های در جریان — در onMutate خوش‌بینانه</td></tr>
+      <tr><td><code>removeQueries(filters)</code></td><td>حذف کامل از کش (مثلاً خروج کاربر)</td></tr>
+      <tr><td><code>qc.clear()</code></td><td>پاک‌سازی کل کش</td></tr>
+      <tr><td><code>getQueryState(key)</code> / <code>qc.getQueryCache().findAll()</code></td><td>دیباگ و ابزارهای reporting</td></tr>
+    </tbody>
+  </table>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">پیش‌واکشی هوشمند: وقتی روی لینک hover شد</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">function PostLink({ id }) {
+  const qc = useQueryClient()
+  const prefetch = () =&gt; qc.prefetchQuery(postQueries.detail(id))
+
+  return (
+    &lt;a href={`/posts/${id}`} onMouseEnter={prefetch} onFocus={prefetch}&gt;
+      پست {id}
+    &lt;/a&gt;
+  )
+}</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">خروج کاربر: کش را خالی کن</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">// در useAuthStore یا logout mutation
+onSuccess: () =&gt; {
+  queryClient.clear() // یا removeQueries({ predicate: q =&gt; q.queryKey[0] !== 'public' })
+  navigate('/login')
+}</code></pre>
+  </div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته — Structural Sharing</div><p>TanStack Query به‌صورت پیش‌فرض، پاسخ جدید را با قبلی مقایسهٔ عمیق می‌کند و مرجعِ بخش‌های بدون تغییر را حفظ می‌کند. نتیجه: <code>useMemo</code>های شما کمتر می‌سوزند و React کمتر رندر می‌گیرد. خاموشش نکنید مگر با دلیل (<code>structuralSharing: false</code>).</p></div>
+
+  <h2>مینی‌الگو: invalidate هدفمند در سه سطح</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">ثبت کامنت — چه چیزهایی باید stale شوند؟</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">const addComment = useMutation({
+  mutationFn: (vars) =&gt; api.addComment(vars.postId, vars.body),
+  onSuccess: (comment, vars) =&gt; {
+    // ۱) کامنت‌های همان پست
+    qc.invalidateQueries({ queryKey: postKeys.comments(vars.postId) })
+    // ۲) شمارندهٔ کامنت در جزئیات پست
+    qc.invalidateQueries({ queryKey: postKeys.detail(vars.postId) })
+    // ۳) «کامنت‌های اخیر من» در داشبورد — دامنهٔ متفاوت
+    qc.invalidateQueries({ queryKey: ['my-activity'] })
+  },
+})</code></pre>
+  </div>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>کلید سلسله‌مراتبی و serialize‌پذیر بنویسید؛ پارامترها داخل کلید، نه در State جدا.</li>
+      <li>Query Key Factory + <code>queryOptions</code> = کلید و fetch و تایپ در یک نقطه.</li>
+      <li>invalidate تطبیق جزئی دارد؛ با exact یا predicate هدف بگیرید.</li>
+      <li>prefetch برای سرعت، ensureQueryData برای لودرها، remove/clear برای خروج کاربر.</li>
+      <li>Structural sharing مرجع پایدار می‌دهد؛ همان چیزی که Zustand هم دوست دارد.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۱۱</div>
+    <p>برای دامنهٔ users یک Query Key Factory کامل بنویسید (all/lists/list/detail/posts). بعد صفحهٔ «پروفایل کاربر» بسازید که با hover روی لینکِ کاربر، جزئیاتش را prefetch می‌کند. در logout اپ، کل کش را پاک کنید و با DevTools مطمئن شوید چیزی باقی نمانده.</p>
+  </div>
+</section>

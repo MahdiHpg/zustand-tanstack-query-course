@@ -1,0 +1,205 @@
+<section class="chapter part-zustand" id="ch06">
+  <div class="pgmark">CHAPTER-06</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۶</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand</div>
+      <h1>الگوهای حرفه‌ای Zustand — TypeScript و اسلایس‌ها</h1>
+      <p class="ch-desc">از این فصل به بعد مثل یک تیم واقعی کد می‌زنیم: استورهای تایپ‌دار با TypeScript، الگوی اسلایس برای استورهای بزرگ، subscribe با سلکتور و ملاحظات SSR.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>فرم کِرید (curried) تایپ‌دار <code>create&lt;State&gt;()(...)</code></li>
+      <li>الگوی Slices برای شکستن استورهای بزرگ</li>
+      <li><code>subscribeWithSelector</code> و کاربردهای عملی</li>
+      <li>ساختار پوشه‌بندی استور در پروژه‌های واقعی و نکات SSR</li>
+    </ul>
+  </div>
+
+  <h2>TypeScript با Zustand</h2>
+  <p>در Zustand نسخهٔ ۵، فرم استاندارد نوشتن استور تایپ‌دار «کِرید» است — یعنی دو بار پرانتز. دلیلش این است که TypeScript برای اینکه هم State و هم اکشن‌ها را درست حدس بزند، باید تایپ را «قبل از» دیدن تابع شما بداند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useCounterStore.ts</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { create } from 'zustand'
+
+// ۱) تایپ کل State: داده + اکشن‌ها
+type CounterState = {
+  count: number
+  increment: (by?: number) =&gt; void
+  decrement: (by?: number) =&gt; void
+  reset: () =&gt; void
+}
+
+// ۲) create&lt;CounterState&gt;()  ← پرانتز اول؛ بعد تابع
+export const useCounterStore = create&lt;CounterState&gt;()((set) =&gt; ({
+  count: 0,
+  increment: (by = 1) =&gt; set((s) =&gt; ({ count: s.count + by })),
+  decrement: (by = 1) =&gt; set((s) =&gt; ({ count: s.count - by })),
+  reset: () =&gt; set({ count: 0 }),
+}))</code></pre>
+  </div>
+  <p>از این لحظه اگر <code>increment(2)</code> را با آرگومان رشته صدا بزنید یا فیلدی را تایپ اشتباه بخوانید، کامپایلر خطا می‌دهد — همان چیزی که در تیم‌ها جان شما را نجات می‌دهد.</p>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — پرانتز جا نماند!</div><p>فرم اشتباه: <code>create&lt;CounterState&gt;((set) =&gt; ...)</code> (بدون پرانتز وسط). در این شکل استنتاج تایپ اکشن‌ها درست کار نمی‌کند و در مکان‌های استفاده خطای عجیب می‌گیرید. یادتان باشد: <code>create&lt;State&gt;()</code> سپس <code>((set) =&gt; ...)</code>.</p></div>
+
+  <h3>تایپ‌های کمکی برای persist</h3>
+  <p>وقتی میان‌افزار هم هست، زنجیرهٔ تایپ به ترکیب میان‌افزارها وابسته است؛ برای همین به‌جای نوشتن همه‌چیز دستی، از همان فرم کِرید استفاده می‌کنیم و اگر لازم شد، تایپ State را با <code>Partialize</code> محدود می‌کنیم:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">persist تایپ‌دار</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+
+type CartState = {
+  items: { id: number; qty: number }[]
+  addItem: (id: number) =&gt; void
+}
+
+export const useCartStore = create&lt;CartState&gt;()(
+  persist(
+    (set) =&gt; ({
+      items: [],
+      addItem: (id) =&gt;
+        set((s) =&gt; ({ items: [...s.items, { id, qty: 1 }] })),
+    }),
+    {
+      name: 'cart',
+      // فقط items ذخیره شود؛ تایپ همین را تحمیل می‌کند
+      partialize: (s) =&gt; ({ items: s.items }),
+    }
+  )
+)</code></pre>
+  </div>
+
+  <h2>الگوی Slices: استور بزرگ را بشکنید</h2>
+  <p>اگر همهٔ اپ را در یک استور بریزید (کاربر، سبد، فیلترها، نوتیفیکیشن...)، فایل صدها خط می‌شود و هر تغییر، rebase دردناک می‌سازد. الگوی <strong>Slices</strong> راه‌حل رسمی Zustand است: هر دامنه یک «اسلایس» مستقل، و ترکیب آن‌ها در یک استور واحد. با یک تایپ کمکی شروع می‌کنیم:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/createStore.ts — تایپ کمکی</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { StateCreator } from 'zustand'
+
+// اسلایس‌ها به هم اشاره می‌کنند؛ یک نوع مشترک برای «کل استور» تعریف می‌کنیم
+export type BoundStore = CartSlice &amp; UISlice
+
+export type SliceCreator&lt;T&gt; = StateCreator&lt;
+  BoundStore,   // استور نهایی (برای get دیدن همه‌چیز)
+  [],           // میان‌افزارهای سفارشی
+  [],           // میان‌افزارهای ماقبل
+  T             // تایپ همین اسلایس
+&gt;</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/slices/cartSlice.ts</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { SliceCreator } from '../createStore'
+
+export type CartSlice = {
+  items: { id: number; qty: number }[]
+  addItem: (id: number) =&gt; void
+  removeItem: (id: number) =&gt; void
+  clear: () =&gt; void
+}
+
+export const createCartSlice: SliceCreator&lt;CartSlice&gt; = (set, get) =&gt; ({
+  items: [],
+  addItem: (id) =&gt;
+    set((s) =&gt; {
+      const found = s.items.find((i) =&gt; i.id === id)
+      if (found) {
+        return { items: s.items.map((i) =&gt; (i.id === id ? { ...i, qty: i.qty + 1 } : i)) }
+      }
+      return { items: [...s.items, { id, qty: 1 }] }
+    }),
+  removeItem: (id) =&gt; set((s) =&gt; ({ items: s.items.filter((i) =&gt; i.id !== id) })),
+  clear: () =&gt; set({ items: [] }),
+})</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/slices/uiSlice.ts</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { SliceCreator } from '../createStore'
+
+export type UISlice = {
+  cartOpen: boolean
+  toggleCart: (open?: boolean) =&gt; void
+}
+
+export const createUISlice: SliceCreator&lt;UISlice&gt; = (set) =&gt; ({
+  cartOpen: false,
+  toggleCart: (open) =&gt; set((s) =&gt; ({ cartOpen: open ?? !s.cartOpen })),
+})</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useBoundStore.ts — ترکیب نهایی</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { create } from 'zustand'
+import { createCartSlice } from './slices/cartSlice'
+import { createUISlice } from './slices/uiSlice'
+import { BoundStore } from './createStore'
+
+export const useBoundStore = create&lt;BoundStore&gt;()((...a) =&gt; ({
+  ...createCartSlice(...a),
+  ...createUISlice(...a),
+}))</code></pre>
+  </div>
+  <p>حالا یک استور واحد دارید که هر اسلایس فایل خودش را دارد؛ و پاداش بزرگ: اسلایس‌ها به State همدیگر هم دسترسی دارند (از طریق <code>get</code>). مثلاً <code>addItem</code> می‌تواند بعد از افزودن، <code>toggleCart(true)</code> صدا بزند.</p>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته — یک استور بزرگ یا چند استور کوچک؟</div><p>هر دو الگو قابل قبول است. اگر بخش‌ها مستقل‌اند (تم و سبد هیچ ربطی به هم ندارند) چند استور جدا بسازید. اگر باید با هم تعامل کنند یا منطق مشترک دارند، اسلایس. آنچه ممنوع است، «استور خدای ۱۵۰۰ خطی» است.</p></div>
+
+  <h2>subscribeWithSelector: گوش دادن هدفمند</h2>
+  <p><code>subscribe</code> پیش‌فرض به <em>هر</em> تغییر گوش می‌دهد. میان‌افزار <code>subscribeWithSelector</code> نسخهٔ سلکتوردار می‌دهد — مثل useEffect اما بدون رندر:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">subscribe به یک فیلد خاص</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { subscribeWithSelector } from 'zustand/middleware'
+
+const useBoundStore = create&lt;BoundStore&gt;()(
+  subscribeWithSelector((...a) =&gt; ({ /* اسلایس‌ها */ }))
+)
+
+// هر جا (مثلاً App):
+useEffect(() =&gt; {
+  const unsub = useBoundStore.subscribe(
+    (s) =&gt; s.items.length,               // فقط این مقدار مهم است
+    (len, prevLen) =&gt; {                  // فقط وقتی عوض شود صدا می‌شود
+      if (len &gt; prevLen) toast('به سبد اضافه شد!')
+    },
+    { equalityFn: Object.is }            // اختیاری
+  )
+  return unsub
+}, [])</code></pre>
+  </div>
+  <p>کاربردهای واقعی: نمایش toast بعد از افزودن به سبد، ذخیرهٔ خودکار draft بعد از تغییر متن، گزارش analytics روی اکشن‌های خاص.</p>
+
+  <h2>ساختار پروژه و نکات SSR در یک نگاه</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">قرارداد پوشه‌بندی حرفه‌ای</span><span class="cb-lang">text</span></div>
+    <pre><code class="language-bash">src/
+├── store/
+│   ├── useBoundStore.ts      # ترکیب اسلایس‌ها (اگر الگوی اسلایس)
+│   ├── slices/
+│   │   ├── cartSlice.ts
+│   │   └── uiSlice.ts
+│   └── useAuthStore.ts       # استورهای مستقل دامنه‌ای
+├── features/                 # کامپوننت‌ها کنار دامنهٔ خودشان
+│   ├── cart/
+│   └── products/
+└── lib/                      # کد عمومی (api، utils)</code></pre>
+  </div>
+  <ul>
+    <li><strong>SSR / Next.js:</strong> <code>localStorage</code> روی سرور وجود ندارد. اگر persist دارید، آپشن <code>skipHydration: true</code> بدهید و بعداً در سمت کلاینت با <code>useCartStore.persist.rehydrate()</code> ادامه دهید. در SPA معمولی این موضوع ندارید.</li>
+    <li><strong>Testability:</strong> چون استور شیء معمولی است، در تست‌ها با <code>useXStore.setState({...})</code> مستقیم سناریو می‌سازید — فصل ۱۴ کاملش می‌کند.</li>
+    <li><strong>قانون تنهایی:</strong> استور نباید fetch بلد باشد مگر برای فرمان‌های دستورالعملی؛ خواندن دادهٔ سرور کار Query است (فصل بعدی).</li>
+  </ul>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>TS با فرم کِرید: <code>create&lt;State&gt;()((set) =&gt; ...)</code> — پرانتز دوم را فراموش نکنید.</li>
+      <li>الگوی اسلایس = هر دامنه یک فایل + تایپ مشترک + ترکیب در یک استور.</li>
+      <li><code>subscribeWithSelector</code> گوش دادن بدون رندر به یک فیلد خاص می‌دهد.</li>
+      <li>در SSR با persist از <code>skipHydration</code> استفاده کنید؛ در SPA نیازی نیست.</li>
+      <li>چند استور مستقل برای دامنه‌های بی‌ربط؛ اسلایس برای دامنه‌های متعامل.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۶</div>
+    <p>استور تم (<code>useThemeStore</code>) را به TypeScript مهاجرت کنید با تایپ دقیق <code>'light' | 'dark'</code> برای تم. بعد استور سبد و استور UI مودال را با الگوی اسلایس در یک استور ترکیب کنید به‌طوری که <code>addItem</code> بعد از هر افزودن، مودال سبد را باز کند — بدون هیچ رفرشی بین دو اسلایس.</p>
+  </div>
+</section>

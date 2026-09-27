@@ -1,0 +1,240 @@
+<section class="chapter part-zustand" id="ch05">
+  <div class="pgmark">CHAPTER-05</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۵</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand</div>
+      <h1>Middlewareها — persist، devtools و immer</h1>
+      <p class="ch-desc">میان‌افزارها رفتار استور را در چند خط upgrade می‌کنند: ذخیرهٔ دائمی در localStorage، دیباگ زمان‌سفر با Redux DevTools و نوشتن کد قابل جهش با immer.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>مفهوم middleware و ترتیب صحیح ترکیب آن‌ها</li>
+      <li><code>persist</code>: ذخیرهٔ دائمی با partialize، version و migrate</li>
+      <li><code>devtools</code>: دیدن اکشن‌ها در Redux DevTools</li>
+      <li><code>immer</code>: نوشتن State به شکل قابل جهش، امن</li>
+      <li>ساخت یک middleware سفارشی ساده</li>
+    </ul>
+  </div>
+
+  <h2>Middleware چیست؟</h2>
+  <p>یک <strong>middleware (میان‌افزار)</strong> تابعی است که دور <code>create</code> پیچیده می‌شود و رفتار استور را تغییر می‌دهد — بدون اینکه منطق شما را عوض کند. حالت کلی:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">قالب عمومی</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+import { someMiddleware } from 'zustand/middleware'
+
+const useStore = create(
+  someMiddleware((set, get) =&gt; ({
+    // ...استور عادی شما
+  }))
+)</code></pre>
+  </div>
+  <p>می‌توان چند middleware را تو در تو ترکیب کرد. ترتیب توصیه‌شده و رایج (از بیرون به داخل): <code>devtools</code> ← <code>persist</code> ← بقیه (مثل <code>immer</code>):</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">ترکیب استاندارد سه‌گانه</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+import { persist, devtools } from 'zustand/middleware'
+import { immer } from 'zustand/middleware/immer'
+
+const useStore = create(
+  devtools(
+    persist(
+      immer((set) =&gt; ({
+        items: [],
+        addItem: (item) =&gt; set((state) =&gt; {
+          state.items.push(item) // با immer مجاز است!
+        }),
+      })),
+      { name: 'cart-storage' }
+    )
+  )
+)</code></pre>
+  </div>
+
+  <h2>persist — ذخیرهٔ دائمی State</h2>
+  <p>پیش‌فرض Zustand در حافظه است: رفرش صفحه یعنی خداحافظی با سبد خرید. میان‌افزار <code>persist</code> هر تغییر State را در <code>localStorage</code> ذخیره و هنگام اجرا برمی‌گرداند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useCartStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
+
+export const useCartStore = create(
+  persist(
+    (set, get) =&gt; ({
+      items: [],
+      coupon: null,
+      _hasHydrated: false,
+
+      addItem: (product) =&gt;
+        set((s) =&gt; {
+          const found = s.items.find((i) =&gt; i.id === product.id)
+          if (found) {
+            return {
+              items: s.items.map((i) =&gt;
+                i.id === product.id ? { ...i, qty: i.qty + 1 } : i
+              ),
+            }
+          }
+          return { items: [...s.items, { ...product, qty: 1 }] }
+        }),
+      removeItem: (id) =&gt; set((s) =&gt; ({ items: s.items.filter((i) =&gt; i.id !== id) })),
+      clearCart: () =&gt; set({ items: [], coupon: null }),
+
+      setHasHydrated: (v) =&gt; set({ _hasHydrated: v }),
+    }),
+    {
+      name: 'cart-storage',                        // کلید در localStorage (اجباری)
+      storage: createJSONStorage(() =&gt; localStorage), // پیش‌فرض همین است؛ برای وضوح نوشتیم
+      partialize: (state) =&gt; ({                    // فقط داده ذخیره شود، نه اکشن‌ها
+        items: state.items,
+        coupon: state.coupon,
+      }),
+      onRehydrateStorage: () =&gt; (state) =&gt; {
+        state?.setHasHydrated(true)                // پایان بازیابی
+      },
+    }
+  )
+)</code></pre>
+  </div>
+  <p>چهار آپشن مهم persist:</p>
+  <table class="tbl tbl-z">
+    <thead><tr><th style="width:22%">آپشن</th><th>کار</th></tr></thead>
+    <tbody>
+      <tr><td><code>name</code></td><td>کلید ذخیره‌سازی (اجباری). یکتا و ثابت نگهش دارید.</td></tr>
+      <tr><td><code>storage</code></td><td>محل ذخیره: <code>localStorage</code>، <code>sessionStorage</code> یا هر Storage سازگار. پیش‌فرض localStorage است.</td></tr>
+      <tr><td><code>partialize</code></td><td>انتخاب بخشی از State برای ذخیره — اکشن‌ها را ذخیره نکنید (بلااستهلاک و بزرگ می‌شوند).</td></tr>
+      <tr><td><code>version</code> + <code>migrate</code></td><td>کنترل نسخهٔ ساختار ذخیره‌شده و مهاجرت داده‌های قدیمی.</td></tr>
+      <tr><td><code>onRehydrateStorage</code></td><td>هوک پایان بازیابی — برای ست کردن فلگ hydration یا لاگ.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>version و migrate — وقتی شکل داده عوض می‌شود</h3>
+  <p>فرض کنید بعد از انتشار محصول، فیلد <code>qty</code> را به آیتم‌ها اضافه کرده‌اید؛ کاربرانی که نسخهٔ قبلی را در localStorage دارند، دادهٔ بی‌شکل می‌گیرند. راه‌حل:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">مهاجرت دادهٔ قدیمی</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">persist(storeApi, {
+  name: 'cart-storage',
+  version: 2, // نسخهٔ فعلی
+  migrate: (persisted, version) =&gt; {
+    if (version === 1) {
+      // نسخهٔ ۱: هر آیتم qty نداشت → برابر ۱ قرار بده
+      return {
+        ...persisted,
+        items: persisted.items.map((i) =&gt; ({ ...i, qty: i.qty ?? 1 })),
+      }
+    }
+    return persisted
+  },
+})</code></pre>
+  </div>
+
+  <h3>مشکل فلش داده: جلوی رندر «سبد خالی» را بگیرید</h3>
+  <p>بازیابی از localStorage <em>غیرهمزمان</em> است (در v5 با یک میکروتسک). برای یک فریم، State اولیه (سبد خالی) رندر می‌شود و بعد داده می‌آید — کاربر لحظه‌ای «سبد خالی» می‌بیند و اگر بعدش چیزی اضافه کند، ممکن است روی دادهٔ hydrate نشده بنویسد. الگوی حرفه‌ای: فلگ <code>_hasHydrated</code> (که در کد بالا دیدید) و تا true نشده، UI پایدار نشان ندهید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/CartPage.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">function CartPage() {
+  const hasHydrated = useCartStore((s) =&gt; s._hasHydrated)
+  const items = useCartStore((s) =&gt; s.items)
+
+  if (!hasHydrated) return &lt;p&gt;در حال بازیابی سبد...&lt;/p&gt;
+  if (items.length === 0) return &lt;p&gt;سبد خرید خالی است.&lt;/p&gt;
+  return &lt;CartList /&gt;
+}</code></pre>
+  </div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته</div><p>فیلدهایی که با <code>_</code> شروع می‌شوند (مثل <code>_hasHydrated</code>) یک قرارداد رایج برای State داخلی است. چون در <code>partialize</code> ذخیره نشده‌اند، بعد از هر رفرش دوباره false می‌شوند و چرخه تمیز است.</p></div>
+
+  <h2>devtools — دیباگ با Redux DevTools</h2>
+  <p>میان‌افزار <code>devtools</code> استور شما را به افزونهٔ <strong>Redux DevTools</strong> (همان که برای Redux استفاده می‌شود) وصل می‌کند: هر <code>set</code> یک اکشن در تایم‌لاین می‌شود، می‌توانید State هر لحظه را ببینید و حتی به عقب برگردید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">اتصال devtools + نام‌گذاری اکشن‌ها</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+import { devtools } from 'zustand/middleware'
+
+const useCartStore = create(
+  devtools(
+    (set) =&gt; ({
+      items: [],
+      addItem: (product) =&gt;
+        set(
+          (s) =&gt; ({ items: [...s.items, product] }),
+          undefined, // جای replace؛ در v5 مثل قبل
+          'cart/addItem' // نام اکشن در DevTools
+        ),
+    }),
+    { name: 'CartStore' } // نام استور در DevTools
+  )
+)</code></pre>
+  </div>
+  <p>در محیط تولید می‌توانید شرطی وصل کنید تا هزینهٔ اضافه ندهد:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">فقط در development</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">const wrap = import.meta.env.DEV ? devtools : (f) =&gt; f
+const useStore = create(wrap((set) =&gt; ({ /* ... */ })))</code></pre>
+  </div>
+
+  <h2>immer — بنویس ساده، خودش immutable می‌کند</h2>
+  <p>یادتان هست آپدیت تو در تو چه دردسری بود؟ میان‌افزار <code>immer</code> اجازه می‌دهد داخل <code>set</code> مثل کد معمولی «جهش» بنویسید و خودش نسخهٔ immutable می‌سازد:</p>
+  <div class="compare">
+    <div class="codeblock light bad">
+      <div class="cb-head"><span class="cb-file">بدون immer</span><span class="cb-lang">js</span></div>
+      <pre><code class="language-js">set((s) =&gt; ({
+  cart: {
+    ...s.cart,
+    items: s.cart.items.map((i) =&gt;
+      i.id === id ? { ...i, qty: i.qty + 1 } : i
+    ),
+  },
+}))</code></pre>
+    </div>
+    <div class="codeblock light good">
+      <div class="cb-head"><span class="cb-file">با immer</span><span class="cb-lang">js</span></div>
+      <pre><code class="language-js">set((s) =&gt; {
+  const item = s.cart.items.find((i) =&gt; i.id === id)
+  if (item) item.qty += 1
+})</code></pre>
+    </div>
+  </div>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار</div><p>با immer فقط <em>داخل</em> <code>set</code> می‌توانید جهش کنید؛ بیرون از آن State همچنان freeze شده و خواندنش مشکلی ندارد اما تغییرش خطا می‌دهد. ضمناً در <code>set</code> immer دار، چیزی return نکنید — یا جهش کنید یا مقدار برگردانید، نه هر دو.</p></div>
+
+  <h2>middleware سفارشی: چطور ساخته می‌شود؟</h2>
+  <p>هر middleware فقط تابعی است که <code>create</code> بعدی را می‌گیرد و نسخهٔ مزین‌شده برمی‌گرداند. یک لاگر ساده بنویسیم تا جعبهٔ جادویی باز شود:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/middleware/logger.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">export const logger = (config) =&gt; (set, get, api) =&gt;
+  config(
+    (args, ...rest) =&gt; {
+      console.groupCollapsed('action', rest[2] ?? '(unnamed)')
+      console.log('prev state:', get())
+      set(args, ...rest)
+      console.log('next state:', get())
+      console.groupEnd()
+    },
+    get,
+    api
+  )
+
+// استفاده: create(logger((set) =&gt; ({ ... })))</code></pre>
+  </div>
+  <div class="callout co-note"><div class="co-title"><span class="dot"></span>یادداشت</div><p>میان‌افزارهای دیگری هم در اکوسیستم هست — <code>subscribeWithSelector</code> برای subscribe با سلکتور (فصل ۶)، <code>combine</code> برای ادغام State و اکشن‌های جدا، و بستهٔ <code>zustand-middleware-yjs</code> برای همگام‌سازی چندکاربره. الگو همه یکسان است.</p></div>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>middleware تابعی دور <code>create</code> است؛ ترتیب استاندارد: devtools ← persist ← immer.</li>
+      <li><code>persist</code> با <code>name</code> و بهتر است با <code>partialize</code>؛ برای تغییر ساختار، <code>version</code> + <code>migrate</code>.</li>
+      <li>بازیابی غیرهمزمان است؛ با فلگ hydration از رندرِ «سبد خالی» جلوگیری کنید.</li>
+      <li><code>devtools</code> اکشن‌ها را در Redux DevTools می‌بیند؛ نام اکشن‌ها را در آرگومان سوم <code>set</code> بدهید.</li>
+      <li><code>immer</code> جهش امن داخل <code>set</code> می‌دهد؛ یا جهش یا return، نه هر دو.</li>
+      <li>middleware سفارشی = تابعی که <code>config</code> را می‌گیرد و set/get را مزین می‌کند.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۵</div>
+    <p>استور تمرین فصل ۲ (<code>useTodoStore</code>) را ارتقا دهید: با <code>persist</code> ذخیره‌اش کنید (فقط آرایهٔ todos)، با <code>immer</code> اکشن‌ها را بازنویسی کنید و با <code>devtools</code> نام هر اکشن را ببینید. بعد ساختار <code>todo</code> را تغییر دهید (فیلد <code>priority</code> اضافه کنید) و <code>version: 2</code> و <code>migrate</code> بنویسید تا دادهٔ قدیمی‌تان سالم بماند. رفرش صفحه و تب DevTools → Application → Local Storage را چک کنید.</p>
+  </div>
+</section>

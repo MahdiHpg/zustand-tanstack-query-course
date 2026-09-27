@@ -1,0 +1,30 @@
+{
+  "book": {
+    "title": "صفر تا صد Zustand و TanStack Query",
+    "subtitle": "دورهٔ جامع مدیریت State سمت کلاینت و سرور در React",
+    "version": "ویرایش ۱٫۰ — پاییز ۱۴۰۵"
+  },
+  "parts": [
+    { "id": "zustand", "label": "بخش اول · Zustand — مدیریت State سمت کلاینت" },
+    { "id": "tq", "label": "بخش دوم · TanStack Query — مدیریت Server State" },
+    { "id": "both", "label": "بخش سوم · پروژهٔ ترکیبی و آمادگی حرفه‌ای" },
+    { "id": "ref", "label": "بخش چهارم · مرجع سریع" }
+  ],
+  "chapters": [
+    { "id": "ch01", "file": "ch01.html", "num": "۱", "part": "zustand", "title": "مدیریت State — چرا، کِی و با چه ابزاری؟", "short": "چرا State؟", "desc": "انواع State در اپلیکیشن‌های React و جایگاه هر ابزار" },
+    { "id": "ch02", "file": "ch02.html", "num": "۲", "part": "zustand", "title": "Zustand از صفر — نصب و اولین استور", "short": "اولین استور", "desc": "ساخت اولین استور، اکشن‌ها و استفاده در کامپوننت" },
+    { "id": "ch03", "file": "ch03.html", "num": "۳", "part": "zustand", "title": "عمق Zustand — set، get و کار با استور از هر جا", "short": "set و get", "desc": "منطق به‌روزرسانی، اکشن‌های async و دسترسی خارج از کامپوننت" },
+    { "id": "ch04", "file": "ch04.html", "num": "۴", "part": "zustand", "title": "Selectors و بهینه‌سازی رندر", "short": "Selectors", "desc": "انتخاب داده با سلکتور، مقایسه سطحی و جلوگیری از رندر اضافه" },
+    { "id": "ch05", "file": "ch05.html", "num": "۵", "part": "zustand", "title": "Middlewareها — persist، devtools و immer", "short": "Middleware", "desc": "ذخیرهٔ دائمی، دیباگ با Redux DevTools و دسترسی‌پذیری دائمی" },
+    { "id": "ch06", "file": "ch06.html", "num": "۶", "part": "zustand", "title": "الگوهای حرفه‌ای Zustand — TypeScript و اسلایس‌ها", "short": "الگوهای TS", "desc": "استور تایپ‌دار، الگوی اسلایس، subscribeWithSelector و ساختار پروژه" },
+    { "id": "ch07", "file": "ch07.html", "num": "۷", "part": "zustand", "title": "پروژهٔ عملی ۱ — سبد خرید کامل با Zustand", "short": "پروژه ۱", "desc": "سبد خرید فروشگاه: افزودن، تعداد، کد تخفیف، مبلغ نهایی و persist" },
+    { "id": "ch08", "file": "ch08.html", "num": "۸", "part": "tq", "title": "TanStack Query و دنیای Server State", "short": "Server State", "desc": "چرا دادهٔ سرور فرق دارد؟ معماری کش و راه‌اندازی QueryClient" },
+    { "id": "ch09", "file": "ch09.html", "num": "۹", "part": "tq", "title": "useQuery — خواندن داده از سرور", "short": "useQuery", "desc": "queryKey و queryFn، وضعیت‌ها، staleTime و کنترل کامل fetch" },
+    { "id": "ch10", "file": "ch10.html", "num": "۱۰", "part": "tq", "title": "useMutation — تغییر داده و به‌روزرسانی کش", "short": "useMutation", "desc": "ساخت mutation، invalidation و به‌روزرسانی خوش‌بینانه" },
+    { "id": "ch11", "file": "ch11.html", "num": "۱۱", "part": "tq", "title": "Query Keys و مدیریت کش", "short": "کش و کلیدها", "desc": "الگوی Query Key Factory، اینولیدیشن هدفمند و prefetch" },
+    { "id": "ch12", "file": "ch12.html", "num": "۱۲", "part": "tq", "title": "امکانات پیشرفته — صفحه‌بندی، Infinite و Suspense", "short": "پیشرفته", "desc": "صفحه‌بندی نرم، useInfiniteQuery، useSuspenseQuery و DevTools" },
+    { "id": "ch13", "file": "ch13.html", "num": "۱۳", "part": "both", "title": "پروژهٔ عملی ۲ — اپ کامل با Zustand و TanStack Query", "short": "پروژه ۲", "desc": "اپ پست‌بلاگ: جداسازی UI State و Server State در یک پروژهٔ واقعی" },
+    { "id": "ch14", "file": "ch14.html", "num": "۱۴", "part": "both", "title": "حرفه‌ای شو — تست، دیباگ و آمادگی استخدام", "short": "تست و دیباگ", "desc": "تست استور و هوک‌ها، آنتی‌پترن‌ها و چک‌لیست ورود به تیم" },
+    { "id": "ch15", "file": "ch15.html", "num": "۱۵", "part": "ref", "title": "چیت‌شیت، گلاساری و نقشهٔ راه", "short": "مرجع سریع", "desc": "خلاصهٔ دستورها، واژه‌نامهٔ فارسی-انگلیسی و ادامهٔ مسیر" }
+  ]
+}

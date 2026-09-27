@@ -1,0 +1,177 @@
+<section class="chapter part-zustand" id="ch02">
+  <div class="pgmark">CHAPTER-02</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۲</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand</div>
+      <h1>Zustand از صفر — نصب و اولین استور</h1>
+      <p class="ch-desc">از نصب تا ساخت اولین استور واقعی: State، اکشن‌ها و مصرف آن‌ها در کامپوننت — بدون حتی یک Provider.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>نصب Zustand در یک پروژهٔ Vite و ساخت اولین استور</li>
+      <li>آناتومی <code>create</code>: چرا استور، «هوک» است؟</li>
+      <li>نوشتن اکشن‌ها و فراخوانی آن‌ها در UI</li>
+      <li>قوانین نام‌گذاری و سازماندهی فایل استورها از روز اول</li>
+    </ul>
+  </div>
+
+  <h2>راه‌اندازی پروژه</h2>
+  <p>برای تمرین‌های بخش اول یک پروژهٔ React ساده با Vite می‌سازیم (اگر پروژهٔ آماده دارید، از همان استفاده کنید):</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">terminal</span><span class="cb-lang">bash</span></div>
+    <pre><code class="language-bash">npm create vite@latest zustand-lab -- --template react
+cd zustand-lab
+npm install
+npm install zustand        # نسخهٔ ۵ را نصب می‌کند
+npm run dev</code></pre>
+  </div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته</div><p>Zustand به هیچ Wrapper (مثل <code>QueryClientProvider</code> یا <code>Provider</code> ریداکس) نیاز ندارد. وابستگی واحدش خود React است؛ یعنی حتی می‌توانید آن را در پروژه‌های غیر React هم استفاده کنید.</p></div>
+
+  <h2>اولین استور: شمارنده</h2>
+  <p>کلاسیک‌ترین شروع. یک فایل جدید بسازید: <code>src/store/useCounterStore.js</code></p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useCounterStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+
+// create یک «هوک» برمی‌گرداند؛ به همین دلیل اسمش را با use شروع می‌کنیم
+export const useCounterStore = create((set) =&gt; ({
+  // ۱) State اولیه
+  count: 0,
+
+  // ۲) اکشن‌ها: توابعی که State را تغییر می‌دهند
+  increment: () =&gt; set((state) =&gt; ({ count: state.count + 1 })),
+  decrement: () =&gt; set((state) =&gt; ({ count: state.count - 1 })),
+  reset: () =&gt; set({ count: 0 }),
+}))</code></pre>
+  </div>
+  <p>سه نکتهٔ بنیادی در همین ۱۰ خط هست:</p>
+  <ul>
+    <li><code>create(callback)</code> یک هوک سفارشی برمی‌گرداند که هر جای برنامه قابل استفاده است — بدون Provider و بدون Context.</li>
+    <li>شیء برگشتیِ callback ترکیبی از <strong>داده</strong> (اینجا <code>count</code>) و <strong>اکشن‌ها</strong> (اینجا <code>increment</code> و...) است. در Zustand هیچ اجباری به جداسازی این دو نیست — حتی توصیه هم می‌شود کنار هم بمانند.</li>
+    <li><code>set</code> مثل <code>setState</code> در React کار می‌کند: اگر یک <strong>شیء جزئی</strong> بدهید، فقط همان کلیدها با merge به‌روزرسانی می‌شوند و بقیهٔ State دست‌نخورده می‌ماند.</li>
+  </ul>
+
+  <h3>مصرف در کامپوننت</h3>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/App.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useCounterStore } from './store/useCounterStore'
+
+export default function App() {
+  // مقدار count را «انتخاب» می‌کنیم (selector)
+  const count = useCounterStore((s) =&gt; s.count)
+  const increment = useCounterStore((s) =&gt; s.increment)
+
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;{count}&lt;/h1&gt;
+      &lt;button onClick={increment}&gt;+1&lt;/button&gt;
+    &lt;/main&gt;
+  )
+}</code></pre>
+  </div>
+  <p>کامپوننت با <code>useCounterStore((s) =&gt; s.count)</code> می‌گوید: «من فقط به <code>count</code> کار دارم». نتیجه: اگر بعداً قسمت دیگری از استور تغییر کند، این کامپوننت اصلاً رندر نمی‌شود. (در فصل ۴ به‌عمق این موضوع می‌رویم.)</p>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — فراخوانی هوک بدون سلکتور</div><p>اگر بنویسید <code>const state = useCounterStore()</code> بدون آرگومان، کل استور subscribe می‌شود و <em>هر</em> تغییر، رندر دوباره می‌گیرد. در Zustand نسخهٔ ۴ این شکل مجاز بود؛ از نسخهٔ ۵ استفاده از آن بدون سلکتور فقط برای State ثابت (مثل مقادیر اولیه) مجاز است. عادت کنید: <strong>همیشه سلکتور بنویسید</strong>.</p></div>
+
+  <h2>استور واقعی‌تر: اطلاعات کاربر</h2>
+  <p>یک استور با دادهٔ شیء‌ای و چند اکشن واقعی، تا merge و تغییر تو در تو را ببینید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useUserStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+
+const guest = { name: '', email: '', loggedIn: false }
+
+export const useUserStore = create((set) =&gt; ({
+  user: guest,
+  lastAction: null,
+
+  login: (user) =&gt; set({ user: { ...user, loggedIn: true }, lastAction: 'login' }),
+
+  logout: () =&gt; set({ user: guest, lastAction: 'logout' }),
+
+  // به‌روزرسانی فقط یک فیلد از شیء تو در تو
+  rename: (name) =&gt;
+    set((state) =&gt; ({
+      user: { ...state.user, name },
+      lastAction: 'rename',
+    })),
+}))</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/Profile.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useState } from 'react'
+import { useUserStore } from './store/useUserStore'
+
+export default function Profile() {
+  const user = useUserStore((s) =&gt; s.user)
+  const login = useUserStore((s) =&gt; s.login)
+  const rename = useUserStore((s) =&gt; s.rename)
+
+  const [name, setName] = useState('')
+
+  if (!user.loggedIn) {
+    return &lt;button onClick={() =&gt; login({ name: 'مهدی', email: 'm@example.com' })}&gt;ورود&lt;/button&gt;
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;سلام {user.name}! ({user.email})&lt;/p&gt;
+      &lt;input value={name} onChange={(e) =&gt; setName(e.target.value)} placeholder="نام جدید" /&gt;
+      &lt;button onClick={() =&gt; rename(name)}&gt;تغییر نام&lt;/button&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+  </div>
+  <p>دقت کنید: <code>rename</code> شیء <code>user</code> را با spread بازسازی می‌کند و فقط <code>name</code> را عوض می‌کند. Zustand مثل React به <strong>immutability</strong> پایبند است؛ هر تغییر یعنی ساخت نسخهٔ جدید از همان قسمت. (فصل ۵ نشان می‌دهد چطور با immer، این نوشتن را ساده کنیم.)</p>
+
+  <h2>set — دو صورت کاربرد</h2>
+  <table class="tbl">
+    <thead><tr><th style="width:34%">صورت</th><th>مثال</th><th>کی استفاده کنیم؟</th></tr></thead>
+    <tbody>
+      <tr><td>شیء جزئی (Partial)</td><td><code>set({ count: 0 })</code></td><td>وقتی مقدار جدید به State فعلی وابسته نیست</td></tr>
+      <tr><td>تابع آپدیتر</td><td><code>set((s) =&gt; ({ count: s.count + 1 }))</code></td><td>وقتی به State فعلی نیاز دارید — همیشه امن‌تر است چون اگر دو آپدیت پشت‌سرهم برسند، از آخرین نسخهٔ State حساب می‌کند</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-danger"><div class="co-title"><span class="dot"></span>ممنوع — جهش (Mutation) مستقیم</div><p><code>set((s) =&gt; { s.count++ ; return s })</code> یعنی جهش State موجود؛ React متوجه تغییر نمی‌شود، مقایسهٔ مرجع خراب می‌شود و باگ‌های «رندر نمی‌شود» تولید می‌کند. همیشه یک شیء <em>جدید</em> برگردانید. (فقط در فصل ۵ با میان‌افزار immer قانونی می‌شود.)</p></div>
+
+  <h2>سازماندهی فایل‌ها از روز اول</h2>
+  <p>یک قرارداد ساده که در تیم‌ها جواب می‌دهد: برای هر دامنهٔ مستقل، یک فایل استور با پیشوند <code>use</code>:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">ساختار پیشنهادی</span><span class="cb-lang">text</span></div>
+    <pre><code class="language-bash">src/
+├── store/
+│   ├── useCounterStore.js
+│   ├── useUserStore.js
+│   └── useCartStore.js      # فصل ۷ همین را کامل می‌کنیم
+├── components/
+└── App.jsx</code></pre>
+  </div>
+  <ul>
+    <li>اسم استور = <code>use</code> + نام دامنه + <code>Store</code> (مثلاً <code>useCartStore</code>).</li>
+    <li>هر استور فقط مسئول دامنهٔ خودش است؛ «استور مادرِ همه‌چیز» نسازید — همین باعث فساد State می‌شود.</li>
+    <li>اکشن‌ها را با فعل نام‌گذاری کنید: <code>addItem</code>، <code>clearCart</code>، <code>toggleTheme</code>.</li>
+  </ul>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li><code>create</code> یک هوک برمی‌گرداند؛ بدون Provider در هر کامپوننتی مصرف می‌شود.</li>
+      <li>استور = دادهٔ اولیه + اکشن‌ها، کنار هم؛ اکشن‌ها با فعل نام‌گذاری می‌شوند.</li>
+      <li>در کامپوننت همیشه با سلکتور بخوانید: <code>useXStore((s) =&gt; s.x)</code>.</li>
+      <li><code>set</code> دو صورت دارد: شیء جزئی یا تابع آپدیتر؛ برای State وابسته، تابع آپدیتر.</li>
+      <li>هرگز State را جهش ندهید؛ نسخهٔ جدید بسازید.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۲</div>
+    <p>یک استور <code>useThemeStore</code> بسازید با State <code>theme: 'light' | 'dark'</code> و اکشن <code>toggleTheme</code>. در اپ یک دکمه بگذارید که تم را عوض می‌کند و رنگ پس‌زمینهٔ صفحه را بر اساس State عوض کنید. بعد یک استور <code>useTodoStore</code> با آرایهٔ <code>todos</code> و سه اکشن <code>addTodo</code>، <code>removeTodo</code> و <code>toggleTodo</code> بنویسید و یک لیست‌کار ساده بسازید — بدون هیچ prop drillingی.</p>
+  </div>
+
+  <div class="next-ch">
+    <b>در فصل بعد:</b> عمق API استور — پارامتر get، اکشن‌های async و خواندن/نوشتن State از بیرونِ دنیای React (در interceptorها و توابع کمکی).
+  </div>
+</section>

@@ -1,0 +1,184 @@
+<section class="chapter part-zustand" id="ch01">
+  <div class="pgmark">CHAPTER-01</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۱</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand — فصل مقدماتی</div>
+      <h1>مدیریت State — چرا، کِی و با چه ابزاری؟</h1>
+      <p class="ch-desc">قبل از نصب هر کتابخانه‌ای، باید بدانیم «State» دقیقاً چیست، چند نوع دارد و چرا React به‌تنهایی برای همهٔ آن‌ها کافی نیست. این فصل نقشهٔ کل مسیر دوره است.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>State چیست و در یک اپلیکیشن واقعی چند نوع State داریم؟</li>
+      <li>چرا <code>useState</code> و <code>useContext</code> در پروژه‌های بزرگ کافی نیستند؟</li>
+      <li>تفاوت بنیادین Client State و Server State چیست؟</li>
+      <li>چرا ترکیب Zustand و TanStack Query معماری استاندارد امروز است؟</li>
+    </ul>
+  </div>
+
+  <h2>State یعنی چه؟</h2>
+  <p>هر اپلیکیشن React در هر لحظه یک «تصویر از وضعیت» دارد: کاربر کیست؟ سبد خریدش چه چیزی دارد؟ مودالی باز است؟ دادهٔ لیست محصولات هنوز از سرور نیامده؟ به همهٔ این‌ها <strong>State (وضعیت)</strong> می‌گوییم: داده‌هایی که در طول زمان تغییر می‌کنند و <em>رابط کاربری چیزی است که از این داده‌ها رندر می‌شود</em>.</p>
+  <p>رابطهٔ معروف React را به یاد بیاورید:</p>
+  <div class="formula">
+    <div class="f-eq" dir="ltr">UI = f(state)</div>
+    <div class="f-cap">رابط کاربری، خروجی یک تابع از State است؛ هر بار State عوض شود، UI دوباره رندر می‌شود.</div>
+  </div>
+  <p>یعنی کار اصلی ما به‌عنوان توسعه‌دهندهٔ فرانت‌اند، در واقع <strong>مدیریت صحیح State</strong> است: کجا نگهش داریم؟ چه کسی تغییرش بدهد؟ و از کجا بفهمیم که تغییر کرده؟</p>
+
+  <h2>اما همهٔ Stateها از یک جنس نیستند</h2>
+  <p>بزرگ‌ترین اشتباه مبتدی‌ها این است که همهٔ داده‌ها را در یک قیف می‌ریزند. یک اپلیکیشن واقعی حداقل چهار نوع State دارد:</p>
+  <table class="tbl">
+    <thead><tr><th style="width:22%">نوع State</th><th>مثال</th><th>ویژگی کلیدی</th><th style="width:24%">ابزار مناسب</th></tr></thead>
+    <tbody>
+      <tr><td><b>UI State</b></td><td>باز/بسته بودن مودال، سایدبار، تم روشن/تاریک، تب فعال</td><td>کوتاه‌عمر، فقط در همین مرورگر معنا دارد</td><td><code>useState</code> / <code>Zustand</code></td></tr>
+      <tr><td><b>Client Data State</b></td><td>سبد خرید، لیست آهنگ‌های انتخابی، فرم چند مرحله‌ای</td><td>داده‌ای که «ما» می‌سازیم و مالکش هستیم</td><td><code>Zustand</code></td></tr>
+      <tr><td><b>Server State</b></td><td>لیست پست‌ها، پروفایل کاربر، موجودی انبار</td><td>مالکش سرور است؛ ما فقط نسخهٔ کش‌شدهٔ آن را داریم</td><td><code>TanStack Query</code></td></tr>
+      <tr><td><b>URL State</b></td><td>صفحهٔ فعلی، فیلترها، id محصول</td><td>باید در آدرس باشد تا لینک‌پذیر و رفرش‌پذیر باشد</td><td>React Router</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکتهٔ طلایی</div><p>سؤالی که همیشه بپرسید: «<strong>مالکِ حقیقی این داده کیست؟</strong>» اگر مالک، خودِ مرورگر است (سبد خرید، مودال) → Client State است. اگر مالک، دیتابیسِ سرور است (پست‌ها، موجودی) → Server State است و اگر جایی ذخیره‌اش کنیم فقط یک «کپی محلی و ممکن است کهنه» نگه داشته‌ایم.</p></div>
+
+  <h2>چرا useState به‌تنهایی کافی نیست؟</h2>
+  <p><code>useState</code> عالی است — برای State محلیِ یک کامپوننت. مشکل وقتی شروع می‌شود که چند کامپوننتِ دور از هم به یک State نیاز دارند. رایج‌ترین راه‌حل خام، <strong>Prop Drilling</strong> است: دادن props از کامپوننت ریشه، لابه‌لای کامپوننت‌هایی که اصلاً به آن نیاز ندارند، تا به مقصد برسد.</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/App.jsx — prop drilling</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">function App() {
+  const [cart, setCart] = useState([])
+  return &lt;Layout cart={cart} setCart={setCart} /&gt;
+}
+
+function Layout({ cart, setCart }) {
+  // Layout اصلاً به cart نیاز ندارد؛ فقط جاده است!
+  return &lt;Header cart={cart} setCart={setCart} /&gt;
+}
+
+function Header({ cart, setCart }) {
+  // باز هم فقط جاده...
+  return &lt;CartBadge cart={cart} setCart={setCart} /&gt;
+}
+
+function CartBadge({ cart, setCart }) {
+  // بالاخره مقصد!
+  return &lt;span&gt;{cart.length} قلم&lt;/span&gt;
+}</code></pre>
+  </div>
+  <p>در پروژه‌های واقعی این «جاده‌ها» ده‌ها سطح می‌شوند: تغییر کوچک در State یعنی ویرایش پنج فایل و رندر دوبارهٔ کامپوننت‌هایی که ربطی به ماجرا نداشتند.</p>
+
+  <h2>پس useContext؟ ظاهر فریبنده است</h2>
+  <p>راه‌حل داخلی React، <code>Context</code> است. یک مقدار را بالا تعریف می‌کنیم و هر کامپوننتی هر جای درخت، مستقیم می‌خواند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/CartContext.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">const CartContext = createContext(null)
+
+function CartProvider({ children }) {
+  const [cart, setCart] = useState([])
+  const addItem = (item) =&gt; setCart((prev) =&gt; [...prev, item])
+  return (
+    &lt;CartContext.Provider value={{ cart, addItem }}&gt;
+      {children}
+    &lt;/CartContext.Provider&gt;
+  )
+}
+
+// هر جا:
+const { cart, addItem } = useContext(CartContext)</code></pre>
+  </div>
+  <p>برای مقدارهای کم‌تغییر (مثل کاربر لاگین‌شده یا تم) این کافی است. اما سه مشکل جدی دارد:</p>
+  <ul>
+    <li><strong>رندر همه‌جانبه:</strong> هر تغییری در <code>value</code> باعث رندر دوبارهٔ <em>همهٔ</em> مصرف‌کننده‌های Context می‌شود — حتی آن‌هایی که به آن قسمت تغییرکرده نیاز ندارند. Context هیچ مکانیزم سلکتور ندارد.</li>
+    <li><strong>Provider جهنمی:</strong> هر Context یک Provider جداگانه می‌خواهد و درخت کامپوننت‌ها زیر لایه‌لایهٔ Providerها دفن می‌شود.</li>
+    <li><strong>بدون اکشن سازمان‌یافته:</strong> منطق تغییر State یا در کامپوننت‌ها پخش می‌شود یا باید در Provider انبار شود؛ در پروژه‌های بزرگ به کد سرگردان تبدیل می‌شود.</li>
+  </ul>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار</div><p>Context برای مقادیر <em>کم‌تغییر</em> طراحی شده (Theme، Locale، کاربر). اگر داده‌ای مدام تغییر می‌کند (سبد خرید، تایمر، موقعیت موس)، Context شما را به آهسته‌ترین اپ جهان تبدیل می‌کند. برای این کار جای درست، یک استور خارجی مثل Zustand است.</p></div>
+
+  <h2>معرفی کوتاه: Zustand</h2>
+  <p><strong>Zustand</strong> (واژهٔ آلمانی به معنی «وضعیت») کتابخانه‌ای است که توسط <code>Daishi Kato</code> — یکی از نویسندگان تیم React/Redux — ساخته شد و امروز به محبوب‌ترین گزینهٔ مدیریت Client State تبدیل شده است. سه ویژگی آن را از بقیه جدا می‌کند:</p>
+  <div class="cards">
+    <div class="card z"><h4>بدون Provider</h4><p>استور یک هوک ساده است؛ هیچ Context و هیچ Wrapper اضافه‌ای دور App نمی‌پیچد.</p></div>
+    <div class="card z"><h4>حداقل حجم</h4><p>زیر ۲ کیلوبایت فشرده؛ برای مقایسه Redux Toolkit چندین برابر این است.</p></div>
+    <div class="card z"><h4>سلکتور بومی</h4><p>کامپوننت فقط به تکه‌ای که می‌خواهد گوش می‌دهد؛ بقیهٔ تغییرات رندر نمی‌کند.</p></div>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">همان سبد خرید، این بار با Zustand</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { create } from 'zustand'
+
+const useCartStore = create((set) =&gt; ({
+  cart: [],
+  addItem: (item) =&gt; set((state) =&gt; ({ cart: [...state.cart, item] })),
+}))
+
+// هر جا — بدون Provider، بدون drilling:
+const cart = useCartStore((s) =&gt; s.cart)
+const addItem = useCartStore((s) =&gt; s.addItem)</code></pre>
+  </div>
+  <p>شاید الان پیچیده به نظر برسد — نگران نباشید؛ از فصل بعد خط‌به‌خط بازش می‌کنیم.</p>
+
+  <h2>و معرفی کوتاه: TanStack Query</h2>
+  <p>حالا آن سؤال طلایی: «مالکِ لیست پست‌ها کیست؟» سرور. پس در React فقط یک <em>کش</em> (Cache) از آن نگه می‌داریم؛ کپی‌ای که ممکن است کهنه شود و باید رفرش شود. مدیریت این کش — گرفتن، نگه‌داشتن، به‌روزرسانی، دوباره‌گیری بعد از خطا — دقیقاً کار <strong>TanStack Query</strong> است (که با نام قدیمی <code>React Query</code> هم می‌شناسندش).</p>
+  <p>بدون آن، همهٔ ما یک الگوی شکننده می‌نویسیم:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">الگوی شکنندهٔ «useEffect + fetch»</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">const [posts, setPosts] = useState([])
+const [loading, setLoading] = useState(true)
+const [error, setError] = useState(null)
+
+useEffect(() =&gt; {
+  setLoading(true)
+  fetch('/api/posts')
+    .then((r) =&gt; r.json())
+    .then(setPosts)
+    .catch(setError)
+    .finally(() =&gt; setLoading(false))
+}, []) // بدون کش، بدون retry، بدون dedup، بدون refresh...</code></pre>
+  </div>
+  <p>و بعد باید دستی به آن اضافه کنیم: جلوگیری از double-fetch در StrictMode، لغو درخواست هنگام unmount، دوباره‌گیری بعد از برگشتن اینترنت، کش بین تب‌ها، به‌روزرسانی بعد از هر mutation... TanStack Query همهٔ این‌ها را از پیش حل کرده است.</p>
+
+  <h2>معماری نهایی دوره</h2>
+  <p>این تصویر ذهنی را تا آخر دوره حفظ کنید — تقریباً هر تصمیم فنی از روی آن پاس می‌گیرد:</p>
+  <div class="flow">
+    <div class="fnode" style="border-color:var(--ink)"><b>UI (React)</b>کامپوننت‌ها فقط رندر می‌کنند</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--z); background:var(--z-soft)"><b>Client State</b>Zustand<br><span style="font-size:11px;color:var(--muted)">سبد خرید · UI · فرم</span></div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--t); background:var(--t-soft)"><b>Server State (کش)</b>TanStack Query<br><span style="font-size:11px;color:var(--muted)">دادهٔ سرور با staleTime و invalidation</span></div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--line)"><b>Backend API</b>REST / GraphQL</div>
+  </div>
+  <p>قانون سرانگشتی: <strong>هر داده‌ای که از API می‌آید به Zustand نمی‌رود</strong> — به کشِ Query می‌رود. و هر داده‌ای که فقط در مرورگر معنا دارد، به Query نمی‌رود — به Zustand می‌رود. در فصل ۸ کامل این مرز را یاد می‌گیریم؛ فعلاً همین کافی است.</p>
+
+  <h2>جدول مقایسه: جای ما بین ابزارها کجاست؟</h2>
+  <table class="tbl">
+    <thead><tr><th>ابزار</th><th>نوع</th><th>قوت</th><th>ضعف برای تیم‌های معمول</th></tr></thead>
+    <tbody>
+      <tr><td><code>useState/Context</code></td><td>داخلی React</td><td>بدون کتابخانه</td><td>سلکتور ندارد؛ در مقیاس بزرگ رندر اضافه و Provider جهنمی</td></tr>
+      <tr><td><code>Redux Toolkit</code></td><td>Client State</td><td>بویرپلیت نظیم‌شده، DevTools عالی</td><td>حجم مفاهیم بالا؛ برای اکثر پروژه‌های امروزی بیش‌ازحد سنگین</td></tr>
+      <tr><td><code>Zustand</code></td><td>Client State</td><td>ساده، سبک، بدون Provider، TS عالی</td><td>برای Server State ساخته نشده (و نباید شود!)</td></tr>
+      <tr><td><code>Jotai</code></td><td>Client State (اتمیک)</td><td>گرانولار بودن عالی</td><td>پارادایم اتم‌ها یادگیری دارد؛ برای State دامنه‌ای سنگین‌تر از حد</td></tr>
+      <tr><td><code>TanStack Query</code></td><td>Server State</td><td>کش، اینولیدیشن، sync بین تب‌ها، retry</td><td>جای Client State را نمی‌گیرد (و نباید بگیرد)</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-note"><div class="co-title"><span class="dot"></span>دربارهٔ کد این کتاب</div><p>فصل‌های ۱ تا ۷ با <b>JavaScript</b> می‌نویسیم تا مفهوم‌ها سنگین نشوند؛ از فصل ۶ به بعد (و کل بخش TanStack Query) به <b>TypeScript</b> مهاجرت می‌کنیم — همان‌طور که تیم‌های واقعی کار می‌کنند. کد تایپ‌دار در هر فصل، معادل JS همان الگوست.</p></div>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>State = دادهٔ تغییرپذیری که UI از آن رندر می‌شود؛ UI = f(state).</li>
+      <li>چهار نوع State داریم: UI، Client Data، Server و URL — هرکدام ابزار خودش را می‌خواهد.</li>
+      <li>Prop Drilling و Context در مقیاس بزرگ می‌شکند؛ Context فقط برای مقادیر کم‌تغییر است.</li>
+      <li>Zustand = Client State (سبد خرید، UI). TanStack Query = Server State (هر داده‌ای که مالکش سرور است).</li>
+      <li>معماری برنده: UI ← Zustand ← Query Cache ← API.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۱ — با کاغذ و قلم!</div>
+    <p>لیست ۱۰ داده از اپی که هر روز استفاده می‌کنید (مثلاً دیجی‌کالا یا توییتر) بنویسید: سبد خرید، اعلان‌ها، لایک‌ها، تم شبانه و... جلوی هرکدام بنویسید Client State است یا Server State یا URL State و چرا. این تمرین ۱۰ دقیقه‌ای، نیمی از درس فصل ۸ را از قبل در ذهنتان جا می‌اندازد.</p>
+  </div>
+
+  <div class="next-ch">
+    <b>در فصل بعد:</b> نصب Zustand و نوشتن اولین استور واقعی — با سه ویژگی که آن را از Context و Redux متمایز می‌کند.
+  </div>
+</section>

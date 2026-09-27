@@ -1,0 +1,3197 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>صفر تا صد Zustand و TanStack Query</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- ============ جلد ============ -->
+<section class="front-cover" id="front-cover">
+  <div class="deco deco-1"></div>
+  <div class="deco deco-2"></div>
+  <div class="deco deco-3"></div>
+  <div class="deco deco-4"></div>
+  <div class="front-cover-inner">
+    <div class="kicker"><span class="rule"></span>دورهٔ جامع و پروژه‌محور — مخصوص فرانت‌اند دولوپرها</div>
+    <div class="brandline">
+      <span class="chip z">Zustand 5</span>
+      <span class="chip plus">×</span>
+      <span class="chip t">TanStack Query 5</span>
+    </div>
+    <h1>صفر تا صد<br><span class="lt">Zustand</span> و <span class="lt2">TanStack Query</span></h1>
+    <p class="subtitle">مسیر کامل مدیریت State در اپلیکیشن‌های React؛ از اولین <b>useState</b> تا معماری حرفه‌ای که در تیم‌های واقعی شرکت‌ها استفاده می‌شود — با زبان فارسی، پروژه‌های عملی و تمرین‌های هدفمند.</p>
+    <div class="summary">در این دوره یاد می‌گیرید داده‌های سمت کلاینت را با Zustand و داده‌های سمت سرور را با TanStack Query به شکل حرفه‌ای مدیریت کنید؛ کش، اینولیدیشن، به‌روزرسانی خوش‌بینانه، ذخیرهٔ دائمی، تست و الگوهای استاندارد تیمی — همراه با دو پروژهٔ کامل (سبد خرید و اپ بلاگ) که پورتفولیوی شما را متحول می‌کند.</div>
+    <div class="meta">
+      <span class="m">مخاطب: <b>فرانت‌اند دولوپرها</b></span>
+      <span class="m">سطح: <b>صفر مطلق تا آمادهٔ کار</b></span>
+      <span class="m">پیش‌نیاز: <b>آشنایی مقدماتی با React</b></span>
+      <span class="m">خروجی: <b>هندل کامل پروژه‌های واقعی</b></span>
+    </div>
+    <div class="foot">
+      <span>ویرایش ۱٫۰ — پاییز ۱۴۰۵</span>
+      <span class="en">ZUSTAND × TANSTACK QUERY · PERSIAN EDITION</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ دربارهٔ دوره ============ -->
+<section class="front chapter-free" id="about">
+  <div class="pgmark">ABOUT-PAGE</div>
+  <h2>این کتاب برای کیست و چرا نوشته شده؟</h2>
+  <p class="lead">تقریباً هر فرانت‌اند دولوپری در اولین پروژهٔ جدی خود با همین سؤال روبه‌رو می‌شود: «<strong>این داده را کجا نگه دارم؟</strong>» سبد خرید کاربر، وضعیت مودال‌ها، لیست پست‌های گرفته‌شده از سرور، توکن ورود، تنظیمات تم... همه و همه «State» هستند؛ اما همه از یک جنس نیستند و همه در یک ابزار جا نمی‌گیرند.</p>
+  <p>تجربهٔ سال‌ها پروژه‌های واقعی نشان داده ترکیب <strong>Zustand برای State سمت کلاینت</strong> و <strong>TanStack Query برای State سمت سرور</strong> ساده‌ترین، سبک‌ترین و در عین حال استانداردترین معماری در اکوسیستم React است — ترکیبی که امروزه در استارتاپ‌ها و شرکت‌های بزرگ به یک انتخاب پیش‌فرض تبدیل شده است. این کتاب دقیقاً همان مسیری را پیش می‌گیرد که یک توسعه‌دهنده از صفر تا استخدام در شرکت طی می‌کند.</p>
+
+  <h3>پیش‌نیازهای لازم</h3>
+  <ul>
+    <li>آشنایی مقدماتی با <strong>HTML/CSS</strong> و <strong>JavaScript مدرن</strong> (متغیرها، تابع، آرایه، Object، destructuring، async/await).</li>
+    <li>آشنایی مقدماتی با <strong>React</strong>: کامپوننت، JSX، props و useState. اگر این‌ها را بلد نیستید، یکی دو هفته با مستندات رسمی React پیش بروید و بعد برگردید.</li>
+    <li>نصب بودن <strong>Node.js نسخهٔ ۲۰ به بالا</strong> و یک ویرایشگر مثل VS Code.</li>
+    <li>هیچ پیش‌نیازی دربارهٔ Redux، MobX یا مدیریت State حرفه‌ای لازم نیست — از صفرِ صفر شروع می‌کنیم.</li>
+  </ul>
+
+  <h3>ساختار کتاب</h3>
+  <div class="cards">
+    <div class="card z"><h4>بخش اول · Zustand (فصل ۱ تا ۷)</h4><p>از مفهوم State و انگیزهٔ ساخت Zustand تا سلکتورها، Middlewareها، الگوهای TypeScript و یک پروژهٔ کامل سبد خرید.</p></div>
+    <div class="card t"><h4>بخش دوم · TanStack Query (فصل ۸ تا ۱۲)</h4><p>از تفاوت Server State و Client State تا useQuery، useMutation، مدیریت کش و امکانات پیشرفته مثل Infinite Query.</p></div>
+    <div class="card v"><h4>بخش سوم · حرفه‌ای شدن (فصل ۱۳ و ۱۴)</h4><p>پروژهٔ ترکیبی کامل با هر دو ابزار به‌علاوهٔ تست‌نویسی، دیباگ، آنتی‌پترن‌ها و آمادگی مصاحبه و استخدام.</p></div>
+    <div class="card s"><h4>بخش چهارم · مرجع سریع (فصل ۱۵)</h4><p>چیت‌شیت دستورها، گلاساری فارسی-انگلیسی و نقشهٔ راه ادامهٔ مسیر — برگه‌ای که همیشه باید دم دست باشد.</p></div>
+  </div>
+
+  <h3>قراردادهای کتاب</h3>
+  <p>در سراسر کتاب از باکس‌های رنگی زیر استفاده شده تا بتوانید سریع اسکن کنید:</p>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته</div><p>تجربه‌ها و ترفندهایی که در پروژه‌های واقعی نجات‌تان می‌دهد.</p></div>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار</div><p>خطاهای رایجی که اگر ندانید، ساعت‌ها وقت‌تان را می‌گیرند.</p></div>
+  <div class="callout co-danger"><div class="co-title"><span class="dot"></span>ممنوع</div><p>الگوهای اشتباه (آنتی‌پترن) که در تیم‌ها بلافاصله رد می‌شوند.</p></div>
+  <div class="callout co-exercise"><div class="co-title"><span class="dot"></span>تمرین</div><p>کارهایی که خودتان باید بنویسید — این کتاب بدون تمرین شما اثری ندارد.</p></div>
+
+  <h3>چطور از این کتاب استفاده کنم؟</h3>
+  <ol>
+    <li>فصل‌ها عمداً به‌ترتیب طراحی شده‌اند؛ هر فصل روی فصل قبل سوار است. از پرش نترسید، اما بدانید هزینه‌اش را بعداً می‌پردازید.</li>
+    <li>هر کد را <strong>خودتان تایپ کنید</strong>. کپی-پیست عضلهٔ برنامه‌نویسی را می‌سوزاند.</li>
+    <li>تمرین‌های انتهای فصل‌ها را حتماً انجام دهید؛ سؤالات مصاحبه معمولاً از دل همین تمرین‌ها بیرون می‌آید.</li>
+    <li>اگر جایی گیر کردید، فصل ۱۵ (چیت‌شیت و گلاساری) مرجع سریع شماست.</li>
+  </ol>
+
+  <div class="callout co-note"><div class="co-title"><span class="dot"></span>یادداشت نسخه‌ها</div><p>کدهای این کتاب بر اساس <code>Zustand نسخهٔ ۵</code> و <code>@tanstack/react-query نسخهٔ ۵</code> و <code>React 18/19</code> نوشته شده‌اند. اگر با نسخهٔ ۴ آموزش دیده‌اید، جدول تفاوت‌ها در فصل ۸ و ۹ را از دست ندهید.</p></div>
+</section>
+
+<section class="toc-page" id="toc"><div class="pgmark">TOC-PAGE</div><h2>فهرست مطالب</h2><div class="toc-part" style="color:var(--z)">بخش اول · Zustand — مدیریت State سمت کلاینت<span class="rule"></span></div>
+<div class="toc-row pz"><span class="t-num">فصل ۱</span><span class="t-title">مدیریت State — چرا، کِی و با چه ابزاری؟</span><span class="t-dots"></span><span class="t-pg" data-toc="ch01">…</span></div>
+<div class="toc-row pz"><span class="t-num">فصل ۲</span><span class="t-title">Zustand از صفر — نصب و اولین استور</span><span class="t-dots"></span><span class="t-pg" data-toc="ch02">…</span></div>
+<div class="toc-row pz"><span class="t-num">فصل ۳</span><span class="t-title">عمق Zustand — set، get و کار با استور از هر جا</span><span class="t-dots"></span><span class="t-pg" data-toc="ch03">…</span></div>
+<div class="toc-row pz"><span class="t-num">فصل ۴</span><span class="t-title">Selectors و بهینه‌سازی رندر</span><span class="t-dots"></span><span class="t-pg" data-toc="ch04">…</span></div>
+<div class="toc-row pz"><span class="t-num">فصل ۵</span><span class="t-title">Middlewareها — persist، devtools و immer</span><span class="t-dots"></span><span class="t-pg" data-toc="ch05">…</span></div>
+<div class="toc-row pz"><span class="t-num">فصل ۶</span><span class="t-title">الگوهای حرفه‌ای Zustand — TypeScript و اسلایس‌ها</span><span class="t-dots"></span><span class="t-pg" data-toc="ch06">…</span></div>
+<div class="toc-row pz"><span class="t-num">فصل ۷</span><span class="t-title">پروژهٔ عملی ۱ — سبد خرید کامل با Zustand</span><span class="t-dots"></span><span class="t-pg" data-toc="ch07">…</span></div>
+<div class="toc-part" style="color:var(--t)">بخش دوم · TanStack Query — مدیریت Server State<span class="rule"></span></div>
+<div class="toc-row pt"><span class="t-num">فصل ۸</span><span class="t-title">TanStack Query و دنیای Server State</span><span class="t-dots"></span><span class="t-pg" data-toc="ch08">…</span></div>
+<div class="toc-row pt"><span class="t-num">فصل ۹</span><span class="t-title">useQuery — خواندن داده از سرور</span><span class="t-dots"></span><span class="t-pg" data-toc="ch09">…</span></div>
+<div class="toc-row pt"><span class="t-num">فصل ۱۰</span><span class="t-title">useMutation — تغییر داده و به‌روزرسانی کش</span><span class="t-dots"></span><span class="t-pg" data-toc="ch10">…</span></div>
+<div class="toc-row pt"><span class="t-num">فصل ۱۱</span><span class="t-title">Query Keys و مدیریت کش</span><span class="t-dots"></span><span class="t-pg" data-toc="ch11">…</span></div>
+<div class="toc-row pt"><span class="t-num">فصل ۱۲</span><span class="t-title">امکانات پیشرفته — صفحه‌بندی، Infinite و Suspense</span><span class="t-dots"></span><span class="t-pg" data-toc="ch12">…</span></div>
+<div class="toc-part" style="color:var(--v)">بخش سوم · پروژهٔ ترکیبی و آمادگی حرفه‌ای<span class="rule"></span></div>
+<div class="toc-row pv"><span class="t-num">فصل ۱۳</span><span class="t-title">پروژهٔ عملی ۲ — اپ کامل با Zustand و TanStack Query</span><span class="t-dots"></span><span class="t-pg" data-toc="ch13">…</span></div>
+<div class="toc-row pv"><span class="t-num">فصل ۱۴</span><span class="t-title">حرفه‌ای شو — تست، دیباگ و آمادگی استخدام</span><span class="t-dots"></span><span class="t-pg" data-toc="ch14">…</span></div>
+<div class="toc-part" style="color:var(--s)">بخش چهارم · مرجع سریع<span class="rule"></span></div>
+<div class="toc-row ps"><span class="t-num">فصل ۱۵</span><span class="t-title">چیت‌شیت، گلاساری و نقشهٔ راه</span><span class="t-dots"></span><span class="t-pg" data-toc="ch15">…</span></div></section>
+<section class="chapter part-zustand" id="ch01">
+  <div class="pgmark">CHAPTER-01</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۱</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand — فصل مقدماتی</div>
+      <h1>مدیریت State — چرا، کِی و با چه ابزاری؟</h1>
+      <p class="ch-desc">قبل از نصب هر کتابخانه‌ای، باید بدانیم «State» دقیقاً چیست، چند نوع دارد و چرا React به‌تنهایی برای همهٔ آن‌ها کافی نیست. این فصل نقشهٔ کل مسیر دوره است.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>State چیست و در یک اپلیکیشن واقعی چند نوع State داریم؟</li>
+      <li>چرا <code>useState</code> و <code>useContext</code> در پروژه‌های بزرگ کافی نیستند؟</li>
+      <li>تفاوت بنیادین Client State و Server State چیست؟</li>
+      <li>چرا ترکیب Zustand و TanStack Query معماری استاندارد امروز است؟</li>
+    </ul>
+  </div>
+
+  <h2>State یعنی چه؟</h2>
+  <p>هر اپلیکیشن React در هر لحظه یک «تصویر از وضعیت» دارد: کاربر کیست؟ سبد خریدش چه چیزی دارد؟ مودالی باز است؟ دادهٔ لیست محصولات هنوز از سرور نیامده؟ به همهٔ این‌ها <strong>State (وضعیت)</strong> می‌گوییم: داده‌هایی که در طول زمان تغییر می‌کنند و <em>رابط کاربری چیزی است که از این داده‌ها رندر می‌شود</em>.</p>
+  <p>رابطهٔ معروف React را به یاد بیاورید:</p>
+  <div class="formula">
+    <div class="f-eq" dir="ltr">UI = f(state)</div>
+    <div class="f-cap">رابط کاربری، خروجی یک تابع از State است؛ هر بار State عوض شود، UI دوباره رندر می‌شود.</div>
+  </div>
+  <p>یعنی کار اصلی ما به‌عنوان توسعه‌دهندهٔ فرانت‌اند، در واقع <strong>مدیریت صحیح State</strong> است: کجا نگهش داریم؟ چه کسی تغییرش بدهد؟ و از کجا بفهمیم که تغییر کرده؟</p>
+
+  <h2>اما همهٔ Stateها از یک جنس نیستند</h2>
+  <p>بزرگ‌ترین اشتباه مبتدی‌ها این است که همهٔ داده‌ها را در یک قیف می‌ریزند. یک اپلیکیشن واقعی حداقل چهار نوع State دارد:</p>
+  <table class="tbl">
+    <thead><tr><th style="width:22%">نوع State</th><th>مثال</th><th>ویژگی کلیدی</th><th style="width:24%">ابزار مناسب</th></tr></thead>
+    <tbody>
+      <tr><td><b>UI State</b></td><td>باز/بسته بودن مودال، سایدبار، تم روشن/تاریک، تب فعال</td><td>کوتاه‌عمر، فقط در همین مرورگر معنا دارد</td><td><code>useState</code> / <code>Zustand</code></td></tr>
+      <tr><td><b>Client Data State</b></td><td>سبد خرید، لیست آهنگ‌های انتخابی، فرم چند مرحله‌ای</td><td>داده‌ای که «ما» می‌سازیم و مالکش هستیم</td><td><code>Zustand</code></td></tr>
+      <tr><td><b>Server State</b></td><td>لیست پست‌ها، پروفایل کاربر، موجودی انبار</td><td>مالکش سرور است؛ ما فقط نسخهٔ کش‌شدهٔ آن را داریم</td><td><code>TanStack Query</code></td></tr>
+      <tr><td><b>URL State</b></td><td>صفحهٔ فعلی، فیلترها، id محصول</td><td>باید در آدرس باشد تا لینک‌پذیر و رفرش‌پذیر باشد</td><td>React Router</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکتهٔ طلایی</div><p>سؤالی که همیشه بپرسید: «<strong>مالکِ حقیقی این داده کیست؟</strong>» اگر مالک، خودِ مرورگر است (سبد خرید، مودال) → Client State است. اگر مالک، دیتابیسِ سرور است (پست‌ها، موجودی) → Server State است و اگر جایی ذخیره‌اش کنیم فقط یک «کپی محلی و ممکن است کهنه» نگه داشته‌ایم.</p></div>
+
+  <h2>چرا useState به‌تنهایی کافی نیست؟</h2>
+  <p><code>useState</code> عالی است — برای State محلیِ یک کامپوننت. مشکل وقتی شروع می‌شود که چند کامپوننتِ دور از هم به یک State نیاز دارند. رایج‌ترین راه‌حل خام، <strong>Prop Drilling</strong> است: دادن props از کامپوننت ریشه، لابه‌لای کامپوننت‌هایی که اصلاً به آن نیاز ندارند، تا به مقصد برسد.</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/App.jsx — prop drilling</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">function App() {
+  const [cart, setCart] = useState([])
+  return &lt;Layout cart={cart} setCart={setCart} /&gt;
+}
+
+function Layout({ cart, setCart }) {
+  // Layout اصلاً به cart نیاز ندارد؛ فقط جاده است!
+  return &lt;Header cart={cart} setCart={setCart} /&gt;
+}
+
+function Header({ cart, setCart }) {
+  // باز هم فقط جاده...
+  return &lt;CartBadge cart={cart} setCart={setCart} /&gt;
+}
+
+function CartBadge({ cart, setCart }) {
+  // بالاخره مقصد!
+  return &lt;span&gt;{cart.length} قلم&lt;/span&gt;
+}</code></pre>
+  </div>
+  <p>در پروژه‌های واقعی این «جاده‌ها» ده‌ها سطح می‌شوند: تغییر کوچک در State یعنی ویرایش پنج فایل و رندر دوبارهٔ کامپوننت‌هایی که ربطی به ماجرا نداشتند.</p>
+
+  <h2>پس useContext؟ ظاهر فریبنده است</h2>
+  <p>راه‌حل داخلی React، <code>Context</code> است. یک مقدار را بالا تعریف می‌کنیم و هر کامپوننتی هر جای درخت، مستقیم می‌خواند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/CartContext.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">const CartContext = createContext(null)
+
+function CartProvider({ children }) {
+  const [cart, setCart] = useState([])
+  const addItem = (item) =&gt; setCart((prev) =&gt; [...prev, item])
+  return (
+    &lt;CartContext.Provider value={{ cart, addItem }}&gt;
+      {children}
+    &lt;/CartContext.Provider&gt;
+  )
+}
+
+// هر جا:
+const { cart, addItem } = useContext(CartContext)</code></pre>
+  </div>
+  <p>برای مقدارهای کم‌تغییر (مثل کاربر لاگین‌شده یا تم) این کافی است. اما سه مشکل جدی دارد:</p>
+  <ul>
+    <li><strong>رندر همه‌جانبه:</strong> هر تغییری در <code>value</code> باعث رندر دوبارهٔ <em>همهٔ</em> مصرف‌کننده‌های Context می‌شود — حتی آن‌هایی که به آن قسمت تغییرکرده نیاز ندارند. Context هیچ مکانیزم سلکتور ندارد.</li>
+    <li><strong>Provider جهنمی:</strong> هر Context یک Provider جداگانه می‌خواهد و درخت کامپوننت‌ها زیر لایه‌لایهٔ Providerها دفن می‌شود.</li>
+    <li><strong>بدون اکشن سازمان‌یافته:</strong> منطق تغییر State یا در کامپوننت‌ها پخش می‌شود یا باید در Provider انبار شود؛ در پروژه‌های بزرگ به کد سرگردان تبدیل می‌شود.</li>
+  </ul>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار</div><p>Context برای مقادیر <em>کم‌تغییر</em> طراحی شده (Theme، Locale، کاربر). اگر داده‌ای مدام تغییر می‌کند (سبد خرید، تایمر، موقعیت موس)، Context شما را به آهسته‌ترین اپ جهان تبدیل می‌کند. برای این کار جای درست، یک استور خارجی مثل Zustand است.</p></div>
+
+  <h2>معرفی کوتاه: Zustand</h2>
+  <p><strong>Zustand</strong> (واژهٔ آلمانی به معنی «وضعیت») کتابخانه‌ای است که توسط <code>Daishi Kato</code> — یکی از نویسندگان تیم React/Redux — ساخته شد و امروز به محبوب‌ترین گزینهٔ مدیریت Client State تبدیل شده است. سه ویژگی آن را از بقیه جدا می‌کند:</p>
+  <div class="cards">
+    <div class="card z"><h4>بدون Provider</h4><p>استور یک هوک ساده است؛ هیچ Context و هیچ Wrapper اضافه‌ای دور App نمی‌پیچد.</p></div>
+    <div class="card z"><h4>حداقل حجم</h4><p>زیر ۲ کیلوبایت فشرده؛ برای مقایسه Redux Toolkit چندین برابر این است.</p></div>
+    <div class="card z"><h4>سلکتور بومی</h4><p>کامپوننت فقط به تکه‌ای که می‌خواهد گوش می‌دهد؛ بقیهٔ تغییرات رندر نمی‌کند.</p></div>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">همان سبد خرید، این بار با Zustand</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { create } from 'zustand'
+
+const useCartStore = create((set) =&gt; ({
+  cart: [],
+  addItem: (item) =&gt; set((state) =&gt; ({ cart: [...state.cart, item] })),
+}))
+
+// هر جا — بدون Provider، بدون drilling:
+const cart = useCartStore((s) =&gt; s.cart)
+const addItem = useCartStore((s) =&gt; s.addItem)</code></pre>
+  </div>
+  <p>شاید الان پیچیده به نظر برسد — نگران نباشید؛ از فصل بعد خط‌به‌خط بازش می‌کنیم.</p>
+
+  <h2>و معرفی کوتاه: TanStack Query</h2>
+  <p>حالا آن سؤال طلایی: «مالکِ لیست پست‌ها کیست؟» سرور. پس در React فقط یک <em>کش</em> (Cache) از آن نگه می‌داریم؛ کپی‌ای که ممکن است کهنه شود و باید رفرش شود. مدیریت این کش — گرفتن، نگه‌داشتن، به‌روزرسانی، دوباره‌گیری بعد از خطا — دقیقاً کار <strong>TanStack Query</strong> است (که با نام قدیمی <code>React Query</code> هم می‌شناسندش).</p>
+  <p>بدون آن، همهٔ ما یک الگوی شکننده می‌نویسیم:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">الگوی شکنندهٔ «useEffect + fetch»</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">const [posts, setPosts] = useState([])
+const [loading, setLoading] = useState(true)
+const [error, setError] = useState(null)
+
+useEffect(() =&gt; {
+  setLoading(true)
+  fetch('/api/posts')
+    .then((r) =&gt; r.json())
+    .then(setPosts)
+    .catch(setError)
+    .finally(() =&gt; setLoading(false))
+}, []) // بدون کش، بدون retry، بدون dedup، بدون refresh...</code></pre>
+  </div>
+  <p>و بعد باید دستی به آن اضافه کنیم: جلوگیری از double-fetch در StrictMode، لغو درخواست هنگام unmount، دوباره‌گیری بعد از برگشتن اینترنت، کش بین تب‌ها، به‌روزرسانی بعد از هر mutation... TanStack Query همهٔ این‌ها را از پیش حل کرده است.</p>
+
+  <h2>معماری نهایی دوره</h2>
+  <p>این تصویر ذهنی را تا آخر دوره حفظ کنید — تقریباً هر تصمیم فنی از روی آن پاس می‌گیرد:</p>
+  <div class="flow">
+    <div class="fnode" style="border-color:var(--ink)"><b>UI (React)</b>کامپوننت‌ها فقط رندر می‌کنند</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--z); background:var(--z-soft)"><b>Client State</b>Zustand<br><span style="font-size:11px;color:var(--muted)">سبد خرید · UI · فرم</span></div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--t); background:var(--t-soft)"><b>Server State (کش)</b>TanStack Query<br><span style="font-size:11px;color:var(--muted)">دادهٔ سرور با staleTime و invalidation</span></div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--line)"><b>Backend API</b>REST / GraphQL</div>
+  </div>
+  <p>قانون سرانگشتی: <strong>هر داده‌ای که از API می‌آید به Zustand نمی‌رود</strong> — به کشِ Query می‌رود. و هر داده‌ای که فقط در مرورگر معنا دارد، به Query نمی‌رود — به Zustand می‌رود. در فصل ۸ کامل این مرز را یاد می‌گیریم؛ فعلاً همین کافی است.</p>
+
+  <h2>جدول مقایسه: جای ما بین ابزارها کجاست؟</h2>
+  <table class="tbl">
+    <thead><tr><th>ابزار</th><th>نوع</th><th>قوت</th><th>ضعف برای تیم‌های معمول</th></tr></thead>
+    <tbody>
+      <tr><td><code>useState/Context</code></td><td>داخلی React</td><td>بدون کتابخانه</td><td>سلکتور ندارد؛ در مقیاس بزرگ رندر اضافه و Provider جهنمی</td></tr>
+      <tr><td><code>Redux Toolkit</code></td><td>Client State</td><td>بویرپلیت نظیم‌شده، DevTools عالی</td><td>حجم مفاهیم بالا؛ برای اکثر پروژه‌های امروزی بیش‌ازحد سنگین</td></tr>
+      <tr><td><code>Zustand</code></td><td>Client State</td><td>ساده، سبک، بدون Provider، TS عالی</td><td>برای Server State ساخته نشده (و نباید شود!)</td></tr>
+      <tr><td><code>Jotai</code></td><td>Client State (اتمیک)</td><td>گرانولار بودن عالی</td><td>پارادایم اتم‌ها یادگیری دارد؛ برای State دامنه‌ای سنگین‌تر از حد</td></tr>
+      <tr><td><code>TanStack Query</code></td><td>Server State</td><td>کش، اینولیدیشن، sync بین تب‌ها، retry</td><td>جای Client State را نمی‌گیرد (و نباید بگیرد)</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-note"><div class="co-title"><span class="dot"></span>دربارهٔ کد این کتاب</div><p>فصل‌های ۱ تا ۷ با <b>JavaScript</b> می‌نویسیم تا مفهوم‌ها سنگین نشوند؛ از فصل ۶ به بعد (و کل بخش TanStack Query) به <b>TypeScript</b> مهاجرت می‌کنیم — همان‌طور که تیم‌های واقعی کار می‌کنند. کد تایپ‌دار در هر فصل، معادل JS همان الگوست.</p></div>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>State = دادهٔ تغییرپذیری که UI از آن رندر می‌شود؛ UI = f(state).</li>
+      <li>چهار نوع State داریم: UI، Client Data، Server و URL — هرکدام ابزار خودش را می‌خواهد.</li>
+      <li>Prop Drilling و Context در مقیاس بزرگ می‌شکند؛ Context فقط برای مقادیر کم‌تغییر است.</li>
+      <li>Zustand = Client State (سبد خرید، UI). TanStack Query = Server State (هر داده‌ای که مالکش سرور است).</li>
+      <li>معماری برنده: UI ← Zustand ← Query Cache ← API.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۱ — با کاغذ و قلم!</div>
+    <p>لیست ۱۰ داده از اپی که هر روز استفاده می‌کنید (مثلاً دیجی‌کالا یا توییتر) بنویسید: سبد خرید، اعلان‌ها، لایک‌ها، تم شبانه و... جلوی هرکدام بنویسید Client State است یا Server State یا URL State و چرا. این تمرین ۱۰ دقیقه‌ای، نیمی از درس فصل ۸ را از قبل در ذهنتان جا می‌اندازد.</p>
+  </div>
+
+  <div class="next-ch">
+    <b>در فصل بعد:</b> نصب Zustand و نوشتن اولین استور واقعی — با سه ویژگی که آن را از Context و Redux متمایز می‌کند.
+  </div>
+</section>
+<section class="chapter part-zustand" id="ch02">
+  <div class="pgmark">CHAPTER-02</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۲</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand</div>
+      <h1>Zustand از صفر — نصب و اولین استور</h1>
+      <p class="ch-desc">از نصب تا ساخت اولین استور واقعی: State، اکشن‌ها و مصرف آن‌ها در کامپوننت — بدون حتی یک Provider.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>نصب Zustand در یک پروژهٔ Vite و ساخت اولین استور</li>
+      <li>آناتومی <code>create</code>: چرا استور، «هوک» است؟</li>
+      <li>نوشتن اکشن‌ها و فراخوانی آن‌ها در UI</li>
+      <li>قوانین نام‌گذاری و سازماندهی فایل استورها از روز اول</li>
+    </ul>
+  </div>
+
+  <h2>راه‌اندازی پروژه</h2>
+  <p>برای تمرین‌های بخش اول یک پروژهٔ React ساده با Vite می‌سازیم (اگر پروژهٔ آماده دارید، از همان استفاده کنید):</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">terminal</span><span class="cb-lang">bash</span></div>
+    <pre><code class="language-bash">npm create vite@latest zustand-lab -- --template react
+cd zustand-lab
+npm install
+npm install zustand        # نسخهٔ ۵ را نصب می‌کند
+npm run dev</code></pre>
+  </div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته</div><p>Zustand به هیچ Wrapper (مثل <code>QueryClientProvider</code> یا <code>Provider</code> ریداکس) نیاز ندارد. وابستگی واحدش خود React است؛ یعنی حتی می‌توانید آن را در پروژه‌های غیر React هم استفاده کنید.</p></div>
+
+  <h2>اولین استور: شمارنده</h2>
+  <p>کلاسیک‌ترین شروع. یک فایل جدید بسازید: <code>src/store/useCounterStore.js</code></p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useCounterStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+
+// create یک «هوک» برمی‌گرداند؛ به همین دلیل اسمش را با use شروع می‌کنیم
+export const useCounterStore = create((set) =&gt; ({
+  // ۱) State اولیه
+  count: 0,
+
+  // ۲) اکشن‌ها: توابعی که State را تغییر می‌دهند
+  increment: () =&gt; set((state) =&gt; ({ count: state.count + 1 })),
+  decrement: () =&gt; set((state) =&gt; ({ count: state.count - 1 })),
+  reset: () =&gt; set({ count: 0 }),
+}))</code></pre>
+  </div>
+  <p>سه نکتهٔ بنیادی در همین ۱۰ خط هست:</p>
+  <ul>
+    <li><code>create(callback)</code> یک هوک سفارشی برمی‌گرداند که هر جای برنامه قابل استفاده است — بدون Provider و بدون Context.</li>
+    <li>شیء برگشتیِ callback ترکیبی از <strong>داده</strong> (اینجا <code>count</code>) و <strong>اکشن‌ها</strong> (اینجا <code>increment</code> و...) است. در Zustand هیچ اجباری به جداسازی این دو نیست — حتی توصیه هم می‌شود کنار هم بمانند.</li>
+    <li><code>set</code> مثل <code>setState</code> در React کار می‌کند: اگر یک <strong>شیء جزئی</strong> بدهید، فقط همان کلیدها با merge به‌روزرسانی می‌شوند و بقیهٔ State دست‌نخورده می‌ماند.</li>
+  </ul>
+
+  <h3>مصرف در کامپوننت</h3>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/App.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useCounterStore } from './store/useCounterStore'
+
+export default function App() {
+  // مقدار count را «انتخاب» می‌کنیم (selector)
+  const count = useCounterStore((s) =&gt; s.count)
+  const increment = useCounterStore((s) =&gt; s.increment)
+
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;{count}&lt;/h1&gt;
+      &lt;button onClick={increment}&gt;+1&lt;/button&gt;
+    &lt;/main&gt;
+  )
+}</code></pre>
+  </div>
+  <p>کامپوننت با <code>useCounterStore((s) =&gt; s.count)</code> می‌گوید: «من فقط به <code>count</code> کار دارم». نتیجه: اگر بعداً قسمت دیگری از استور تغییر کند، این کامپوننت اصلاً رندر نمی‌شود. (در فصل ۴ به‌عمق این موضوع می‌رویم.)</p>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — فراخوانی هوک بدون سلکتور</div><p>اگر بنویسید <code>const state = useCounterStore()</code> بدون آرگومان، کل استور subscribe می‌شود و <em>هر</em> تغییر، رندر دوباره می‌گیرد. در Zustand نسخهٔ ۴ این شکل مجاز بود؛ از نسخهٔ ۵ استفاده از آن بدون سلکتور فقط برای State ثابت (مثل مقادیر اولیه) مجاز است. عادت کنید: <strong>همیشه سلکتور بنویسید</strong>.</p></div>
+
+  <h2>استور واقعی‌تر: اطلاعات کاربر</h2>
+  <p>یک استور با دادهٔ شیء‌ای و چند اکشن واقعی، تا merge و تغییر تو در تو را ببینید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useUserStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+
+const guest = { name: '', email: '', loggedIn: false }
+
+export const useUserStore = create((set) =&gt; ({
+  user: guest,
+  lastAction: null,
+
+  login: (user) =&gt; set({ user: { ...user, loggedIn: true }, lastAction: 'login' }),
+
+  logout: () =&gt; set({ user: guest, lastAction: 'logout' }),
+
+  // به‌روزرسانی فقط یک فیلد از شیء تو در تو
+  rename: (name) =&gt;
+    set((state) =&gt; ({
+      user: { ...state.user, name },
+      lastAction: 'rename',
+    })),
+}))</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/Profile.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useState } from 'react'
+import { useUserStore } from './store/useUserStore'
+
+export default function Profile() {
+  const user = useUserStore((s) =&gt; s.user)
+  const login = useUserStore((s) =&gt; s.login)
+  const rename = useUserStore((s) =&gt; s.rename)
+
+  const [name, setName] = useState('')
+
+  if (!user.loggedIn) {
+    return &lt;button onClick={() =&gt; login({ name: 'مهدی', email: 'm@example.com' })}&gt;ورود&lt;/button&gt;
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;سلام {user.name}! ({user.email})&lt;/p&gt;
+      &lt;input value={name} onChange={(e) =&gt; setName(e.target.value)} placeholder="نام جدید" /&gt;
+      &lt;button onClick={() =&gt; rename(name)}&gt;تغییر نام&lt;/button&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+  </div>
+  <p>دقت کنید: <code>rename</code> شیء <code>user</code> را با spread بازسازی می‌کند و فقط <code>name</code> را عوض می‌کند. Zustand مثل React به <strong>immutability</strong> پایبند است؛ هر تغییر یعنی ساخت نسخهٔ جدید از همان قسمت. (فصل ۵ نشان می‌دهد چطور با immer، این نوشتن را ساده کنیم.)</p>
+
+  <h2>set — دو صورت کاربرد</h2>
+  <table class="tbl">
+    <thead><tr><th style="width:34%">صورت</th><th>مثال</th><th>کی استفاده کنیم؟</th></tr></thead>
+    <tbody>
+      <tr><td>شیء جزئی (Partial)</td><td><code>set({ count: 0 })</code></td><td>وقتی مقدار جدید به State فعلی وابسته نیست</td></tr>
+      <tr><td>تابع آپدیتر</td><td><code>set((s) =&gt; ({ count: s.count + 1 }))</code></td><td>وقتی به State فعلی نیاز دارید — همیشه امن‌تر است چون اگر دو آپدیت پشت‌سرهم برسند، از آخرین نسخهٔ State حساب می‌کند</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-danger"><div class="co-title"><span class="dot"></span>ممنوع — جهش (Mutation) مستقیم</div><p><code>set((s) =&gt; { s.count++ ; return s })</code> یعنی جهش State موجود؛ React متوجه تغییر نمی‌شود، مقایسهٔ مرجع خراب می‌شود و باگ‌های «رندر نمی‌شود» تولید می‌کند. همیشه یک شیء <em>جدید</em> برگردانید. (فقط در فصل ۵ با میان‌افزار immer قانونی می‌شود.)</p></div>
+
+  <h2>سازماندهی فایل‌ها از روز اول</h2>
+  <p>یک قرارداد ساده که در تیم‌ها جواب می‌دهد: برای هر دامنهٔ مستقل، یک فایل استور با پیشوند <code>use</code>:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">ساختار پیشنهادی</span><span class="cb-lang">text</span></div>
+    <pre><code class="language-bash">src/
+├── store/
+│   ├── useCounterStore.js
+│   ├── useUserStore.js
+│   └── useCartStore.js      # فصل ۷ همین را کامل می‌کنیم
+├── components/
+└── App.jsx</code></pre>
+  </div>
+  <ul>
+    <li>اسم استور = <code>use</code> + نام دامنه + <code>Store</code> (مثلاً <code>useCartStore</code>).</li>
+    <li>هر استور فقط مسئول دامنهٔ خودش است؛ «استور مادرِ همه‌چیز» نسازید — همین باعث فساد State می‌شود.</li>
+    <li>اکشن‌ها را با فعل نام‌گذاری کنید: <code>addItem</code>، <code>clearCart</code>، <code>toggleTheme</code>.</li>
+  </ul>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li><code>create</code> یک هوک برمی‌گرداند؛ بدون Provider در هر کامپوننتی مصرف می‌شود.</li>
+      <li>استور = دادهٔ اولیه + اکشن‌ها، کنار هم؛ اکشن‌ها با فعل نام‌گذاری می‌شوند.</li>
+      <li>در کامپوننت همیشه با سلکتور بخوانید: <code>useXStore((s) =&gt; s.x)</code>.</li>
+      <li><code>set</code> دو صورت دارد: شیء جزئی یا تابع آپدیتر؛ برای State وابسته، تابع آپدیتر.</li>
+      <li>هرگز State را جهش ندهید؛ نسخهٔ جدید بسازید.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۲</div>
+    <p>یک استور <code>useThemeStore</code> بسازید با State <code>theme: 'light' | 'dark'</code> و اکشن <code>toggleTheme</code>. در اپ یک دکمه بگذارید که تم را عوض می‌کند و رنگ پس‌زمینهٔ صفحه را بر اساس State عوض کنید. بعد یک استور <code>useTodoStore</code> با آرایهٔ <code>todos</code> و سه اکشن <code>addTodo</code>، <code>removeTodo</code> و <code>toggleTodo</code> بنویسید و یک لیست‌کار ساده بسازید — بدون هیچ prop drillingی.</p>
+  </div>
+
+  <div class="next-ch">
+    <b>در فصل بعد:</b> عمق API استور — پارامتر get، اکشن‌های async و خواندن/نوشتن State از بیرونِ دنیای React (در interceptorها و توابع کمکی).
+  </div>
+</section>
+<section class="chapter part-zustand" id="ch03">
+  <div class="pgmark">CHAPTER-03</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۳</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand</div>
+      <h1>عمق Zustand — set، get و کار با استور از هر جا</h1>
+      <p class="ch-desc">قدرت واقعی Zustand وقتی آشکار می‌شود که بفهمید استور فقط یک شیء زندهٔ خارج از React است: از اکشن‌های async تا خواندن و نوشتن State داخل توابع معمولی جاوااسکریپت.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>پارامتر <code>get</code> در اکشن‌ها و حالت <code>replace</code> در <code>set</code></li>
+      <li>نوشتن اکشن‌های async با الگوی loading/error</li>
+      <li>API کامل استور: <code>getState</code>، <code>setState</code>، <code>subscribe</code> — بیرون از React</li>
+      <li>الگوی <code>reset</code> و استخراج State اولیه</li>
+    </ul>
+  </div>
+
+  <h2>پارامتر get: خواندن آخرین نسخهٔ State داخل اکشن</h2>
+  <p>تا حالا همهٔ اکشن‌ها فقط <code>set</code> را دیسکت می‌کردند. اما <code>create</code> دو پارامتر به شما می‌دهد: <code>(set, get)</code>. <code>get</code> همان لحظه، <em>آخرین نسخهٔ</em> State را برمی‌گرداند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useWishlistStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+
+export const useWishlistStore = create((set, get) =&gt; ({
+  items: [],
+
+  // toggle با get: اول بخوان، بعد تصمیم بگیر
+  toggle: (product) =&gt; {
+    const exists = get().items.some((i) =&gt; i.id === product.id)
+    if (exists) {
+      set({ items: get().items.filter((i) =&gt; i.id !== product.id) })
+    } else {
+      set({ items: [...get().items, product] })
+    }
+  },
+
+  clear: () =&gt; set({ items: [] }),
+}))</code></pre>
+  </div>
+  <p>همین کار را می‌شد داخل <code>set((state) =&gt; ...)</code> هم کرد؛ تفاوت ظریف اینجاست: اگر اکشن چند <code>set</code> پشت‌سرهم داشته باشد، <code>get()</code> همیشه نسخهٔ تازه را می‌دهد اما پارامتر <code>state</code> داخل یک <code>set</code> فقط نسخهٔ همان لحظه است. در اکشن‌های چندمرحله‌ای (مخصوصاً async) <code>get</code> انتخاب مطمئن‌تری است.</p>
+
+  <h3>حالت کم‌کاربرد اما مهم: replace</h3>
+  <p><code>set</code> یک آرگومان دوم دارد. اگر <code>true</code> بدهید، به‌جای merge، کل State را جایگزین می‌کند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">replace — کل State عوض می‌شود</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">set({ items: [] }, true) // اکشن‌ها هم حذف می‌شوند! تقریباً هرگز این کار را نکنید
+
+// کاربرد درستِ replace: ریست کامل به State اولیه — فصل ادامه دارد</code></pre>
+  </div>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار</div><p><code>set(obj, true)</code> کل استور (از جمله اکشن‌ها) را با آن شیء عوض می‌کند. اگر اکشن‌ها را در شیء جدید نیاورده باشید، عملاً استور را می‌سوزانید. ۹۹٪ موارد باید replace نزنید.</p></div>
+
+  <h2>اکشن‌های async: بارگذاری داده با loading و error</h2>
+  <p>اکشن‌ها توابع معمولی هستند؛ پس می‌توانند <code>async</code> باشند. الگوی استاندارد برای فراخوانی API داخل استور:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useNotificationsStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+
+export const useNotificationsStore = create((set, get) =&gt; ({
+  items: [],
+  status: 'idle', // idle | loading | success | error
+  error: null,
+
+  fetchAll: async () =&gt; {
+    if (get().status === 'loading') return // جلوگیری از درخواست موازی
+    set({ status: 'loading', error: null })
+    try {
+      const res = await fetch('/api/notifications')
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const items = await res.json()
+      set({ items, status: 'success' })
+    } catch (err) {
+      set({ status: 'error', error: err.message })
+    }
+  },
+
+  markAllRead: async () =&gt; {
+    const ids = get().items.filter((n) =&gt; !n.read).map((n) =&gt; n.id)
+    await fetch('/api/notifications/read', {
+      method: 'POST',
+      body: JSON.stringify({ ids }),
+    })
+    set((s) =&gt; ({
+      items: s.items.map((n) =&gt; ({ ...n, read: true })),
+    }))
+  },
+}))</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/Notifications.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useEffect } from 'react'
+import { useNotificationsStore } from './store/useNotificationsStore'
+
+export default function Notifications() {
+  const items = useNotificationsStore((s) =&gt; s.items)
+  const status = useNotificationsStore((s) =&gt; s.status)
+  const fetchAll = useNotificationsStore((s) =&gt; s.fetchAll)
+
+  useEffect(() =&gt; {
+    fetchAll()
+  }, [fetchAll])
+
+  if (status === 'loading') return &lt;p&gt;در حال بارگذاری...&lt;/p&gt;
+  if (status === 'error') return &lt;p&gt;خطا در دریافت اعلان‌ها&lt;/p&gt;
+  return &lt;ul&gt;{items.map((n) =&gt; &lt;li key={n.id}&gt;{n.text}&lt;/li&gt;)}&lt;/ul&gt;
+}</code></pre>
+  </div>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — این کد را در پروژهٔ واقعی برای دادهٔ سرور ننویسید!</div><p>الگوی بالا برای «فراخوانی‌های دستورالعملی» (مثلاً ثبت لاگ، ارسال فرم به API خارج از کش) مناسب است، اما برای <em>داده‌ای که از سرور می‌خوانید و در UI نشان می‌دهید</em>، نوشتن دستی loading/error/caching یعنی بازاختراع TanStack Query به شکل شکسته. از فصل ۸ به بعد، خواندن داده فقط با Query انجام می‌شود و این الگو را در جای درستش می‌بینیم.</p></div>
+
+  <h2>استور، فراتر از کامپوننت: getState و setState</h2>
+  <p>هوکی که <code>create</code> برمی‌گرداند، خودش چند متد اضافه دارد که استور را از «دنیای بیرون React» قابل استفاده می‌کند:</p>
+  <table class="tbl">
+    <thead><tr><th style="width:32%">متد</th><th>کار</th><th>رندر می‌کند؟</th></tr></thead>
+    <tbody>
+      <tr><td><code>useXStore.getState()</code></td><td>خواندن لحظه‌ای State (بدون subscribe)</td><td>خیر</td></tr>
+      <tr><td><code>useXStore.setState(partial)</code></td><td>نوشتن مستقیم State از بیرون اکشن‌ها</td><td>بله (برای مشترکین)</td></tr>
+      <tr><td><code>useXStore.subscribe(fn)</code></td><td>گوش دادن به هر تغییر (بازگشت unsubscribe)</td><td>خیر</td></tr>
+      <tr><td><code>useXStore.destroy()</code></td><td>پاک‌سازی استور (به‌ندرت، در تست‌ها)</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p>کاربردهای واقعی‌ای که در پروژه‌های شرکت‌ها هر روز می‌بینید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/lib/api.js — اتصال استور به لایهٔ شبکه</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { useAuthStore } from '../store/useAuthStore'
+
+// ۱) خواندن توکن در interceptor — جایی که هوک نداریم!
+api.interceptors.request.use((config) =&gt; {
+  const token = useAuthStore.getState().token
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+api.interceptors.response.use(
+  (res) =&gt; res,
+  (err) =&gt; {
+    // ۲) نوشتن مستقیم از بیرون: 401 یعنی نشست منقضی شده
+    if (err.response?.status === 401) {
+      useAuthStore.getState().logout()
+    }
+    return Promise.reject(err)
+  }
+)</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">گوش دادن به تغییرات — بدون رندر</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">// داخل App.jsx — یک بار برای همیشه
+useEffect(() =&gt; {
+  const unsubscribe = useCartStore.subscribe((state) =&gt; {
+    // مثال: گزارش‌گیری، sync با سرور، هشدار سبد پر
+    if (state.items.length &gt; 20) console.warn('سبد خیلی پر شد!')
+  })
+  return unsubscribe // پاک‌سازی هنگام unmount
+}, [])</code></pre>
+  </div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته</div><p>« getState در event handler» یکی از رایج‌ترین الگوهای بهینه‌سازی است: وقتی در <code>onClick</code> به مقدار فعلی نیاز دارید ولی نمی‌خواهید تغییراتش باعث رندر شود، به‌جای subscribe به آن در کامپوننت، همان لحظه <code>getState()</code> بخوانید. (کاملش در فصل ۴ زیر عنوان «Transient Updates».)</p></div>
+
+  <h2>الگوی reset: استخراج State اولیه</h2>
+  <p>با رشد استور، «ریست به اول» سخت می‌شود. راه استاندارد، بیرون کشیدن State اولیه در یک ثابت است:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useFiltersStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+
+const initialState = {
+  query: '',
+  category: 'all',
+  minPrice: 0,
+  sort: 'newest',
+}
+
+export const useFiltersStore = create((set) =&gt; ({
+  ...initialState,
+  setQuery: (query) =&gt; set({ query }),
+  setCategory: (category) =&gt; set({ category }),
+  setSort: (sort) =&gt; set({ sort }),
+  reset: () =&gt; set({ ...initialState }), // شیء تازه؛ نه replace
+}))</code></pre>
+  </div>
+  <p>دو نکته: اول اینکه <code>reset</code> با merge ساده انجام شد (بدون <code>true</code>)، چون اکشن‌ها جزء State هستند و باید بمانند. دوم اینکه استور فیلترها نمونهٔ خوبی از مرز Client State و URL State است — در پروژهٔ فصل ۱۳ بحثش می‌کنیم.</p>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li><code>get()</code> آخرین نسخهٔ State را داخل اکشن می‌دهد؛ برای اکشن‌های چندمرحله‌ای و async.</li>
+      <li><code>set(partial, true)</code> کل State را جایگزین می‌کند — تقریباً هرگز لازم نیست.</li>
+      <li>اکشن async با الگوی <code>idle → loading → success/error</code> نوشته می‌شود؛ اما برای «دادهٔ سرور» جای این الگو TanStack Query است.</li>
+      <li><code>getState</code>/<code>setState</code>/<code>subscribe</code> استور را به لایه‌های غیر React (interceptor، روتر، توابع کمکی) وصل می‌کنند.</li>
+      <li>ریست استاندارد = استخراج <code>initialState</code> + اکشن <code>reset</code> با merge ساده.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۳</div>
+    <p>استور <code>useAuthStore</code> بسازید با فیلدهای <code>token</code> و <code>user</code> و اکشن‌های <code>login(email, password)</code> (async با delay ساختگی ۵۰۰ میلی‌ثانیه و الگوی loading)، <code>logout</code> و <code>reset</code>. بعد یک تابع <code>api</code> ساختگی بنویسید که با <code>getState()</code> توکن را بخواند و اگر توکن نبود، Promise reject کند. خروجی را در کنسول با subscribe دنبال کنید و ببینید هر اکشن چه تغییری می‌سازد.</p>
+  </div>
+</section>
+<section class="chapter part-zustand" id="ch04">
+  <div class="pgmark">CHAPTER-04</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۴</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand</div>
+      <h1>Selectors و بهینه‌سازی رندر</h1>
+      <p class="ch-desc">سلکتور قلب کارایی Zustand است. در این فصل یاد می‌گیرید دقیقاً چه چیزی باعث رندر می‌شود، چرا برگرداندن شیءِ جدید از سلکتور خطرناک است و با useShallow و Transient Updates چطور حرفه‌ای بنویسیم.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>مکانیزم subscribe و مقایسهٔ <code>Object.is</code></li>
+      <li>چرا <code>(s) =&gt; ({ a: s.a, b: s.b })</code> باگ رندر می‌سازد؟</li>
+      <li>استفادهٔ صحیح از <code>useShallow</code></li>
+      <li>Transient Updates: خواندن و اجرا بدون رندر</li>
+    </ul>
+  </div>
+
+  <h2>چه چیزی باعث رندر می‌شود؟</h2>
+  <p>وقتی می‌نویسید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">مکانیزم سلکتور</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">const price = useProductStore((s) =&gt; s.price)</code></pre>
+  </div>
+  <p>پشت صحنه این اتفاق می‌افتد: کامپوننت در استور <strong>subscribe</strong> می‌شود. هر بار استور تغییر می‌کند، Zustand سلکتور شما را با State جدید دوباره اجرا می‌کند و نتیجه را با نتیجهٔ قبلی مقایسه می‌کند — با <code>Object.is</code>. اگر برابر باشند، <strong>رندری در کار نیست</strong>. اگر متفاوت باشند، کامپوننت رندر می‌شود.</p>
+  <p>پس قانون کارایی Zustand یک جمله است: <strong>سلکتور شما باید برای دادهٔ تغییرنکرده، همیشه «همان مقدار» (برابر از نظر Object.is) را برگرداند.</strong></p>
+
+  <h3>مقادیر اولیه امن‌اند؛ مقادیر مرجعی خطر</h3>
+  <table class="tbl">
+    <thead><tr><th>سلکتور</th><th>نوع خروجی</th><th>هر تغییر استور باعث رندر؟</th></tr></thead>
+    <tbody>
+      <tr><td><code>(s) =&gt; s.count</code></td><td>عدد/رشته/بولین</td><td>فقط وقتی خودش عوض شود — امن</td></tr>
+      <tr><td><code>(s) =&gt; s.user.name</code></td><td>رشته</td><td>فقط وقتی name عوض شود — امن</td></tr>
+      <tr><td><code>(s) =&gt; s.items</code></td><td>مرجع آرایه</td><td>فقط وقتی مرجع آرایه عوض شود — امن</td></tr>
+      <tr><td><code>(s) =&gt; s.items.map(...)</code></td><td><b>آرایهٔ جدید</b></td><td><b>همیشه!</b> — باگ رندر</td></tr>
+      <tr><td><code>(s) =&gt; ({ a: s.a, b: s.b })</code></td><td><b>شیء جدید</b></td><td><b>همیشه!</b> — باگ رندر</td></tr>
+    </tbody>
+  </table>
+  <p>مقایسهٔ <code>Object.is</code> برای اعداد و رشته‌ها «ارزشی» است، اما برای آرایه و شیء «مرجعی»: هر اجرای <code>s.items.map(...)</code> یک آرایهٔ <em>جدید</em> در حافظه می‌سازد که هرگز با قبلی برابر نیست؛ پس هر تغییر استور (حتی تغییر یک فیلد بی‌ربط) رندر می‌گیرد. بدتر: چون خود State هم هر بار عوض می‌شود، در برخی سناریوها حلقهٔ بی‌نهایت رندر می‌سازد.</p>
+
+  <h2>راه‌حل ۱: سلکتورهای کوچک و متعدد</h2>
+  <p>به‌جای یک سلکتورِ شیءساز، چند سلکتور مجزا:</p>
+  <div class="compare">
+    <div class="codeblock bad">
+      <div class="cb-head"><span class="cb-file">بد — شیء جدید در هر رندر</span><span class="cb-lang">jsx</span></div>
+      <pre><code class="language-jsx">const { name, email } = useUserStore(
+  (s) =&gt; ({ name: s.user.name, email: s.user.email })
+)</code></pre>
+    </div>
+    <div class="codeblock good">
+      <div class="cb-head"><span class="cb-file">خوب — دو subscribe مستقل</span><span class="cb-lang">jsx</span></div>
+      <pre><code class="language-jsx">const name = useUserStore((s) =&gt; s.user.name)
+const email = useUserStore((s) =&gt; s.user.email)</code></pre>
+    </div>
+  </div>
+  <p>فراتر از درستی: این شکل هم دقیق‌تر است (فقط تغییر name رندر می‌گیرد، نه تغییر email) هم خواناتر.</p>
+
+  <h2>راه‌حل ۲: useShallow — مقایسهٔ سطحی</h2>
+  <p>گاهی واقعاً چند فیلد را یک‌جا می‌خواهید (مثلاً در یک map یا بازگشت از یک تابع کمکی). برای این موارد Zustand یک هوک کمکی دارد که خروجی سلکتور را <em>سطحی</em> مقایسه می‌کند: کلیدها و مقادیر اولیهٔ برابر = برابر.</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useCartStore.js و کامپوننت</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useShallow } from 'zustand/react/shallow'
+import { useCartStore } from './useCartStore'
+
+function CartSummary() {
+  const { items, coupon } = useCartStore(
+    useShallow((s) =&gt; ({ items: s.items, coupon: s.coupon }))
+  )
+  // فقط وقتی مرجعِ items یا مقدار coupon عوض شود رندر می‌گیرد
+  return &lt;span&gt;{items.length} قلم — کوپن: {coupon}&lt;/span&gt;
+}</code></pre>
+  </div>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — shallow یعنی سطحی، نه عمیق</div><p><code>useShallow</code> فقط یک سطح مقایسه می‌کند. اگر سلکتور هر بار <em>محتوای جدیدی</em> بسازد (مثل <code>s.items.map(i =&gt; i.id * 2)</code>) که عناصرش آرایه/شیء تازه‌اند، باز هم هر بار متفاوت است. برای دادهٔ محاسبه‌شدهٔ سنگین، راه‌حل درست <code>useMemo</code> در کامپوننت یا سلکتورِ ذخیره‌شده در استور است.</p></div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته — تفاوت با نسخهٔ ۴</div><p>در نسخهٔ ۴ آرگومان دوم هوک را برابر <code>shallow</code> می‌گذاشتند: <code>useStore(selector, shallow)</code>. این API در نسخهٔ ۵ حذف شده و به‌جایش <code>useShallow</code> دور سلکتور پیچیده می‌شود. در مصاحبه‌ها هم می‌پرسند!</p></div>
+
+  <h2>محاسبات مشتق‌شده: کجا انجام شود؟</h2>
+  <p>مجموع قیمت سبد از دادهٔ خام مشتق می‌شود. سه جای ممکن:</p>
+  <ul>
+    <li><strong>در استور، هنگام هر mutation</strong> (نگه‌داشتن <code>total</code> در State): سریع ولی تکرار اطلاعات و ریسک ناهماهنگی — معمولاً نه.</li>
+    <li><strong>در سلکتور</strong>: <code>(s) =&gt; s.items.reduce(...)</code> — هر اجرا عدد جدیدی «ارزشی» می‌سازد پس رندر مشکل شیء را ندارد؛ اما محاسبه در هر تغییر استور اجرا می‌شود.</li>
+    <li><strong>در کامپوننت با <code>useMemo</code></strong>: فقط وقتی مرجع <code>items</code> عوض شود محاسبه می‌شود — انتخاب پیش‌فرض برای محاسبات سنگین.</li>
+  </ul>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/CartTotal.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useMemo } from 'react'
+import { useCartStore } from './store/useCartStore'
+
+export default function CartTotal() {
+  const items = useCartStore((s) =&gt; s.items)
+
+  // فقط وقتی آرایهٔ items عوض شود دوباره حساب می‌شود
+  const total = useMemo(
+    () =&gt; items.reduce((sum, i) =&gt; sum + i.price * i.qty, 0),
+    [items]
+  )
+
+  return &lt;div&gt;جمع کل: {total.toLocaleString('fa-IR')} تومان&lt;/div&gt;
+}</code></pre>
+  </div>
+
+  <h2>Transient Updates: بدون رندر با State کار کن</h2>
+  <p>گاهی State تغییری می‌کند که اصلاً نباید UI را رندر کند: موقعیت موس، مقدار اسکرول، تایمر... برای این‌ها subscribe و getState بدون هوک استفاده می‌شود:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/MousePad.jsx — رندر صفر در هر حرکت</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useRef, useEffect } from 'react'
+import { useMouseStore } from './store/useMouseStore'
+
+export default function MousePad() {
+  const ref = useRef(null)
+
+  useEffect(() =&gt; {
+    // ۱) نوشتن: هر حرکت موس را در استور ذخیره کن — بدون setState در React
+    const onMove = (e) =&gt; useMouseStore.setState({ x: e.clientX, y: e.clientY })
+    window.addEventListener('mousemove', onMove)
+
+    // ۲) خواندن: DOM را مستقیم آپدیت کن، نه با رندر React
+    const unsubscribe = useMouseStore.subscribe((s) =&gt; {
+      if (ref.current) {
+        ref.current.style.transform = `translate(${s.x}px, ${s.y}px)`
+      }
+    })
+
+    return () =&gt; {
+      window.removeEventListener('mousemove', onMove)
+      unsubscribe()
+    }
+  }, [])
+
+  return &lt;div ref={ref} className="cursor-dot" /&gt;
+}</code></pre>
+  </div>
+  <p>و اگر فقط در یک رویداد به مقدار لحظه‌ای نیاز دارید، اصلاً subscribe لازم نیست:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">خواندن در لحظهٔ نیاز</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">const handleSave = () =&gt; {
+  const { draft } = useEditorStore.getState() // بدون رندر، بدون سلکتور
+  saveToServer(draft)
+}</code></pre>
+  </div>
+
+  <h2>چک‌لیست کارایی سلکتورها</h2>
+  <ul class="checklist">
+    <li>پیش‌فرض: سلکتورِ مقدار اولیهٔ تکی — <code>(s) =&gt; s.a.b</code>.</li>
+    <li>هیچ‌وقت شیء/آرایهٔ تازه داخل سلکتور نسازید.</li>
+    <li>چند فیلد؟ یا چند سلکتور، یا <code>useShallow</code> — نه object literal خام.</li>
+    <li>محاسبهٔ سنگین؟ <code>useMemo</code> در کامپوننت روی مرجعِ پایدار.</li>
+    <li>State پرتغییر و بی‌نیاز از رندر؟ Transient pattern با <code>setState/subscribe</code>.</li>
+    <li>برای راستی‌آزمایی، از tab «Profiler» در React DevTools استفاده کنید و تعداد رندرها را ببینید.</li>
+  </ul>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>رندر وقتی اتفاق می‌افتد که خروجی سلکتور با <code>Object.is</code> تغییر کرده باشد.</li>
+      <li>شیء/آرایهٔ تازه در سلکتور = رندر اضافه = باگ کلاسیک Zustand.</li>
+      <li><code>useShallow</code> از <code>zustand/react/shallow</code> مقایسهٔ سطحی می‌دهد؛ در v5 جایگزین آرگومان دوم هوک است.</li>
+      <li>محاسبات مشتق‌شده را با <code>useMemo</code> در کامپوننت انجام دهید.</li>
+      <li>Transient Updates برای دادهٔ پرتغییرِ بی‌نیاز از رندر: <code>getState</code> و <code>setState</code> مستقیم.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۴</div>
+    <p>در پروژهٔ تمرینی یک استور بسازید که هر ۱۰۰ میلی‌ثانیه یک شمارنده را افزایش دهد (با <code>setInterval</code> و <code>setState</code>). دو کامپوننت بسازید: یکی با سلکتور معمولی مقدار شمارنده (که رندر می‌شود) و یکی که با Transient pattern فقط عدد را داخل <code>ref</code> آپدیت می‌کند. با React DevTools Profiler تفاوت تعداد رندرها را ثبت کنید و در یک پاراگراف توضیح دهید هر کدام کجا مناسب است.</p>
+  </div>
+</section>
+<section class="chapter part-zustand" id="ch05">
+  <div class="pgmark">CHAPTER-05</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۵</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand</div>
+      <h1>Middlewareها — persist، devtools و immer</h1>
+      <p class="ch-desc">میان‌افزارها رفتار استور را در چند خط upgrade می‌کنند: ذخیرهٔ دائمی در localStorage، دیباگ زمان‌سفر با Redux DevTools و نوشتن کد قابل جهش با immer.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>مفهوم middleware و ترتیب صحیح ترکیب آن‌ها</li>
+      <li><code>persist</code>: ذخیرهٔ دائمی با partialize، version و migrate</li>
+      <li><code>devtools</code>: دیدن اکشن‌ها در Redux DevTools</li>
+      <li><code>immer</code>: نوشتن State به شکل قابل جهش، امن</li>
+      <li>ساخت یک middleware سفارشی ساده</li>
+    </ul>
+  </div>
+
+  <h2>Middleware چیست؟</h2>
+  <p>یک <strong>middleware (میان‌افزار)</strong> تابعی است که دور <code>create</code> پیچیده می‌شود و رفتار استور را تغییر می‌دهد — بدون اینکه منطق شما را عوض کند. حالت کلی:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">قالب عمومی</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+import { someMiddleware } from 'zustand/middleware'
+
+const useStore = create(
+  someMiddleware((set, get) =&gt; ({
+    // ...استور عادی شما
+  }))
+)</code></pre>
+  </div>
+  <p>می‌توان چند middleware را تو در تو ترکیب کرد. ترتیب توصیه‌شده و رایج (از بیرون به داخل): <code>devtools</code> ← <code>persist</code> ← بقیه (مثل <code>immer</code>):</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">ترکیب استاندارد سه‌گانه</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+import { persist, devtools } from 'zustand/middleware'
+import { immer } from 'zustand/middleware/immer'
+
+const useStore = create(
+  devtools(
+    persist(
+      immer((set) =&gt; ({
+        items: [],
+        addItem: (item) =&gt; set((state) =&gt; {
+          state.items.push(item) // با immer مجاز است!
+        }),
+      })),
+      { name: 'cart-storage' }
+    )
+  )
+)</code></pre>
+  </div>
+
+  <h2>persist — ذخیرهٔ دائمی State</h2>
+  <p>پیش‌فرض Zustand در حافظه است: رفرش صفحه یعنی خداحافظی با سبد خرید. میان‌افزار <code>persist</code> هر تغییر State را در <code>localStorage</code> ذخیره و هنگام اجرا برمی‌گرداند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useCartStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
+
+export const useCartStore = create(
+  persist(
+    (set, get) =&gt; ({
+      items: [],
+      coupon: null,
+      _hasHydrated: false,
+
+      addItem: (product) =&gt;
+        set((s) =&gt; {
+          const found = s.items.find((i) =&gt; i.id === product.id)
+          if (found) {
+            return {
+              items: s.items.map((i) =&gt;
+                i.id === product.id ? { ...i, qty: i.qty + 1 } : i
+              ),
+            }
+          }
+          return { items: [...s.items, { ...product, qty: 1 }] }
+        }),
+      removeItem: (id) =&gt; set((s) =&gt; ({ items: s.items.filter((i) =&gt; i.id !== id) })),
+      clearCart: () =&gt; set({ items: [], coupon: null }),
+
+      setHasHydrated: (v) =&gt; set({ _hasHydrated: v }),
+    }),
+    {
+      name: 'cart-storage',                        // کلید در localStorage (اجباری)
+      storage: createJSONStorage(() =&gt; localStorage), // پیش‌فرض همین است؛ برای وضوح نوشتیم
+      partialize: (state) =&gt; ({                    // فقط داده ذخیره شود، نه اکشن‌ها
+        items: state.items,
+        coupon: state.coupon,
+      }),
+      onRehydrateStorage: () =&gt; (state) =&gt; {
+        state?.setHasHydrated(true)                // پایان بازیابی
+      },
+    }
+  )
+)</code></pre>
+  </div>
+  <p>چهار آپشن مهم persist:</p>
+  <table class="tbl tbl-z">
+    <thead><tr><th style="width:22%">آپشن</th><th>کار</th></tr></thead>
+    <tbody>
+      <tr><td><code>name</code></td><td>کلید ذخیره‌سازی (اجباری). یکتا و ثابت نگهش دارید.</td></tr>
+      <tr><td><code>storage</code></td><td>محل ذخیره: <code>localStorage</code>، <code>sessionStorage</code> یا هر Storage سازگار. پیش‌فرض localStorage است.</td></tr>
+      <tr><td><code>partialize</code></td><td>انتخاب بخشی از State برای ذخیره — اکشن‌ها را ذخیره نکنید (بلااستهلاک و بزرگ می‌شوند).</td></tr>
+      <tr><td><code>version</code> + <code>migrate</code></td><td>کنترل نسخهٔ ساختار ذخیره‌شده و مهاجرت داده‌های قدیمی.</td></tr>
+      <tr><td><code>onRehydrateStorage</code></td><td>هوک پایان بازیابی — برای ست کردن فلگ hydration یا لاگ.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>version و migrate — وقتی شکل داده عوض می‌شود</h3>
+  <p>فرض کنید بعد از انتشار محصول، فیلد <code>qty</code> را به آیتم‌ها اضافه کرده‌اید؛ کاربرانی که نسخهٔ قبلی را در localStorage دارند، دادهٔ بی‌شکل می‌گیرند. راه‌حل:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">مهاجرت دادهٔ قدیمی</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">persist(storeApi, {
+  name: 'cart-storage',
+  version: 2, // نسخهٔ فعلی
+  migrate: (persisted, version) =&gt; {
+    if (version === 1) {
+      // نسخهٔ ۱: هر آیتم qty نداشت → برابر ۱ قرار بده
+      return {
+        ...persisted,
+        items: persisted.items.map((i) =&gt; ({ ...i, qty: i.qty ?? 1 })),
+      }
+    }
+    return persisted
+  },
+})</code></pre>
+  </div>
+
+  <h3>مشکل فلش داده: جلوی رندر «سبد خالی» را بگیرید</h3>
+  <p>بازیابی از localStorage <em>غیرهمزمان</em> است (در v5 با یک میکروتسک). برای یک فریم، State اولیه (سبد خالی) رندر می‌شود و بعد داده می‌آید — کاربر لحظه‌ای «سبد خالی» می‌بیند و اگر بعدش چیزی اضافه کند، ممکن است روی دادهٔ hydrate نشده بنویسد. الگوی حرفه‌ای: فلگ <code>_hasHydrated</code> (که در کد بالا دیدید) و تا true نشده، UI پایدار نشان ندهید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/CartPage.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">function CartPage() {
+  const hasHydrated = useCartStore((s) =&gt; s._hasHydrated)
+  const items = useCartStore((s) =&gt; s.items)
+
+  if (!hasHydrated) return &lt;p&gt;در حال بازیابی سبد...&lt;/p&gt;
+  if (items.length === 0) return &lt;p&gt;سبد خرید خالی است.&lt;/p&gt;
+  return &lt;CartList /&gt;
+}</code></pre>
+  </div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته</div><p>فیلدهایی که با <code>_</code> شروع می‌شوند (مثل <code>_hasHydrated</code>) یک قرارداد رایج برای State داخلی است. چون در <code>partialize</code> ذخیره نشده‌اند، بعد از هر رفرش دوباره false می‌شوند و چرخه تمیز است.</p></div>
+
+  <h2>devtools — دیباگ با Redux DevTools</h2>
+  <p>میان‌افزار <code>devtools</code> استور شما را به افزونهٔ <strong>Redux DevTools</strong> (همان که برای Redux استفاده می‌شود) وصل می‌کند: هر <code>set</code> یک اکشن در تایم‌لاین می‌شود، می‌توانید State هر لحظه را ببینید و حتی به عقب برگردید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">اتصال devtools + نام‌گذاری اکشن‌ها</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+import { devtools } from 'zustand/middleware'
+
+const useCartStore = create(
+  devtools(
+    (set) =&gt; ({
+      items: [],
+      addItem: (product) =&gt;
+        set(
+          (s) =&gt; ({ items: [...s.items, product] }),
+          undefined, // جای replace؛ در v5 مثل قبل
+          'cart/addItem' // نام اکشن در DevTools
+        ),
+    }),
+    { name: 'CartStore' } // نام استور در DevTools
+  )
+)</code></pre>
+  </div>
+  <p>در محیط تولید می‌توانید شرطی وصل کنید تا هزینهٔ اضافه ندهد:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">فقط در development</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">const wrap = import.meta.env.DEV ? devtools : (f) =&gt; f
+const useStore = create(wrap((set) =&gt; ({ /* ... */ })))</code></pre>
+  </div>
+
+  <h2>immer — بنویس ساده، خودش immutable می‌کند</h2>
+  <p>یادتان هست آپدیت تو در تو چه دردسری بود؟ میان‌افزار <code>immer</code> اجازه می‌دهد داخل <code>set</code> مثل کد معمولی «جهش» بنویسید و خودش نسخهٔ immutable می‌سازد:</p>
+  <div class="compare">
+    <div class="codeblock light bad">
+      <div class="cb-head"><span class="cb-file">بدون immer</span><span class="cb-lang">js</span></div>
+      <pre><code class="language-js">set((s) =&gt; ({
+  cart: {
+    ...s.cart,
+    items: s.cart.items.map((i) =&gt;
+      i.id === id ? { ...i, qty: i.qty + 1 } : i
+    ),
+  },
+}))</code></pre>
+    </div>
+    <div class="codeblock light good">
+      <div class="cb-head"><span class="cb-file">با immer</span><span class="cb-lang">js</span></div>
+      <pre><code class="language-js">set((s) =&gt; {
+  const item = s.cart.items.find((i) =&gt; i.id === id)
+  if (item) item.qty += 1
+})</code></pre>
+    </div>
+  </div>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار</div><p>با immer فقط <em>داخل</em> <code>set</code> می‌توانید جهش کنید؛ بیرون از آن State همچنان freeze شده و خواندنش مشکلی ندارد اما تغییرش خطا می‌دهد. ضمناً در <code>set</code> immer دار، چیزی return نکنید — یا جهش کنید یا مقدار برگردانید، نه هر دو.</p></div>
+
+  <h2>middleware سفارشی: چطور ساخته می‌شود؟</h2>
+  <p>هر middleware فقط تابعی است که <code>create</code> بعدی را می‌گیرد و نسخهٔ مزین‌شده برمی‌گرداند. یک لاگر ساده بنویسیم تا جعبهٔ جادویی باز شود:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/middleware/logger.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">export const logger = (config) =&gt; (set, get, api) =&gt;
+  config(
+    (args, ...rest) =&gt; {
+      console.groupCollapsed('action', rest[2] ?? '(unnamed)')
+      console.log('prev state:', get())
+      set(args, ...rest)
+      console.log('next state:', get())
+      console.groupEnd()
+    },
+    get,
+    api
+  )
+
+// استفاده: create(logger((set) =&gt; ({ ... })))</code></pre>
+  </div>
+  <div class="callout co-note"><div class="co-title"><span class="dot"></span>یادداشت</div><p>میان‌افزارهای دیگری هم در اکوسیستم هست — <code>subscribeWithSelector</code> برای subscribe با سلکتور (فصل ۶)، <code>combine</code> برای ادغام State و اکشن‌های جدا، و بستهٔ <code>zustand-middleware-yjs</code> برای همگام‌سازی چندکاربره. الگو همه یکسان است.</p></div>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>middleware تابعی دور <code>create</code> است؛ ترتیب استاندارد: devtools ← persist ← immer.</li>
+      <li><code>persist</code> با <code>name</code> و بهتر است با <code>partialize</code>؛ برای تغییر ساختار، <code>version</code> + <code>migrate</code>.</li>
+      <li>بازیابی غیرهمزمان است؛ با فلگ hydration از رندرِ «سبد خالی» جلوگیری کنید.</li>
+      <li><code>devtools</code> اکشن‌ها را در Redux DevTools می‌بیند؛ نام اکشن‌ها را در آرگومان سوم <code>set</code> بدهید.</li>
+      <li><code>immer</code> جهش امن داخل <code>set</code> می‌دهد؛ یا جهش یا return، نه هر دو.</li>
+      <li>middleware سفارشی = تابعی که <code>config</code> را می‌گیرد و set/get را مزین می‌کند.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۵</div>
+    <p>استور تمرین فصل ۲ (<code>useTodoStore</code>) را ارتقا دهید: با <code>persist</code> ذخیره‌اش کنید (فقط آرایهٔ todos)، با <code>immer</code> اکشن‌ها را بازنویسی کنید و با <code>devtools</code> نام هر اکشن را ببینید. بعد ساختار <code>todo</code> را تغییر دهید (فیلد <code>priority</code> اضافه کنید) و <code>version: 2</code> و <code>migrate</code> بنویسید تا دادهٔ قدیمی‌تان سالم بماند. رفرش صفحه و تب DevTools → Application → Local Storage را چک کنید.</p>
+  </div>
+</section>
+<section class="chapter part-zustand" id="ch06">
+  <div class="pgmark">CHAPTER-06</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۶</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand</div>
+      <h1>الگوهای حرفه‌ای Zustand — TypeScript و اسلایس‌ها</h1>
+      <p class="ch-desc">از این فصل به بعد مثل یک تیم واقعی کد می‌زنیم: استورهای تایپ‌دار با TypeScript، الگوی اسلایس برای استورهای بزرگ، subscribe با سلکتور و ملاحظات SSR.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>فرم کِرید (curried) تایپ‌دار <code>create&lt;State&gt;()(...)</code></li>
+      <li>الگوی Slices برای شکستن استورهای بزرگ</li>
+      <li><code>subscribeWithSelector</code> و کاربردهای عملی</li>
+      <li>ساختار پوشه‌بندی استور در پروژه‌های واقعی و نکات SSR</li>
+    </ul>
+  </div>
+
+  <h2>TypeScript با Zustand</h2>
+  <p>در Zustand نسخهٔ ۵، فرم استاندارد نوشتن استور تایپ‌دار «کِرید» است — یعنی دو بار پرانتز. دلیلش این است که TypeScript برای اینکه هم State و هم اکشن‌ها را درست حدس بزند، باید تایپ را «قبل از» دیدن تابع شما بداند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useCounterStore.ts</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { create } from 'zustand'
+
+// ۱) تایپ کل State: داده + اکشن‌ها
+type CounterState = {
+  count: number
+  increment: (by?: number) =&gt; void
+  decrement: (by?: number) =&gt; void
+  reset: () =&gt; void
+}
+
+// ۲) create&lt;CounterState&gt;()  ← پرانتز اول؛ بعد تابع
+export const useCounterStore = create&lt;CounterState&gt;()((set) =&gt; ({
+  count: 0,
+  increment: (by = 1) =&gt; set((s) =&gt; ({ count: s.count + by })),
+  decrement: (by = 1) =&gt; set((s) =&gt; ({ count: s.count - by })),
+  reset: () =&gt; set({ count: 0 }),
+}))</code></pre>
+  </div>
+  <p>از این لحظه اگر <code>increment(2)</code> را با آرگومان رشته صدا بزنید یا فیلدی را تایپ اشتباه بخوانید، کامپایلر خطا می‌دهد — همان چیزی که در تیم‌ها جان شما را نجات می‌دهد.</p>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — پرانتز جا نماند!</div><p>فرم اشتباه: <code>create&lt;CounterState&gt;((set) =&gt; ...)</code> (بدون پرانتز وسط). در این شکل استنتاج تایپ اکشن‌ها درست کار نمی‌کند و در مکان‌های استفاده خطای عجیب می‌گیرید. یادتان باشد: <code>create&lt;State&gt;()</code> سپس <code>((set) =&gt; ...)</code>.</p></div>
+
+  <h3>تایپ‌های کمکی برای persist</h3>
+  <p>وقتی میان‌افزار هم هست، زنجیرهٔ تایپ به ترکیب میان‌افزارها وابسته است؛ برای همین به‌جای نوشتن همه‌چیز دستی، از همان فرم کِرید استفاده می‌کنیم و اگر لازم شد، تایپ State را با <code>Partialize</code> محدود می‌کنیم:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">persist تایپ‌دار</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+
+type CartState = {
+  items: { id: number; qty: number }[]
+  addItem: (id: number) =&gt; void
+}
+
+export const useCartStore = create&lt;CartState&gt;()(
+  persist(
+    (set) =&gt; ({
+      items: [],
+      addItem: (id) =&gt;
+        set((s) =&gt; ({ items: [...s.items, { id, qty: 1 }] })),
+    }),
+    {
+      name: 'cart',
+      // فقط items ذخیره شود؛ تایپ همین را تحمیل می‌کند
+      partialize: (s) =&gt; ({ items: s.items }),
+    }
+  )
+)</code></pre>
+  </div>
+
+  <h2>الگوی Slices: استور بزرگ را بشکنید</h2>
+  <p>اگر همهٔ اپ را در یک استور بریزید (کاربر، سبد، فیلترها، نوتیفیکیشن...)، فایل صدها خط می‌شود و هر تغییر، rebase دردناک می‌سازد. الگوی <strong>Slices</strong> راه‌حل رسمی Zustand است: هر دامنه یک «اسلایس» مستقل، و ترکیب آن‌ها در یک استور واحد. با یک تایپ کمکی شروع می‌کنیم:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/createStore.ts — تایپ کمکی</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { StateCreator } from 'zustand'
+
+// اسلایس‌ها به هم اشاره می‌کنند؛ یک نوع مشترک برای «کل استور» تعریف می‌کنیم
+export type BoundStore = CartSlice &amp; UISlice
+
+export type SliceCreator&lt;T&gt; = StateCreator&lt;
+  BoundStore,   // استور نهایی (برای get دیدن همه‌چیز)
+  [],           // میان‌افزارهای سفارشی
+  [],           // میان‌افزارهای ماقبل
+  T             // تایپ همین اسلایس
+&gt;</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/slices/cartSlice.ts</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { SliceCreator } from '../createStore'
+
+export type CartSlice = {
+  items: { id: number; qty: number }[]
+  addItem: (id: number) =&gt; void
+  removeItem: (id: number) =&gt; void
+  clear: () =&gt; void
+}
+
+export const createCartSlice: SliceCreator&lt;CartSlice&gt; = (set, get) =&gt; ({
+  items: [],
+  addItem: (id) =&gt;
+    set((s) =&gt; {
+      const found = s.items.find((i) =&gt; i.id === id)
+      if (found) {
+        return { items: s.items.map((i) =&gt; (i.id === id ? { ...i, qty: i.qty + 1 } : i)) }
+      }
+      return { items: [...s.items, { id, qty: 1 }] }
+    }),
+  removeItem: (id) =&gt; set((s) =&gt; ({ items: s.items.filter((i) =&gt; i.id !== id) })),
+  clear: () =&gt; set({ items: [] }),
+})</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/slices/uiSlice.ts</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { SliceCreator } from '../createStore'
+
+export type UISlice = {
+  cartOpen: boolean
+  toggleCart: (open?: boolean) =&gt; void
+}
+
+export const createUISlice: SliceCreator&lt;UISlice&gt; = (set) =&gt; ({
+  cartOpen: false,
+  toggleCart: (open) =&gt; set((s) =&gt; ({ cartOpen: open ?? !s.cartOpen })),
+})</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useBoundStore.ts — ترکیب نهایی</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { create } from 'zustand'
+import { createCartSlice } from './slices/cartSlice'
+import { createUISlice } from './slices/uiSlice'
+import { BoundStore } from './createStore'
+
+export const useBoundStore = create&lt;BoundStore&gt;()((...a) =&gt; ({
+  ...createCartSlice(...a),
+  ...createUISlice(...a),
+}))</code></pre>
+  </div>
+  <p>حالا یک استور واحد دارید که هر اسلایس فایل خودش را دارد؛ و پاداش بزرگ: اسلایس‌ها به State همدیگر هم دسترسی دارند (از طریق <code>get</code>). مثلاً <code>addItem</code> می‌تواند بعد از افزودن، <code>toggleCart(true)</code> صدا بزند.</p>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته — یک استور بزرگ یا چند استور کوچک؟</div><p>هر دو الگو قابل قبول است. اگر بخش‌ها مستقل‌اند (تم و سبد هیچ ربطی به هم ندارند) چند استور جدا بسازید. اگر باید با هم تعامل کنند یا منطق مشترک دارند، اسلایس. آنچه ممنوع است، «استور خدای ۱۵۰۰ خطی» است.</p></div>
+
+  <h2>subscribeWithSelector: گوش دادن هدفمند</h2>
+  <p><code>subscribe</code> پیش‌فرض به <em>هر</em> تغییر گوش می‌دهد. میان‌افزار <code>subscribeWithSelector</code> نسخهٔ سلکتوردار می‌دهد — مثل useEffect اما بدون رندر:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">subscribe به یک فیلد خاص</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { subscribeWithSelector } from 'zustand/middleware'
+
+const useBoundStore = create&lt;BoundStore&gt;()(
+  subscribeWithSelector((...a) =&gt; ({ /* اسلایس‌ها */ }))
+)
+
+// هر جا (مثلاً App):
+useEffect(() =&gt; {
+  const unsub = useBoundStore.subscribe(
+    (s) =&gt; s.items.length,               // فقط این مقدار مهم است
+    (len, prevLen) =&gt; {                  // فقط وقتی عوض شود صدا می‌شود
+      if (len &gt; prevLen) toast('به سبد اضافه شد!')
+    },
+    { equalityFn: Object.is }            // اختیاری
+  )
+  return unsub
+}, [])</code></pre>
+  </div>
+  <p>کاربردهای واقعی: نمایش toast بعد از افزودن به سبد، ذخیرهٔ خودکار draft بعد از تغییر متن، گزارش analytics روی اکشن‌های خاص.</p>
+
+  <h2>ساختار پروژه و نکات SSR در یک نگاه</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">قرارداد پوشه‌بندی حرفه‌ای</span><span class="cb-lang">text</span></div>
+    <pre><code class="language-bash">src/
+├── store/
+│   ├── useBoundStore.ts      # ترکیب اسلایس‌ها (اگر الگوی اسلایس)
+│   ├── slices/
+│   │   ├── cartSlice.ts
+│   │   └── uiSlice.ts
+│   └── useAuthStore.ts       # استورهای مستقل دامنه‌ای
+├── features/                 # کامپوننت‌ها کنار دامنهٔ خودشان
+│   ├── cart/
+│   └── products/
+└── lib/                      # کد عمومی (api، utils)</code></pre>
+  </div>
+  <ul>
+    <li><strong>SSR / Next.js:</strong> <code>localStorage</code> روی سرور وجود ندارد. اگر persist دارید، آپشن <code>skipHydration: true</code> بدهید و بعداً در سمت کلاینت با <code>useCartStore.persist.rehydrate()</code> ادامه دهید. در SPA معمولی این موضوع ندارید.</li>
+    <li><strong>Testability:</strong> چون استور شیء معمولی است، در تست‌ها با <code>useXStore.setState({...})</code> مستقیم سناریو می‌سازید — فصل ۱۴ کاملش می‌کند.</li>
+    <li><strong>قانون تنهایی:</strong> استور نباید fetch بلد باشد مگر برای فرمان‌های دستورالعملی؛ خواندن دادهٔ سرور کار Query است (فصل بعدی).</li>
+  </ul>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>TS با فرم کِرید: <code>create&lt;State&gt;()((set) =&gt; ...)</code> — پرانتز دوم را فراموش نکنید.</li>
+      <li>الگوی اسلایس = هر دامنه یک فایل + تایپ مشترک + ترکیب در یک استور.</li>
+      <li><code>subscribeWithSelector</code> گوش دادن بدون رندر به یک فیلد خاص می‌دهد.</li>
+      <li>در SSR با persist از <code>skipHydration</code> استفاده کنید؛ در SPA نیازی نیست.</li>
+      <li>چند استور مستقل برای دامنه‌های بی‌ربط؛ اسلایس برای دامنه‌های متعامل.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۶</div>
+    <p>استور تم (<code>useThemeStore</code>) را به TypeScript مهاجرت کنید با تایپ دقیق <code>'light' | 'dark'</code> برای تم. بعد استور سبد و استور UI مودال را با الگوی اسلایس در یک استور ترکیب کنید به‌طوری که <code>addItem</code> بعد از هر افزودن، مودال سبد را باز کند — بدون هیچ رفرشی بین دو اسلایس.</p>
+  </div>
+</section>
+<section class="chapter part-zustand" id="ch07">
+  <div class="pgmark">CHAPTER-07</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۷</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand — پروژهٔ عملی</div>
+      <h1>پروژهٔ عملی ۱ — سبد خرید کامل با Zustand</h1>
+      <p class="ch-desc">همهٔ آموخته‌های پنج فصل را در یک پروژهٔ واقعی جمع می‌کنیم: فروشگاه کوچکی با گرید محصولات، سبد خرید کشویی، کد تخفیف، محاسبات مشتق‌شده و persist.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>طراحی استور برای یک دامنهٔ واقعی قبل از نوشتن حتی یک خط UI</li>
+      <li>جداسازی State داده از State UI</li>
+      <li>محاسبات مشتق‌شده (جمع، تخفیف، نهایی) بدون تکرار داده</li>
+      <li>اتصال persist و مدیریت hydration در یک پروژهٔ کامل</li>
+    </ul>
+  </div>
+
+  <h2>طراحی قبل از کد</h2>
+  <p>درخواست محصول: «کاربر محصولات را می‌بیند، به سبد اضافه می‌کند، تعداد را تغییر می‌دهد، کد تخفیف می‌زند و جمع نهایی را می‌بیند. سبد بعد از رفرش باقی بماند.» قبل از هر کدی، State را طراحی می‌کنیم:</p>
+  <table class="tbl tbl-z">
+    <thead><tr><th>داده</th><th>جایگاه</th><th>دلیل</th></tr></thead>
+    <tbody>
+      <tr><td><code>products</code> (کاتالوگ)</td><td>فایل ثابت <code>data/products.js</code></td><td>دادهٔ نمایشی؛ بعداً (فصل ۱۳) می‌شود Server State</td></tr>
+      <tr><td><code>items</code>، <code>coupon</code></td><td><code>useCartStore</code></td><td>Client Data State — مالکش مرورگر است</td></tr>
+      <tr><td><code>cartOpen</code>، <code>toast</code></td><td><code>useShopUIStore</code></td><td>UI State — با دادهٔ سبد بی‌ربط</td></tr>
+      <tr><td>جمع‌ها و تخفیف</td><td>هیچ‌جا ذخیره نمی‌شود</td><td>مشتق است؛ با useMemo در کامپوننت حساب می‌شود</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکتهٔ طراحی</div><p>در <code>items</code> فقط <code>id</code> و <code>qty</code> نگه می‌داریم، نه کل شیء محصول. اگر قیمت در کاتالوگ عوض شود، سبد خودکار با قیمت جدید حساب می‌شود و داده تکراری نمی‌ماند. (همان اصل Normalization در دیتابیس‌ها!)</p></div>
+
+  <h2>۱) دادهٔ کاتالوگ</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/data/products.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">export const PRODUCTS = [
+  { id: 1, name: 'هدفون بی‌سیم Pro', price: 2_450_000, emoji: '🎧' },
+  { id: 2, name: 'کیبورد مکانیکال ۶۸٪', price: 1_890_000, emoji: '⌨️' },
+  { id: 3, name: 'ماوس ارگونومیک M5', price: 980_000, emoji: '🖱️' },
+  { id: 4, name: 'پایهٔ لپ‌تاپ آلومینیومی', price: 720_000, emoji: '💻' },
+]
+
+export const COUPONS = {
+  YALDA10: { type: 'percent', value: 10, min: 2_000_000 },  // ۱۰٪ اگر بالای ۲ میلیون
+  SHIP500: { type: 'fixed', value: 500_000, min: 1_000_000 }, // ۵۰۰ هزار تومان کمتر
+}</code></pre>
+  </div>
+
+  <h2>۲) استور سبد — قلب پروژه</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useCartStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import { COUPONS } from '../data/products'
+
+const initialState = { items: [], couponCode: null, _hasHydrated: false }
+
+export const useCartStore = create(
+  persist(
+    (set, get) =&gt; ({
+      ...initialState,
+
+      addItem: (id) =&gt;
+        set((s) =&gt; {
+          const found = s.items.find((i) =&gt; i.id === id)
+          if (found) {
+            return { items: s.items.map((i) =&gt; (i.id === id ? { ...i, qty: i.qty + 1 } : i)) }
+          }
+          return { items: [...s.items, { id, qty: 1 }] }
+        }),
+
+      setQty: (id, qty) =&gt;
+        set((s) =&gt; ({
+          items:
+            qty &lt;= 0
+              ? s.items.filter((i) =&gt; i.id !== id)
+              : s.items.map((i) =&gt; (i.id === id ? { ...i, qty } : i)),
+        })),
+
+      removeItem: (id) =&gt; set((s) =&gt; ({ items: s.items.filter((i) =&gt; i.id !== id) })),
+
+      applyCoupon: (code) =&gt; {
+        const coupon = COUPONS[code.trim().toUpperCase()]
+        if (!coupon) return { ok: false, message: 'کد تخفیف نامعتبر است' }
+        const subtotal = get().items.reduce((sum, i) =&gt; sum + i.qty * priceOf(i.id), 0)
+        if (subtotal &lt; coupon.min) {
+          return { ok: false, message: 'حداقل مبلغ برای این کد برآورده نشده' }
+        }
+        set({ couponCode: code.trim().toUpperCase() })
+        return { ok: true, message: 'کد تخفیف اعمال شد' }
+      },
+
+      removeCoupon: () =&gt; set({ couponCode: null }),
+      clearCart: () =&gt; set({ items: [], couponCode: null }),
+      setHasHydrated: (v) =&gt; set({ _hasHydrated: v }),
+    }),
+    {
+      name: 'shop-cart',
+      partialize: (s) =&gt; ({ items: s.items, couponCode: s.couponCode }),
+      onRehydrateStorage: () =&gt; (state) =&gt; state?.setHasHydrated(true),
+    }
+  )
+)
+
+// کمکی: قیمت محصول از کاتالوگ (منبع واحد حقیقت)
+import { PRODUCTS } from '../data/products'
+const priceOf = (id) =&gt; PRODUCTS.find((p) =&gt; p.id === id)?.price ?? 0</code></pre>
+  </div>
+  <p>به <code>applyCoupon</code> دقت کنید: از <code>get()</code> برای خواندن جمع فعلی استفاده کرد و «نتیجهٔ اعتبارسنجی» را به‌صورت مقدار برگرداند — کامپوننت می‌تواند بر اساس آن پیام نشان دهد؛ به‌جای اینکه منطق پیام‌ها داخل استور بنشیند.</p>
+
+  <h2>۳) استور UI</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useShopUIStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+
+export const useShopUIStore = create((set) =&gt; ({
+  cartOpen: false,
+  openCart: () =&gt; set({ cartOpen: true }),
+  closeCart: () =&gt; set({ cartOpen: false }),
+}))</code></pre>
+  </div>
+
+  <h2>۴) کامپوننت‌ها</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/ProductGrid.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { PRODUCTS } from '../data/products'
+import { useCartStore } from '../store/useCartStore'
+import { useShopUIStore } from '../store/useShopUIStore'
+
+export default function ProductGrid() {
+  const addItem = useCartStore((s) =&gt; s.addItem)
+  const openCart = useShopUIStore((s) =&gt; s.openCart)
+
+  const handleAdd = (id) =&gt; {
+    addItem(id)
+    openCart()
+  }
+
+  return (
+    &lt;div className="grid"&gt;
+      {PRODUCTS.map((p) =&gt; (
+        &lt;div key={p.id} className="card"&gt;
+          &lt;span className="emoji"&gt;{p.emoji}&lt;/span&gt;
+          &lt;h3&gt;{p.name}&lt;/h3&gt;
+          &lt;p&gt;{p.price.toLocaleString('fa-IR')} تومان&lt;/p&gt;
+          &lt;button onClick={() =&gt; handleAdd(p.id)}&gt;افزودن به سبد&lt;/button&gt;
+        &lt;/div&gt;
+      ))}
+    &lt;/div&gt;
+  )
+}</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/CartDrawer.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useMemo, useState } from 'react'
+import { PRODUCTS } from '../data/products'
+import { useCartStore } from '../store/useCartStore'
+import { useShopUIStore } from '../store/useShopUIStore'
+
+const byId = Object.fromEntries(PRODUCTS.map((p) =&gt; [p.id, p]))
+
+export default function CartDrawer() {
+  const cartOpen = useShopUIStore((s) =&gt; s.cartOpen)
+  const closeCart = useShopUIStore((s) =&gt; s.closeCart)
+  const items = useCartStore((s) =&gt; s.items)
+  const couponCode = useCartStore((s) =&gt; s.couponCode)
+  const setQty = useCartStore((s) =&gt; s.setQty)
+  const removeItem = useCartStore((s) =&gt; s.removeItem)
+  const clearCart = useCartStore((s) =&gt; s.clearCart)
+  const applyCoupon = useCartStore((s) =&gt; s.applyCoupon)
+  const removeCoupon = useCartStore((s) =&gt; s.removeCoupon)
+  const hasHydrated = useCartStore((s) =&gt; s._hasHydrated)
+
+  const [code, setCode] = useState('')
+  const [msg, setMsg] = useState(null)
+
+  // محاسبات مشتق‌شده — فقط وقتی items یا couponCode عوض شود
+  const totals = useMemo(() =&gt; {
+    const subtotal = items.reduce((sum, i) =&gt; sum + byId[i.id].price * i.qty, 0)
+    let discount = 0
+    if (couponCode === 'YALDA10') discount = Math.round(subtotal * 0.1)
+    if (couponCode === 'SHIP500') discount = 500_000
+    return { subtotal, discount, payable: subtotal - discount }
+  }, [items, couponCode])
+
+  if (!cartOpen) return null
+
+  return (
+    &lt;aside className="drawer"&gt;
+      &lt;header&gt;
+        &lt;h2&gt;سبد خرید ({items.length.toLocaleString('fa-IR')})&lt;/h2&gt;
+        &lt;button onClick={closeCart}&gt;بستن&lt;/button&gt;
+      &lt;/header&gt;
+
+      {!hasHydrated &amp;&amp; &lt;p&gt;در حال بازیابی سبد...&lt;/p&gt;}
+
+      {items.map((i) =&gt; (
+        &lt;div key={i.id} className="row"&gt;
+          &lt;span&gt;{byId[i.id].emoji} {byId[i.id].name}&lt;/span&gt;
+          &lt;span&gt;
+            &lt;button onClick={() =&gt; setQty(i.id, i.qty - 1)}&gt;−&lt;/button&gt;
+            {' '}{i.qty.toLocaleString('fa-IR')}{' '}
+            &lt;button onClick={() =&gt; setQty(i.id, i.qty + 1)}&gt;+&lt;/button&gt;
+          &lt;/span&gt;
+          &lt;button onClick={() =&gt; removeItem(i.id)}&gt;حذف&lt;/button&gt;
+        &lt;/div&gt;
+      ))}
+
+      {msg &amp;&amp; &lt;p className={msg.ok ? 'ok' : 'err'}&gt;{msg.message}&lt;/p&gt;}
+
+      {couponCode ? (
+        &lt;button onClick={removeCoupon}&gt;حذف کد {couponCode}&lt;/button&gt;
+      ) : (
+        &lt;div className="coupon"&gt;
+          &lt;input value={code} onChange={(e) =&gt; setCode(e.target.value)} placeholder="کد تخفیف" /&gt;
+          &lt;button onClick={() =&gt; setMsg(applyCoupon(code))}&gt;اعمال&lt;/button&gt;
+        &lt;/div&gt;
+      )}
+
+      &lt;footer&gt;
+        &lt;div&gt;جمع: {totals.subtotal.toLocaleString('fa-IR')}&lt;/div&gt;
+        &lt;div&gt;تخفیف: {totals.discount.toLocaleString('fa-IR')}&lt;/div&gt;
+        &lt;div&gt;قابل پرداخت: &lt;b&gt;{totals.payable.toLocaleString('fa-IR')}&lt;/b&gt;&lt;/div&gt;
+        &lt;button disabled={items.length === 0} onClick={clearCart}&gt;پرداخت و خالی کردن سبد&lt;/button&gt;
+      &lt;/footer&gt;
+    &lt;/aside&gt;
+  )
+}</code></pre>
+  </div>
+
+  <h2>نقاط آموزشی پروژه</h2>
+  <ul>
+    <li><strong>دو استور، دو دنیا:</strong> <code>useCartStore</code> داده است و <code>useShopUIStore</code> فقط نمایش. کامپوننت گرید محصول از دومی فقط «باز کردن» می‌گیرد؛ از محتوای سبد خبر ندارد.</li>
+    <li><strong>سلکتور تکی همه‌جا:</strong> هر خط <code>useXStore((s) =&gt; ...)</code> یک فیلد است — دقیقاً همان که فصل ۴ گفت.</li>
+    <li><strong>مرجع پایدار برای useMemo:</strong> چون <code>items</code> فقط هنگام mutation جدید می‌شود، <code>totals</code> کم محاسبه می‌شود.</li>
+    <li><strong>hydration فلگ:</strong> پیام «در حال بازیابی» تا تمام شدن rehydrate رندر می‌شود و بعد لیست واقعی.</li>
+  </ul>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — مرحلهٔ بعدی همان تلهٔ کلاسیک است</div><p>اگر همین پروژه بخواهد «موجودی واقعی» را از سرور بگیرد، اولین وسوسه این است که موجودی را در <code>useCartStore</code> ذخیره کنیم! از فصل ۸ می‌بینیم چرا دادهٔ سرور باید در کشِ TanStack Query برود و Zustand فقط «سبدِ خود کاربر» را نگه دارد.</p></div>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>اول State را روی کاغذ طراحی کنید؛ بعد UI را بنویسید.</li>
+      <li>در سبد فقط id و qty نگه دارید؛ جزئیات را از منبع اصلی بخوانید.</li>
+      <li>محاسبات مشتق‌شده ذخیره نمی‌شوند؛ با useMemo در کامپوننت حساب می‌شوند.</li>
+      <li>اعتبارسنجی (کد تخفیف) داخل اکشن با <code>get()</code> و برگرداندن نتیجه به کامپوننت.</li>
+      <li>persist با partialize + فلگ hydration برای تجربهٔ بدون فلش.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۷ — سه ارتقا</div>
+    <p>۱) قابلیت «ذخیره برای بعد» اضافه کنید: لیست علاقه‌مندی‌ها (wishlist) در استور جدا با persist مشترک؟ نه — استور مستقل با نام کلید خودش. ۲) دکمهٔ «خالی کردن» با تأیید دو مرحله‌ای (State <code>confirming</code> در UI استور). ۳) کد تخفیف جدید بنویسید که اگر تعداد کل آیتم‌ها از ۵ بیشتر بود ۱۵٪ بدهد — سرنخ: در <code>applyCoupon</code> به <code>items.length</code> نیاز دارید.</p>
+  </div>
+</section>
+<section class="chapter part-tq" id="ch08">
+  <div class="pgmark">CHAPTER-08</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۸</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش دوم · TanStack Query</div>
+      <h1>TanStack Query و دنیای Server State</h1>
+      <p class="ch-desc">چرا دادهٔ سرور با State معمولی فرق دارد؟ در این فصل مرز Client State و Server State را قطعی می‌کنیم، معماری کش TanStack Query را می‌شناسیم و پروژه را آماده می‌کنیم.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>پنج ویژگی Server State که آن را از Client State جدا می‌کند</li>
+      <li>نصب و راه‌اندازی <code>QueryClientProvider</code> و تنظیمات پیش‌فرض تیمی</li>
+      <li>نقشهٔ معماری: queryKey، queryFn، کش، observer و garbage collection</li>
+      <li>واژگان کلیدی که تا آخر دوره بارها می‌بینید</li>
+    </ul>
+  </div>
+
+  <h2>چرا نمی‌توان دادهٔ سرور را مثل State معمولی مدیریت کرد؟</h2>
+  <p>سبد خرید مال شماست: فقط شما آن را می‌بینید و فقط شما تغییرش می‌دهید. اما «لیست محصولات» را نه — هر لحظه ممکن است سرور آن را عوض کند، همکار دیگری تغییرش داده باشد و شما اصلاً خبر ندارید. این تفاوتِ ماهوی است، نه فنی. پنج ویژگی Server State:</p>
+  <ol>
+    <li><strong>دور و مشترک:</strong> جای ذخیرهٔ اصلی جای دیگری است و ممکن است بدون اطلاع شما تغییر کند.</li>
+    <li><strong>به‌روزرسانی‌پذیر از بیرون:</strong> دیگر کاربران، پنل ادمین، حتی زمان (موجودی و قیمت‌ها).</li>
+    <li><strong>نیازمند چرخهٔ async:</strong> هر دسترسی یعنی شبکه با تأخیر، خطا و تلاش مجدد.</li>
+    <li><strong>نیازمند حالت‌های فرآیندی:</strong> در حال بارگذاری، خطا، موفقیت، stale/fresh — State معمولی این مفاهیم را ندارد.</li>
+    <li><strong>کِش‌شدنی اما قابل کهنگی:</strong> نسخهٔ فعلی فقط یک snapshot است؛ ممکن است کهنه شود.</li>
+  </ol>
+  <table class="tbl tbl-t">
+    <thead><tr><th>ویژگی</th><th>Client State (Zustand)</th><th>Server State (TanStack Query)</th></tr></thead>
+    <tbody>
+      <tr><td>مالک داده</td><td>مرورگر کاربر</td><td>سرور / دیتابیس</td></tr>
+      <tr><td>ماهیت ذخیره</td><td>منبع حقیقت (Source of Truth)</td><td>کش (Cache) از دادهٔ دیگران</td></tr>
+      <tr><td>تغییر</td><td>با اکشن‌های خودمان</td><td>با mutation + invalidation</td></tr>
+      <tr><td>قابلیت کهنگی</td><td>معنا ندارد</td><td>مفهوم محوری (stale/fresh)</td></tr>
+      <tr><td>ری‌فرش خودکار</td><td>معنا ندارد</td><td>با فوکوس، ری‌کانکت و interval</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-danger"><div class="co-title"><span class="dot"></span>ممنوع — دو منبع حقیقت</div><p>هرگز پاسخ سرور را در Zustand کپی نکنید (<code>useUserStore.setState({ profile: data })</code>). از آن لحظه دو نسخه از یک داده دارید و دیر یا زود ناهماهنگ می‌شوند و باگ‌های «گاهی درست است، گاهی نه» می‌سازید. دادهٔ سرور فقط در کش Query زندگی می‌کند.</p></div>
+
+  <h2>نصب و راه‌اندازی</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">terminal</span><span class="cb-lang">bash</span></div>
+    <pre><code class="language-bash">npm install @tanstack/react-query
+npm install -D @tanstack/react-query-devtools</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/main.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import App from './App'
+
+// ۱) یک QueryClient برای کل اپ — بیرون از کامپوننت بسازید
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,              // داده تا ۱ دقیقه «تازه» محسوب شود
+      retry: 2,                        // دو بار تلاش مجدد قبل از اعلام خطا
+      refetchOnWindowFocus: true,      // برگشت به تب = بررسی تازگی
+    },
+  },
+})
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  &lt;React.StrictMode&gt;
+    &lt;QueryClientProvider client={queryClient}&gt;
+      &lt;App /&gt;
+      &lt;ReactQueryDevtools initialIsOpen={false} /&gt;
+    &lt;/QueryClientProvider&gt;
+  &lt;/React.StrictMode&gt;
+)</code></pre>
+  </div>
+  <p><code>QueryClient</code> مغز متفکر است: کش، پیکربندی و ابزارهای دستوری (invalidate، prefetch و...) همه در آن‌اند و به‌صورت یکتا در کل اپ وجود دارد. <code>QueryClientProvider</code> همان Provider است که در Zustand نداشتیم — اینجا برای اشتراک یک client واحد لازم است.</p>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته — تنظیمات پیش‌فرض، جایی که تصمیم‌های تیمی گرفته می‌شود</div><p>به‌جای اینکه هر <code>useQuery</code> جداگانه staleTime بدهد، در <code>defaultOptions</code> یک‌بار برای کل اپ تعیین کنید و فقط در موارد استثنا، سطح Query بازنویسی کنید. این همان کاری است که در code review از شما خواسته می‌شود.</p></div>
+
+  <h2>معماری کش: پنج بازیگر اصلی</h2>
+  <div class="flow">
+    <div class="fnode" style="border-color:var(--t); background:var(--t-soft)"><b>useQuery</b>observer در کامپوننت</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--t); background:var(--t-soft)"><b>QueryCache</b>انبار همهٔ Queryها</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode"><b>Query</b>یک کلید منحصربه‌فرد</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode"><b>queryFn</b>پرومیس از API</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--line)"><b>Server</b>REST / GraphQL</div>
+  </div>
+  <p>هر <code>useQuery</code> یک <strong>observer</strong> به یک Query در کش اضافه می‌کند. Query با <strong>queryKey</strong> هویت می‌گیرد (همان کلید دیکشنری). داده‌ای که queryFn برمی‌گرداند در همان Query ذخیره می‌شود. وقتی آخرین observer حذف شود (کامپوننت unmount)، داده تا پایان <strong>gcTime</strong> (پیش‌فرض ۵ دقیقه) برای استفاده‌های بعدی زنده می‌ماند و بعد از حافظه پاک می‌شود. دو زمان کلیدی:</p>
+  <table class="tbl tbl-t">
+    <thead><tr><th style="width:20%">پارامتر</th><th style="width:26%">پیش‌فرض</th><th>معنا</th></tr></thead>
+    <tbody>
+      <tr><td><code>staleTime</code></td><td><code>0</code></td><td>چه مدت داده «تازه» است؛ در این مدت هیچ رفرشی به‌صورت خودکار رخ نمی‌دهد (پیش‌فرض ۰ یعنی بلافاصله stale).</td></tr>
+      <tr><td><code>gcTime</code></td><td><code>5 دقیقه</code></td><td>چند وقت پس از بی‌observer شدن، داده از حافظه پاک شود. (در نسخهٔ ۴ به اسم <code>cacheTime</code> بود.)</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — stale یعنی «ممکن است کهنه باشد»، نه «غیرقابل استفاده»</div><p>دادهٔ stale فوراً از کش رندر می‌شود؛ فقط در پس‌زمینه هم fetch تازه اجرا می‌شود و وقتی رسید، UI بی‌دردسر آپدیت می‌شود. الگوی «نمایش فوری کش + به‌روزرسانی در پس‌زمینه» همان چیزی است که اپ‌ها را «سریع» حس می‌کند.</p></div>
+
+  <h2>واژگانی که تا آخر دوره همراه‌ماند</h2>
+  <ul>
+    <li><strong>Query:</strong> خواندن اعلامی از دادهٔ سرور (GET-مانند) با کلید یکتا.</li>
+    <li><strong>Mutation:</strong> تغییر دادهٔ سرور (POST/PUT/DELETE) — اعلامی نیست؛ خودتان اجرایش می‌کنید.</li>
+    <li><strong>Invalidation:</strong> بعد از mutation، علامت‌گذاری Queryهای مرتبط به stale تا دوباره گرفته شوند — جایگزین دستی sync کردن.</li>
+    <li><strong>Refetch:</strong> گرفتن دوبارهٔ داده؛ خودکار (فوکوس/ری‌کانکت/interval) یا دستی.</li>
+    <li><strong>Optimistic Update:</strong> قبل از جواب سرور، UI را آپدیت کن؛ اگر شکست، برگرد (فصل ۱۰).</li>
+  </ul>
+
+  <h2>از نسخهٔ ۴ به ۵ — اگر جایی کد قدیمی دیدید</h2>
+  <table class="tbl">
+    <thead><tr><th>در نسخهٔ ۴</th><th>در نسخهٔ ۵</th></tr></thead>
+    <tbody>
+      <tr><td><code>useQuery({ ... }, queryFn)</code> یا آرگومان‌های جدا</td><td>فقط شیء: <code>useQuery({ queryKey, queryFn })</code></td></tr>
+      <tr><td><code>isLoading</code> = هنوز داده‌ای نیست</td><td><code>isPending</code>؛ <code>isLoading</code> حالا = در حال fetch بدون دادهٔ اولیه</td></tr>
+      <tr><td><code>cacheTime</code></td><td><code>gcTime</code></td></tr>
+      <tr><td><code>keepPreviousData: true</code></td><td><code>placeholderData: keepPreviousData</code> (فصل ۱۲)</td></tr>
+      <tr><td><code>useQuery(…, { enabled })</code></td><td>همه در یک شیء: <code>useQuery({ ..., enabled })</code></td></tr>
+      <tr><td><code>isFetchingNextPage</code> بدون تایپ</td><td>همان است ولی همهٔ هوک‌ها تایپ عمومی بهتر دارند و TS-only شد</td></tr>
+    </tbody>
+  </table>
+
+  <h2>پروژهٔ بخش دوم</h2>
+  <p>در ادامهٔ دوره یک API عمومی به اسم <strong>JSONPlaceholder</strong> را مبنای تمرین می‌کنیم (<code>https://jsonplaceholder.typicode.com</code>) — سرورِ آزمایشی با endpointهای <code>/posts</code>، <code>/users</code> و <code>/comments</code> که همیشه در دسترس است و writeهای ساختگی انجام می‌دهد. برای پروژهٔ فصل ۱۳ همین را به‌عنوان Backend استفاده می‌کنیم؛ در پروژه‌های واقعی فقط آدرس عوض می‌شود.</p>
+  <div class="callout co-note"><div class="co-title"><span class="dot"></span>یادداشت</div><p>TanStack Query فریم‌ورک‌محور نیست: هستهٔ آن (<code>@tanstack/query-core</code>) با Vue و Solid و Svelte هم کار می‌کند. هر چیزی که اینجا یاد می‌گیرید، دانش قابل‌حمل است.</p></div>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>Server State داده‌ای است که مالکش شما نیست؛ مدیریتش یعنی مدیریت یک کش.</li>
+      <li>معماری: observer (useQuery) → QueryCache → Query (با queryKey) → queryFn → سرور.</li>
+      <li><code>staleTime</code> = مدت تازگی؛ <code>gcTime</code> = مدت زنده‌ماندن بعد از unmount.</li>
+      <li>تنظیمات پیش‌فرض را یک‌جا در <code>defaultOptions</code> بدهید.</li>
+      <li>دادهٔ سرور هرگز به Zustand کپی نمی‌شود.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۸</div>
+    <p>پروژهٔ Vite بخش اول را با <code>@tanstack/react-query</code> راه‌اندازی کنید: QueryClient با staleTime ۳۰ ثانیه و DevTools. در App یک کامپوننت آزمایشی بسازید که با <code>fetch</code> آدرس <code>https://jsonplaceholder.typicode.com/users</code> را صدا بزند (فعلاً همان useEffect قدیمی — فصل بعد اصلش می‌کنیم) و خروجی را در کنسول چاپ کند. فقط مطمئن شوید اپ بدون خطا بالا می‌آید.</p>
+  </div>
+</section>
+<section class="chapter part-tq" id="ch09">
+  <div class="pgmark">CHAPTER-09</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۹</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش دوم · TanStack Query</div>
+      <h1>useQuery — خواندن داده از سرور</h1>
+      <p class="ch-desc">هوکی که جای همهٔ loading/error/useEffectهای دستی می‌نشیند: تعریف query، شناخت وضعیت‌ها، کنترل تازگی با staleTime و تنظیمات عملی retry و cancellation.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>نوشتن اولین <code>useQuery</code> با <code>queryKey</code> و <code>queryFn</code></li>
+      <li>تفکیک <code>status</code> و <code>fetchStatus</code> و رندر بر اساس آن‌ها</li>
+      <li>رفتار کش در عمل: dedup، refetch خودکار و staleTime</li>
+      <li>سلکت‌کردن و تبدیل داده با <code>select</code>، کوئری‌های وابسته با <code>enabled</code></li>
+    </ul>
+  </div>
+
+  <h2>اولین useQuery</h2>
+  <p>قرارداد پروژه: یک لایهٔ API جدا نگه می‌داریم تا queryFnها فقط «فراخوانی» باشند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/lib/api.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">const BASE = 'https://jsonplaceholder.typicode.com'
+
+export async function getJSON(path) {
+  const res = await fetch(BASE + path)
+  if (!res.ok) throw new Error(`API error ${res.status}`)
+  return res.json()
+}
+
+export const api = {
+  posts: (params = '') =&gt; getJSON(`/posts${params}`),
+  post: (id) =&gt; getJSON(`/posts/${id}`),
+  users: () =&gt; getJSON('/users'),
+}</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/PostsList.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useQuery } from '@tanstack/react-query'
+import { api } from '../lib/api'
+
+export default function PostsList() {
+  const { data, isPending, isError, error } = useQuery({
+    queryKey: ['posts'],
+    queryFn: () =&gt; api.posts('?_limit=10'),
+  })
+
+  if (isPending) return &lt;p&gt;در حال بارگذاری پست‌ها...&lt;/p&gt;
+  if (isError) return &lt;p&gt;خطا: {error.message}&lt;/p&gt;
+
+  return (
+    &lt;ul&gt;
+      {data.map((post) =&gt; (
+        &lt;li key={post.id}&gt;
+          &lt;b&gt;{post.id}. {post.title}&lt;/b&gt;
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  )
+}</code></pre>
+  </div>
+  <p>دو ورودی، همه‌چیز:</p>
+  <ul>
+    <li><strong><code>queryKey</code></strong>: هویت این داده در کش. آرایه است و از چپ به راست «از عمومی به خاص» خوانده می‌شود: <code>['posts']</code> لیست پست‌ها، <code>['posts', 5]</code> پست شمارهٔ ۵، <code>['posts', { page: 2, q: 'react' }</code> لیست با پارامترها. هر تغییر در محتوای آرایه = یک دادهٔ متفاوت.</li>
+    <li><strong><code>queryFn</code></strong>: تابعی که Promise داده را برمی‌گرداند. اگر reject شود، Query به status خطا می‌رود و بعد از retryها خطا در <code>error</code> است.</li>
+  </ul>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — queryFn باید واقعاً throw کند</div><p>اگر در queryFn خطای HTTP را با <code>if (!res.ok) return null</code> «بلعید»، TanStack Query فکر می‌کند همه‌چیز موفق بوده و UI شما رندر خالی می‌شود. همیشه خطا را پرتاب کنید (همان کاری که <code>getJSON</code> بالا می‌کند).</p></div>
+
+  <h2>وضعیت‌ها: status در برابر fetchStatus</h2>
+  <p>مهم‌ترین نکتهٔ مفهومی فصل. هر Query دو چراغ دارد:</p>
+  <table class="tbl tbl-t">
+    <thead><tr><th style="width:22%">چراغ</th><th>مقادیر</th><th>سؤالی که جواب می‌دهد</th></tr></thead>
+    <tbody>
+      <tr><td><code>status</code> / هوک‌های <code>isPending · isError · isSuccess</code></td><td><code>pending / error / success</code></td><td>«آیا اصلاً داده‌ای داریم؟» — دربارهٔ خودِ داده</td></tr>
+      <tr><td><code>fetchStatus</code> / <code>isFetching</code></td><td><code>fetching / idle / paused</code></td><td>«همین الان درخواستی در جریان است؟» — دربارهٔ فرآیند شبکه</td></tr>
+    </tbody>
+  </table>
+  <p>ترکیب‌های معنادار:</p>
+  <ul>
+    <li><code>isPending &amp;&amp; isFetching</code>: بارگذاری اولیه؛ صفحهٔ loading نشان بدهید. (این ترکیب همان <code>isLoading</code> است.)</li>
+    <li><code>isSuccess &amp;&amp; isFetching</code>: دادهٔ قدیمی روی صفحه + رفرش در پس‌زمینه؛ یک ایندیکاتور کوچک نشان دهید، صفحه را خالی نکنید!</li>
+    <li><code>isSuccess &amp;&amp; !isFetching</code>: داده تازه و آرام.</li>
+    <li><code>isError</code>: خطا — اما دادهٔ قبلی ممکن است هنوز در <code>data</code> باشد.</li>
+  </ul>
+  <div class="callout co-danger"><div class="co-title"><span class="dot"></span>ممنوع — خالی کردن صفحه هنگام رفرش</div><p><code>if (isFetching) return &lt;Spinner /&gt;</code> یعنی هر برگشت کاربر به تب، کل صفحه به اسپینر تبدیل شود. برای رفرش پس‌زمینه فقط <code>isFetching</code> را به یک نشانگر کوچک وصل کنید؛ <code>isPending</code> مال صفحهٔ loading اولیه است.</p></div>
+
+  <h2>رفتار کش در عمل: dedup و refetch</h2>
+  <p>سه کامپوننت مختلف، همان کلید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">سه observer، یک درخواست</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">// در سه کامپوننت مختلف:
+const { data } = useQuery({ queryKey: ['users'], queryFn: api.users })
+// فقط «یک» درخواست شبکه زده می‌شود و هر سه همان data را می‌گیرند.
+// به این می‌گویند Request Deduplication.</code></pre>
+  </div>
+  <p>وقتی داده برمی‌گردد، کش آن را با کلید <code>['users']</code> ذخیره می‌کند. بعداً اگر کامپوننت دیگری mount شود، فوراً دادهٔ کش را می‌گیرد (<code>isSuccess</code> از اول) و Query طبق قوانین refetch تصمیم می‌گیرد دوباره بگیرد یا نه. رفرش خودکار سه‌گانه:</p>
+  <ul>
+    <li><code>refetchOnWindowFocus</code> (پیش‌فرض روشن): برگشت به تب اپ → اگر داده stale است، رفرش پس‌زمینه.</li>
+    <li><code>refetchOnMount</code> (پیش‌فرض روشن): mount دوباره → اگر stale است، رفرش.</li>
+    <li><code>refetchOnReconnect</code> (پیش‌فرض روشن): برگشتن اینترنت → رفرش.</li>
+  </ul>
+  <p>همهٔ این‌ها با <code>staleTime</code> کنترل می‌شوند: تا داده «تازه» است، هیچ‌کدام اضافه‌کاری نمی‌کنند. تنظیم پیشنهادی تیمی: داده‌های کم‌تغییر (کشورها، لیست دسته‌ها) staleTime بالا (ساعت‌ها)، داده‌های زنده (قیمت، اعلان) staleTime کوتاه یا ۰.</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">تنظیمات سطح یک Query</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">const { data: notifications } = useQuery({
+  queryKey: ['notifications'],
+  queryFn: () =&gt; api.get('/notifications'),
+  staleTime: 10_000,          // بازنویسیِ پیش‌فرض فقط برای همین Query
+  refetchInterval: 30_000,    // polling: هر ۳۰ ثانیه
+  refetchIntervalInBackground: false, // در تب پنهان poll نکن
+})</code></pre>
+  </div>
+
+  <h2>retry — تلاش مجدد هوشمند</h2>
+  <p>پیش‌فرض: <strong>۳ بار</strong> با تأخیر نمایی (۱ ثانیه، ۲، ۴). کنترل آن:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">retry سفارشی</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">useQuery({
+  queryKey: ['posts'],
+  queryFn: () =&gt; api.posts(),
+  retry: 2,
+  // یا تابعی: خطای ۴۰۴ را نگیر (منبع واقعاً نیست)، بقیه را بگیر
+  retry: (failureCount, error) =&gt; {
+    if (error.message.includes('404')) return false
+    return failureCount &lt; 3
+  },
+  retryDelay: (attempt) =&gt; Math.min(1000 * 2 ** attempt, 30_000),
+})</code></pre>
+  </div>
+
+  <h2>لغو درخواست: signal</h2>
+  <p>TanStack Query به هر queryFn یک <code>signal</code> (همان AbortController مرورگر) می‌دهد؛ وقتی Query بی‌observer شود، درخواست لغو می‌شود و شبکه اشغال نمی‌ماند. برای استفاده، signal را به fetch بدهید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/lib/api.js — نسخهٔ کامل</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">export const api = {
+  posts: (params = '', signal) =&gt; getJSON(`/posts${params}`, signal),
+  post: (id, signal) =&gt; getJSON(`/posts/${id}`, signal),
+}
+
+async function getJSON(path, signal) {
+  const res = await fetch(BASE + path, { signal })
+  if (!res.ok) throw new Error(`API error ${res.status}`)
+  return res.json()
+}
+
+// در useQuery:
+queryFn: ({ signal }) =&gt; api.posts('?_limit=10', signal)</code></pre>
+  </div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته</div><p>هر بار که کلید عوض شود (مثلاً کاربر سریع بین صفحات می‌زند)، درخواست قبلی به‌طور خودکار بی‌ارزش می‌شود؛ با signal، لغو هم واقعی می‌شود. رقابت پاسخ‌ها (race condition) در TanStack Query اساساً وجود ندارد: هر پاسخ فقط به کلید خودش ثبت می‌شود.</p></div>
+
+  <h2>select: تبدیل داده در سطح کش</h2>
+  <p>اگر فقط بخشی از داده لازم دارید (مثلاً نام کاربران از آرایهٔ کامل)، <code>select</code> درست‌کار است — فقط هنگام تغییرِ «خروجی سلکت‌شده» رندر می‌گیرد:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">select + memo خودکار</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">function UserNames() {
+  const names = useQuery({
+    queryKey: ['users'],
+    queryFn: api.users,
+    select: (users) =&gt; users.map((u) =&gt; u.name), // خروجی تبدیل‌شده
+  })
+  // select در نسخهٔ ۵ به‌صورت داخلی memo می‌شود؛
+  // اگر تابع select را بیرون تعریف کردید، با useMemo پایدارش کنید.
+  return &lt;ul&gt;{names.data?.map((n) =&gt; &lt;li key={n}&gt;{n}&lt;/li&gt;)}&lt;/ul&gt;
+}</code></pre>
+  </div>
+
+  <h2>کوئری‌های وابسته: enabled</h2>
+  <p>کلاسیک‌ترین سناریو: «اول کاربر را بگیر، بعد پست‌های همان کاربر». تا id کاربر نیامده، کوئری دوم نباید اجرا شود:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/UserPosts.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useQuery } from '@tanstack/react-query'
+import { api } from '../lib/api'
+
+export default function UserPosts({ email }) {
+  // ۱) کاربر از روی ایمیل
+  const { data: user } = useQuery({
+    queryKey: ['user', email],
+    queryFn: ({ signal }) =&gt; api.findUserByEmail(email, signal),
+  })
+
+  const userId = user?.id
+
+  // ۲) پست‌ها — فقط وقتی userId آماده است
+  const postsQuery = useQuery({
+    queryKey: ['posts', { userId }],
+    queryFn: ({ signal }) =&gt; api.posts(`?userId=${userId}`, signal),
+    enabled: !!userId, // تا userId نباشد، fetch ممنوع
+  })
+
+  if (!user) return &lt;p&gt;در حال پیدا کردن کاربر...&lt;/p&gt;
+  return &lt;PostList data={postsQuery.data ?? []} /&gt;
+}</code></pre>
+  </div>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — کلید، فقط دادهٔ پایدار</div><p>در queryKey هر چیزی که serialize‌شدنی است می‌گذارید (عدد، رشته، شیء ساده، آرایه). تابع یا کلاس نگذارید. کلیدهای به‌هم‌ریخته یعنی کشِ به‌هم‌ریخته — فصل ۱۱ کل ادبیات کلیدها را ساختار می‌دهد.</p></div>
+
+  <h2>دو ابزار آخر این فصل: placeholderData و initialData</h2>
+  <ul>
+    <li><strong><code>initialData</code></strong>: دادهٔ اولیهٔ قطعی — Query از همان لحظهٔ اول «success» است (مثلاً دادهٔ SSR یا پیش‌فرض ثابت). فقط وقتی واقعاً از صحتش مطمئنید.</li>
+    <li><strong><code>placeholderData</code></strong>: دادهٔ «نمایشی» تا fetch واقعی بیاید؛ status می‌ماند pending و <code>isPlaceholderData: true</code>. کاربرد ستاره‌ای‌اش در صفحه‌بندی است (فصل ۱۲): <code>placeholderData: keepPreviousData</code> یعنی «تا دادهٔ صفحهٔ بعد نیامده، صفحهٔ قبل را نشان بده».</li>
+  </ul>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li><code>useQuery({ queryKey, queryFn })</code>؛ کلید = هویت در کش، queryFn = Promise که throw می‌کند.</li>
+      <li><code>status</code> دربارهٔ داده است (pending/error/success)، <code>fetchStatus</code> دربارهٔ شبکه (fetching/idle).</li>
+      <li>dedup خودکار، refetch خودکار با فوکوس/ری‌کانکت و کنترل با staleTime.</li>
+      <li><code>signal</code> را به fetch بدهید تا لغو واقعی داشته باشید؛ race condition حذف می‌شود.</li>
+      <li><code>select</code> برای تبدیل، <code>enabled</code> برای وابستگی، <code>placeholderData</code> و <code>initialData</code> برای تجربهٔ نرم.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۹</div>
+    <p>کامپوننت <code>PostsList</code> را ارتقا دهید: ۱) سلکتور کاربر، آرایهٔ پست‌ها را بر اساس ورودی جستجو فیلتر کند و با <code>select</code> خروجی فیلترشده بگیرد. ۲) کوئری دوم بسازید که با کلید <code>['post', id]</code> جزئیات یک پست را بگیرد و با کلیک روی هر پست نمایش دهد (با <code>enabled</code>). ۳) در DevTools ببینید وقتی دو بار روی همان پست کلیک می‌کنید، درخواست جدیدی زده نمی‌شود — چرا؟ (staleTime پیش‌فرض ۶۰ ثانیهٔ App را یادتان هست؟)</p>
+  </div>
+</section>
+<section class="chapter part-tq" id="ch10">
+  <div class="pgmark">CHAPTER-10</div>
+  <header class="ch-banner">
+    <div class="ch-num">۱۰</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش دوم · TanStack Query</div>
+      <h1>useMutation — تغییر داده و به‌روزرسانی کش</h1>
+      <p class="ch-desc">ساخت، حذف و ویرایش روی سرور؛ چرخهٔ mutation، اینولیدیشن به‌عنوان راهبرد اصلی sync، و به‌روزرسانی خوش‌بینانه با rollback — الگویی که در مصاحبه‌ها پرسیده می‌شود.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>تعریف <code>useMutation</code> با <code>mutationFn</code> و فراخوانی با <code>variables</code></li>
+      <li>چرخهٔ onMutate → onSuccess / onError → onSettled</li>
+      <li>الگوی به‌روزرسانی خوش‌بینانه کامل با snapshot و rollback</li>
+      <li>انتخاب بین invalidation و setQueryData</li>
+    </ul>
+  </div>
+
+  <h2>آناتومی یک mutation</h2>
+  <p>بر خلاف useQuery که هنگام mount خودش اجرا می‌شود، mutation <strong>دستی</strong> اجرا می‌شود — وقتی کاربر دکمه را زد:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/lib/api.js — اضافه شدن writeها</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">async function sendJSON(path, method, body) {
+  const res = await fetch(BASE + path, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error(`API error ${res.status}`)
+  return res.json()
+}
+
+export const api = {
+  // ...پایین همان getهای فصل ۹
+  addPost: (post) =&gt; sendJSON('/posts', 'POST', post),
+  updatePost: (id, patch) =&gt; sendJSON(`/posts/${id}`, 'PATCH', patch),
+  deletePost: (id) =&gt; sendJSON(`/posts/${id}`, 'DELETE').then(() =&gt; true),
+}</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/NewPostForm.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '../lib/api'
+
+export default function NewPostForm() {
+  const [title, setTitle] = useState('')
+  const queryClient = useQueryClient()
+
+  const addPost = useMutation({
+    mutationFn: (variables) =&gt; api.addPost(variables),
+    onSuccess: (data, variables) =&gt; {
+      // ۱) لیست پست‌ها را stale کن تا از سرور تازه شود
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      setTitle('')
+    },
+    onError: (error, variables) =&gt; {
+      alert('ذخیره نشد: ' + error.message)
+    },
+  })
+
+  return (
+    &lt;form
+      onSubmit={(e) =&gt; {
+        e.preventDefault()
+        addPost.mutate({ title, body: '...', userId: 1 })
+      }}
+    &gt;
+      &lt;input value={title} onChange={(e) =&gt; setTitle(e.target.value)} /&gt;
+      &lt;button disabled={addPost.isPending}&gt;
+        {addPost.isPending ? 'در حال ذخیره...' : 'انتشار'}
+      &lt;/button&gt;
+      {addPost.isError &amp;&amp; &lt;p className="err"&gt;{addPost.error.message}&lt;/p&gt;}
+    &lt;/form&gt;
+  )
+}</code></pre>
+  </div>
+  <table class="tbl tbl-t">
+    <thead><tr><th style="width:26%">قطعه</th><th>نقش</th></tr></thead>
+    <tbody>
+      <tr><td><code>mutationFn</code></td><td>تنها آرگومان اجباری؛ Promise که سرور را تغییر می‌دهد.</td></tr>
+      <tr><td><code>mutate(variables)</code></td><td>اجرای mutation؛ هر داده‌ای (فرم، id، فایل) به‌عنوان variables به mutationFn و کالبک‌ها می‌رسد.</td></tr>
+      <tr><td><code>isPending / isError / error / data</code></td><td>وضعیت‌ها مثل useQuery — <code>isPending</code> یعنی درخواست در جریان است.</td></tr>
+      <tr><td><code>useQueryClient()</code></td><td>دسترسی به client برای invalidate و setQueryData بعد از تغییر.</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — mutate یا mutateAsync؟</div><p><code>mutate()</code> هیچ Promiseای برنمی‌گرداند و خطاها را به onError می‌سپارد — انتخاب پیش‌فرض. اگر منطق بعد از اتمام را «آوانس‌محور» می‌خواهید (مثلاً navigate بعد از موفقیت)، از <code>const res = await mutateAsync(vars)</code> داخل try/catch استفاده کنید. هرگز <code>mutateAsync</code> را بدون try/catch صدا نزنید؛ unhandled rejection می‌گیرید.</p></div>
+
+  <h2>چرخهٔ کامل کالبک‌ها</h2>
+  <div class="flow">
+    <div class="fnode" style="border-color:var(--t)"><b>onMutate</b>قبل از درخواست — جای optimistic update</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--t)"><b>mutationFn</b>درخواست شبکه</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:#15803D"><b>onSuccess</b>پاسخ موفق</div>
+    <div class="fnode" style="border-color:var(--danger)"><b>onError</b>خطا (بعد از retryها)</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode"><b>onSettled</b>در هر دو حالت — پاک‌سازی</div>
+  </div>
+  <p>ترتیب اجرا: کالبک‌های <em>خود mutation</em> اول اجرا می‌شوند و بعد کالبک‌های component-level همان فراخوانی (اگر در <code>mutate(vars, { onSuccess })</code> داده باشید). در تمرین‌های تیمی معمولاً منطق اصلی را در هوک می‌گذاریم و موارد UI-محلی (toast، بستن مودال) را در متد mutate.</p>
+
+  <h2>invalidation: بعد از تغییر، داده را «کهنه» کن</h2>
+  <p>دو راه برای به‌روز نگه‌داشتن کش بعد از mutation:</p>
+  <ol>
+    <li><strong>Invalidation (پیش‌فرض حرفه‌ای):</strong> بگو «دادهٔ X دیگر قابل اعتماد نیست». Queryهای متناظر stale می‌شوند و اگر observer فعال داشته باشند بلافاصله refetch می‌گیرند.</li>
+    <li><strong>setQueryData دستی:</strong> پاسخ سرور را مستقیم در کش بنویس — سریع اما مسئولیت شکل‌دادن به داده با شماست.</li>
+  </ol>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">دو الگو، پهلو به پهلو</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">// الگوی ۱: invalidation — ساده، همیشه درست
+onSuccess: () =&gt; {
+  queryClient.invalidateQueries({ queryKey: ['posts'] })
+}
+
+// الگوی ۲: نوشتن مستقیم پاسخ سرور در کش
+onSuccess: (saved) =&gt; {
+  queryClient.setQueryData(['post', saved.id], saved)
+  queryClient.invalidateQueries({ queryKey: ['posts'] }) // لیست همچنان refetch
+}</code></pre>
+  </div>
+  <p>انتخاب: برای «لیست‌ها» invalidation (سرور منبع حقیقت است)، برای «جزئیات همان آیتم» می‌توانید setQueryData (پاسخ را دارید، چرا دوباره بگیریم؟). ترکیب هر دو رایج و سالم است.</p>
+
+  <h2>به‌روزرسانی خوش‌بینانه (Optimistic Update)</h2>
+  <p>ایده: تغییر را فوراً در کش بنویس (خوش‌بین باش) تا UI آنی شود؛ اگر سرور جواب خطا داد، به حالت قبل برگرد. الگوی رسمی نسخهٔ ۵:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/PostRow.jsx — حذف خوش‌بینانه</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '../lib/api'
+
+export default function DeletePostButton({ id }) {
+  const queryClient = useQueryClient()
+
+  const removePost = useMutation({
+    mutationFn: (id) =&gt; api.deletePost(id),
+
+    // ۱) قبل از درخواست: نسخهٔ فعلی را ذخیره کن و کش را آپدیت کن
+    onMutate: async (id) =&gt; {
+      await queryClient.cancelQueries({ queryKey: ['posts'] }) // refetch در جریان را متوقف کن
+      const previous = queryClient.getQueryData(['posts'])      // snapshot
+      queryClient.setQueryData(['posts'], (old) =&gt;
+        old?.filter((p) =&gt; p.id !== id) ?? old
+      )
+      return { previous } // به context کالبک‌های بعدی می‌رسد
+    },
+
+    // ۲) خطا: برگرد به snapshot
+    onError: (err, id, context) =&gt; {
+      queryClient.setQueryData(['posts'], context.previous)
+      alert('حذف ناموفق بود؛ بازگردانی شد.')
+    },
+
+    // ۳) در هر حالت: همیشه با سرور sync کن
+    onSettled: () =&gt; {
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    },
+  })
+
+  return (
+    &lt;button disabled={removePost.isPending} onClick={() =&gt; removePost.mutate(id)}&gt;
+      {removePost.isPending ? '...' : 'حذف'}
+    &lt;/button&gt;
+  )
+}</code></pre>
+  </div>
+  <p>سه گام طلایی که حفظ کنید:</p>
+  <ol>
+    <li><strong>onMutate:</strong> cancel + snapshot + setQueryData + برگرداندن <code>{ previous }</code>.</li>
+    <li><strong>onError:</strong> بازگردانی از <code>context.previous</code>.</li>
+    <li><strong>onSettled:</strong> invalidation برای همگام‌شدن با حقیقتِ سرور.</li>
+  </ol>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — cancelQueries را حذف نکنید</div><p>اگر قبل از setQueryData، یک refetch در جریان باشد، وقتی تمام شود دادهٔ قدیمی را روی تغییر خوش‌بینانه‌تان می‌نویسد و حذفِ آیتم «برمی‌گردد». اول cancel، بعد snapshot، بعد set.</p></div>
+
+  <h2>mutationهای هماهنگ با هم: useMutationState</h2>
+  <p>برای نمایش وضعیت‌های جهانی (مثلاً badge «N تغییر در حال ذخیره») لازم نیست وضعیت را جابه‌جا کنید؛ Query خودش همهٔ mutationها را نگه می‌دارد:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">شمارش mutationهای در جریان</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useMutationState } from '@tanstack/react-query'
+
+function SavingBadge() {
+  const saving = useMutationState({
+    filters: { status: 'pending' },
+    select: (m) =&gt; m,
+  })
+  if (saving.length === 0) return null
+  return &lt;span className="badge"&gt;{saving.length} تغییر ذخیره می‌شود...&lt;/span&gt;
+}</code></pre>
+  </div>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>mutation دستی اجرا می‌شود: <code>useMutation({ mutationFn })</code> + <code>.mutate(variables)</code>.</li>
+      <li>چرخه: onMutate → mutationFn → onSuccess/onError → onSettled.</li>
+      <li>بعد از هر mutation: invalidation (پیش‌فرض) یا setQueryData (پاسخ قطعی).</li>
+      <li>الگوی خوش‌بینانه: cancelQueries + getQueryData/setQueryData + rollback در onError + invalidate در onSettled.</li>
+      <li><code>useMutationState</code> وضعیت‌های سراسری را بدون state اضافه می‌دهد.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۱۰</div>
+    <p>۱) فرم ویرایش پست بسازید (PATCH با api.updatePost) که بعد از موفقیت، هم جزئیات <code>['post', id]</code> را با setQueryData آپدیت کند و هم لیست را invalidate کند. ۲) افزودن پست را خوش‌بینانه کنید: اول با id موقت (مثلاً <code>Date.now()</code>) در لیست بگذارید و بعد از موفقیت invalidate کنید. ۳) با DevTools ببینید بعد از هر mutation، Queryهای stale چطور دوباره fetch می‌شوند.</p>
+  </div>
+</section>
+<section class="chapter part-tq" id="ch11">
+  <div class="pgmark">CHAPTER-11</div>
+  <header class="ch-banner">
+    <div class="ch-num">۱۱</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش دوم · TanStack Query</div>
+      <h1>Query Keys و مدیریت کش</h1>
+      <p class="ch-desc">کلید، شناسنامهٔ داده در کش است. در این فصل الگوی رسمی Query Key Factory، اینولیدیشن هدفمند با فیلترها، prefetch و ابزارهای دستوری QueryClient را یاد می‌گیرید.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>قواعد ساخت کلید و چرا ترتیب عناصر مهم است</li>
+      <li>الگوی <code>Query Key Factory</code> + هوک <code>queryOptions</code> برای تایپ ایمن</li>
+      <li>invalidate با تطبیق جزئی/دقیق و predicate</li>
+      <li><code>prefetchQuery</code>، <code>ensureQueryData</code>، <code>cancelQueries</code> و بقیهٔ ابزارها</li>
+    </ul>
+  </div>
+
+  <h2>قواعد کلیدنویسی</h2>
+  <p>کلید آرایه است و از چپ به راست، از عمومی به خاص:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">سلسله‌مراتب کلید</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">['posts']                         // همهٔ پست‌ها
+['posts', 'list']                 // لیست
+['posts', 'list', { page: 2, q: 'react' }]  // لیست با پارامتر
+['posts', 'detail', 5]            // جزئیات پست ۵
+['posts', 'detail', 5, 'comments']// کامنت‌های پست ۵</code></pre>
+  </div>
+  <p>سه قاعده:</p>
+  <ul>
+    <li><strong>متجانس و سلسله‌مراتبی:</strong> هر بخش، پدرِ بخش بعدی است تا تطبیق جزئی (بعداً) معنا داشته باشد.</li>
+    <li><strong>serialize‌پذیر:</strong> فقط رشته/عدد/بولین/آرایه/شیء ساده. کلید <code>{ page: 2, q: 'react' }</code> با <code>{ q: 'react', page: 2 }</code> برابر است (هش پایدار با ترتیب کلیدهای مرتب‌شده).</li>
+    <li><strong>متغیرها داخل کلید:</strong> هر چیزی که خروجی را تغییر می‌دهد (پارامترها، زبان، نقش کاربر) باید در کلید باشد.</li>
+  </ul>
+  <div class="callout co-danger"><div class="co-title"><span class="dot"></span>ممنوع — کلید بی‌پارامتر برای دادهٔ پارامتری</div><p>اگر جستجوی کاربر را در State نگه دارید ولی کلید ثابت <code>['posts']</code> باشد، همهٔ جستجوها روی یک داده نوشته می‌شوند! پارامتر باید در کلید باشد: <code>['posts', 'list', { q }]</code>.</p></div>
+
+  <h2>الگوی Query Key Factory</h2>
+  <p>رشته‌های تکراری در کل پروژه = تلهٔ غلط املایی. راه‌حل رسمی مستندات، یک آبجکت کارخانه برای هر دامنه:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/features/posts/keys.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">export const postKeys = {
+  all: ['posts'],
+  lists: () =&gt; [...postKeys.all, 'list'],
+  list: (filters) =&gt; [...postKeys.lists(), filters],
+  details: () =&gt; [...postKeys.all, 'detail'],
+  detail: (id) =&gt; [...postKeys.details(), id],
+  comments: (id) =&gt; [...postKeys.detail(id), 'comments'],
+}
+
+// مصرف:
+queryKey: postKeys.list({ page: 1, q: 'react' })   // ['posts','list',{...}]
+queryKey: postKeys.detail(5)                        // ['posts','detail',5]</code></pre>
+  </div>
+  <p>جادوی این ساختار در invalidate است — از عمومی به خاص، هر سطحی را می‌توانید هدف بگیرید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">قدرت سلسله‌مراتب</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">qc.invalidateQueries({ queryKey: postKeys.all })       // همهٔ چیزِ پست‌ها
+qc.invalidateQueries({ queryKey: postKeys.lists() })   // فقط لیست‌ها، نه جزئیات
+qc.invalidateQueries({ queryKey: postKeys.detail(5) }) // فقط پست ۵ (+کامنت‌هایش)</code></pre>
+  </div>
+
+  <h3>queryOptions: کلید + queryFn در یک جا (نسخهٔ ۵)</h3>
+  <p>هوک کمکی <code>queryOptions</code> تعریف کوئری را به یک آبجکت قابل استفاده در همهٔ هوک‌ها تبدیل می‌کند و تایپ data را هم حفظ می‌کند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/features/posts/queries.js — TS</span><span class="cb-lang">ts</span></div>
+    <pre><code class="language-ts">import { queryOptions } from '@tanstack/react-query'
+import { postKeys } from './keys'
+
+export const postQueries = {
+  list: (filters: { page: number; q?: string }) =&gt;
+    queryOptions({
+      queryKey: postKeys.list(filters),
+      queryFn: ({ signal }) =&gt; api.posts(filters, signal),
+      staleTime: 30_000,
+    }),
+
+  detail: (id: number) =&gt;
+    queryOptions({
+      queryKey: postKeys.detail(id),
+      queryFn: ({ signal }) =&gt; api.post(id, signal),
+    }),
+}
+
+// مصرف — تایپ data دقیقاً Post[] است، بدون تعریف دستی:
+const { data } = useQuery(postQueries.list({ page: 1 }))
+qc.invalidateQueries({ queryKey: postKeys.all })</code></pre>
+  </div>
+
+  <h2>invalidateQueries و فیلترها</h2>
+  <table class="tbl tbl-t">
+    <thead><tr><th style="width:38%">فراخوانی</th><th>اثر</th></tr></thead>
+    <tbody>
+      <tr><td><code>invalidateQueries({ queryKey: postKeys.all })</code></td><td>همهٔ Queryهایی که کلیدشان با <code>['posts']</code> <b>شروع</b> می‌شود.</td></tr>
+      <tr><td><code>invalidateQueries({ queryKey: postKeys.lists(), exact: true })</code></td><td>فقط کلید دقیقاً برابر — بدون زیرمجموعه‌ها.</td></tr>
+      <tr><td><code>invalidateQueries({ predicate: (q) =&gt; q.queryKey[0] === 'posts' &amp;&amp; q.state.dataUpdatedAt &gt; hourAgo })</code></td><td>فیلتر کامل با تابع — برای شرایط پیچیده.</td></tr>
+      <tr><td><code>refetchQueries({ queryKey: postKeys.all })</code></td><td>بدون stale کردن، مستقیم refetch.</td></tr>
+    </tbody>
+  </table>
+  <p>invalidate یعنی: stale کن + اگر observer فعال دارد فوراً refetch، وگرنه فقط برای mount بعدی آمادهٔ refetch باش. به یاد داشته باشید: invalidate هیچ چیز را حذف نمی‌کند؛ دادهٔ قدیمی تا refetch بعدی همان‌جاست.</p>
+
+  <h2>ابزارهای دستوری QueryClient</h2>
+  <table class="tbl tbl-t">
+    <thead><tr><th style="width:34%">متد</th><th>کاربرد واقعی</th></tr></thead>
+    <tbody>
+      <tr><td><code>getQueryData(key)</code></td><td>خواندن کش (مثلاً snapshot در onMutate)</td></tr>
+      <tr><td><code>setQueryData(key, updater)</code></td><td>نوشتن کش — updater مثل setState تابعی است و <code>undefined</code> را نگه می‌دارد</td></tr>
+      <tr><td><code>prefetchQuery({ queryKey, queryFn })</code></td><td>گرفتن قبل از نیاز (hover روی لینک، mount والد) — خطاها بی‌صدا رد می‌شوند</td></tr>
+      <tr><td><code>ensureQueryData(key)</code></td><td>اگر تازه در کش نیست بگیر و Promise بده — در لودرهای روتر عالی است</td></tr>
+      <tr><td><code>cancelQueries(filters)</code></td><td>لغو درخواست‌های در جریان — در onMutate خوش‌بینانه</td></tr>
+      <tr><td><code>removeQueries(filters)</code></td><td>حذف کامل از کش (مثلاً خروج کاربر)</td></tr>
+      <tr><td><code>qc.clear()</code></td><td>پاک‌سازی کل کش</td></tr>
+      <tr><td><code>getQueryState(key)</code> / <code>qc.getQueryCache().findAll()</code></td><td>دیباگ و ابزارهای reporting</td></tr>
+    </tbody>
+  </table>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">پیش‌واکشی هوشمند: وقتی روی لینک hover شد</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">function PostLink({ id }) {
+  const qc = useQueryClient()
+  const prefetch = () =&gt; qc.prefetchQuery(postQueries.detail(id))
+
+  return (
+    &lt;a href={`/posts/${id}`} onMouseEnter={prefetch} onFocus={prefetch}&gt;
+      پست {id}
+    &lt;/a&gt;
+  )
+}</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">خروج کاربر: کش را خالی کن</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">// در useAuthStore یا logout mutation
+onSuccess: () =&gt; {
+  queryClient.clear() // یا removeQueries({ predicate: q =&gt; q.queryKey[0] !== 'public' })
+  navigate('/login')
+}</code></pre>
+  </div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته — Structural Sharing</div><p>TanStack Query به‌صورت پیش‌فرض، پاسخ جدید را با قبلی مقایسهٔ عمیق می‌کند و مرجعِ بخش‌های بدون تغییر را حفظ می‌کند. نتیجه: <code>useMemo</code>های شما کمتر می‌سوزند و React کمتر رندر می‌گیرد. خاموشش نکنید مگر با دلیل (<code>structuralSharing: false</code>).</p></div>
+
+  <h2>مینی‌الگو: invalidate هدفمند در سه سطح</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">ثبت کامنت — چه چیزهایی باید stale شوند؟</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">const addComment = useMutation({
+  mutationFn: (vars) =&gt; api.addComment(vars.postId, vars.body),
+  onSuccess: (comment, vars) =&gt; {
+    // ۱) کامنت‌های همان پست
+    qc.invalidateQueries({ queryKey: postKeys.comments(vars.postId) })
+    // ۲) شمارندهٔ کامنت در جزئیات پست
+    qc.invalidateQueries({ queryKey: postKeys.detail(vars.postId) })
+    // ۳) «کامنت‌های اخیر من» در داشبورد — دامنهٔ متفاوت
+    qc.invalidateQueries({ queryKey: ['my-activity'] })
+  },
+})</code></pre>
+  </div>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>کلید سلسله‌مراتبی و serialize‌پذیر بنویسید؛ پارامترها داخل کلید، نه در State جدا.</li>
+      <li>Query Key Factory + <code>queryOptions</code> = کلید و fetch و تایپ در یک نقطه.</li>
+      <li>invalidate تطبیق جزئی دارد؛ با exact یا predicate هدف بگیرید.</li>
+      <li>prefetch برای سرعت، ensureQueryData برای لودرها، remove/clear برای خروج کاربر.</li>
+      <li>Structural sharing مرجع پایدار می‌دهد؛ همان چیزی که Zustand هم دوست دارد.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۱۱</div>
+    <p>برای دامنهٔ users یک Query Key Factory کامل بنویسید (all/lists/list/detail/posts). بعد صفحهٔ «پروفایل کاربر» بسازید که با hover روی لینکِ کاربر، جزئیاتش را prefetch می‌کند. در logout اپ، کل کش را پاک کنید و با DevTools مطمئن شوید چیزی باقی نمانده.</p>
+  </div>
+</section>
+<section class="chapter part-tq" id="ch12">
+  <div class="pgmark">CHAPTER-12</div>
+  <header class="ch-banner">
+    <div class="ch-num">۱۲</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش دوم · TanStack Query</div>
+      <h1>امکانات پیشرفته — صفحه‌بندی، Infinite و Suspense</h1>
+      <p class="ch-desc">صفحه‌بندی نرم با placeholderData، اسکرول بی‌نهایت با useInfiniteQuery، Suspense خالص با useSuspenseQuery، کوئری‌های موازی داینامیک و اتصال به شبکهٔ آفلاین.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>صفحه‌بندی بدون فلش با <code>placeholderData: keepPreviousData</code></li>
+      <li><code>useInfiniteQuery</code> با <code>initialPageParam</code> و <code>getNextPageParam</code></li>
+      <li>رندر اعلامی با <code>useSuspenseQuery</code> و ErrorBoundary</li>
+      <li>کوئری‌های داینامیک با <code>useQueries</code> و رفتار آفلاین</li>
+    </ul>
+  </div>
+
+  <h2>صفحه‌بندی با UI ثابت</h2>
+  <p>مشکل کلاسیک صفحه‌بندی: با هر تغییر صفحه، لیست خالی و دوباره پر می‌شود؛ اسکرول می‌پرد و کاربر گیج می‌شود. راه‌حل: تا دادهٔ صفحهٔ جدید نیامده، دادهٔ صفحهٔ قبلی را «نمایشی» نگه دار:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/PaginatedPosts.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useState } from 'react'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { api } from '../lib/api'
+import { postKeys } from '../features/posts/keys'
+
+export default function PaginatedPosts() {
+  const [page, setPage] = useState(1)
+
+  const { data, isPlaceholderData, isFetching } = useQuery({
+    queryKey: postKeys.list({ page }),
+    queryFn: ({ signal }) =&gt; api.posts(`?_page=${page}&amp;_limit=10`, signal),
+    placeholderData: keepPreviousData, // ← ستارهٔ ماجرا
+    staleTime: 30_000,
+  })
+
+  return (
+    &lt;div style={{ opacity: isPlaceholderData ? 0.6 : 1 }}&gt;
+      &lt;ul&gt;{data?.map((p) =&gt; &lt;li key={p.id}&gt;{p.title}&lt;/li&gt;)}&lt;/ul&gt;
+      &lt;div&gt;
+        &lt;button onClick={() =&gt; setPage((p) =&gt; p - 1)} disabled={page === 1}&gt;قبلی&lt;/button&gt;
+        &lt;button onClick={() =&gt; setPage((p) =&gt; p + 1)}&gt;بعدی&lt;/button&gt;
+        {isFetching &amp;&amp; !isPlaceholderData &amp;&amp; &lt;span&gt;در حال آوردن صفحهٔ جدید...&lt;/span&gt;}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+  </div>
+  <p>نکته‌ها: <code>data</code> در حین fetch صفحهٔ بعد، هنوز صفحهٔ قبلی است (<code>isPlaceholderData: true</code>)؛ با opacity کم، حس «در حال تغییر» می‌دهیم بدون خالی‌شدن لیست. هر صفحه وقتی گرفته شد، در کشِ کلید خودش می‌ماند و برگشت به صفحهٔ قبل آنی است.</p>
+
+  <h2>useInfiniteQuery — اسکرول بی‌نهایت</h2>
+  <p>برای «بارگذاری بیشتر»، ساختار داده فرق می‌کند: پاسخ شامل چند صفحه و نشانگرِ صفحهٔ بعد (cursor) است. سه ورودی اجباری در نسخهٔ ۵:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/InfinitePosts.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useInfiniteQuery } from '@tanstack/react-query'
+import { api } from '../lib/api'
+import { postKeys } from '../features/posts/keys'
+
+export default function InfinitePosts() {
+  const { data, isPending, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: postKeys.lists(), // یا list({ q }) برای فیلترها
+      queryFn: ({ signal, pageParam }) =&gt; api.posts(`?_limit=10&amp;_page=${pageParam}`, signal),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage, allPages, lastPageParam) =&gt; {
+        // JSONPlaceholder: اگر صفحهٔ آخر کمتر از ۱۰ آیتم داشت یعنی تمام
+        return lastPage.length &lt; 10 ? undefined : lastPageParam + 1
+      },
+      maxPages: 5, // حداکثر ۵ صفحه در کش بماند (حافظهٔ موبایل!)
+    })
+
+  if (isPending) return &lt;p&gt;بارگذاری...&lt;/p&gt;
+  if (isError) return &lt;p&gt;خطا!&lt;/p&gt;
+
+  // data.pages آرایه‌ای از «پاسخ هر صفحه» است
+  const posts = data.pages.flat()
+
+  return (
+    &lt;div&gt;
+      {posts.map((p) =&gt; (
+        &lt;article key={p.id}&gt;&lt;h4&gt;{p.title}&lt;/h4&gt;&lt;/article&gt;
+      ))}
+      &lt;button
+        onClick={() =&gt; fetchNextPage()}
+        disabled={!hasNextPage || isFetchingNextPage}
+      &gt;
+        {isFetchingNextPage
+          ? 'در حال بارگذاری...'
+          : hasNextPage
+            ? 'بارگذاری بیشتر'
+            : 'همه را دیدید'}
+      &lt;/button&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+  </div>
+  <ul>
+    <li><strong><code>getNextPageParam</code>:</strong> از پاسخ آخرین صفحه بگویید صفحهٔ بعد چیست؛ برگرداندن <code>undefined</code> یعنی تمام (<code>hasNextPage: false</code>). اگر API شما cursor در پاسخ می‌دهد (<code>lastPage.nextCursor</code>)، همان را برگردانید.</li>
+    <li><strong><code>data.pages</code></strong> آرایهٔ صفحات است؛ با <code>data.pageParams</code> هم نشانگرها را دارید.</li>
+    <li><strong><code>maxPages</code></strong> (جدید در v5) کش صفحات قدیمی را می‌بُرد تا اپ در لیست‌های خیلی بلند از حافظه نترکد.</li>
+  </ul>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته — اتصال به IntersectionObserver</div><p>برای «اسکرول خودکار» به‌جای دکمه، در production با <code>@tanstack/react-virtual</code> یا یک div sentinel و IntersectionObserver ترکیب کنید: <code>if (entry.isIntersecting &amp;&amp; hasNextPage) fetchNextPage()</code>. دقت کنید <code>fetchNextPage</code> را در خود کالبک observer صدا می‌زنید، نه در رندر!</p></div>
+
+  <h2>useSuspenseQuery — رندر اعلامی</h2>
+  <p>اگر معماری team تان React 18+ و Suspense است، <code>useSuspenseQuery</code> کامپوننت را از تمام ifهای وضعیت خلاص می‌کند: داده همیشه تعریف‌شده است (بدون <code>data?.x</code>) و حالت‌های pending/error به مرزهای Suspense/ErrorBoundary منتقل می‌شوند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/PostDetailSuspense.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { Suspense } from 'react'
+import { useSuspenseQuery, ErrorBoundary } from '@tanstack/react-query'
+import { api } from '../lib/api'
+import { postKeys } from '../features/posts/keys'
+
+function PostDetail({ id }) {
+  const { data: post } = useSuspenseQuery({
+    queryKey: postKeys.detail(id),
+    queryFn: ({ signal }) =&gt; api.post(id, signal),
+  })
+  // اینجا data همیشه هست؛ هیچ isPendingی وجود ندارد
+  return &lt;h1&gt;{post.title}&lt;/h1&gt;
+}
+
+export default function Page({ id }) {
+  return (
+    &lt;ErrorBoundary fallbackRender={({ error }) =&gt; &lt;p&gt;خطا: {error.message}&lt;/p&gt;}&gt;
+      &lt;Suspense fallback={&lt;p&gt;در حال بارگذاری...&lt;/p&gt;}&gt;
+        &lt;PostDetail id={id} /&gt;
+      &lt;/Suspense&gt;
+    &lt;/ErrorBoundary&gt;
+  )
+}</code></pre>
+  </div>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — کلید باید زیر Suspense باشد</div><p>کامپوننتی که useSuspenseQuery دارد باید داخل مرز Suspense رندر شود، وگرنه کل مسیر تا نزدیک‌ترین Suspense بالا معلق می‌شود و کل صفحه لودینگ می‌گیرد. مرزها را دانه‌درشت نه، ولی مرتب بگذارید.</p></div>
+
+  <h2>کوئری‌های موازی و داینامیک: useQueries</h2>
+  <p>چند useQuery کنار هم خودبه‌خود موازی اجرا می‌شوند. اما وقتی «تعداد» کوئری‌ها داینامیک است (مثلاً جزئیات N کاربر انتخابی)، تعداد هوک‌ها ثابت نمی‌ماند — قانون هوک‌ها می‌شکند. راه‌حل رسمی:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">N کوئری با یک هوک</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useQueries } from '@tanstack/react-query'
+import { api } from '../lib/api'
+import { userKeys } from '../features/users/keys'
+
+function UserCards({ userIds }) {
+  const results = useQueries({
+    queries: userIds.map((id) =&gt; ({
+      queryKey: userKeys.detail(id),
+      queryFn: ({ signal }) =&gt; api.user(id, signal),
+      staleTime: 5 * 60_000,
+    })),
+  })
+
+  return (
+    &lt;div&gt;
+      {results.map((r, i) =&gt;
+        r.isPending ? (
+          &lt;p key={userIds[i]}&gt;...&lt;/p&gt;
+        ) : (
+          &lt;Card key={userIds[i]} user={r.data} /&gt;
+        )
+      )}
+    &lt;/div&gt;
+  )
+}</code></pre>
+  </div>
+
+  <h2>شبکهٔ ناپایدار: networkMode</h2>
+  <p>پیش‌فرض: بدون اینترنت، Queryها متوقف (<code>paused</code>) می‌شوند و با برگشتن شبکه دوباره اجرا می‌شوند — با <code>fetchStatus: 'paused'</code> می‌توانید بنر «آفلاین» نشان دهید. سه حالت:</p>
+  <table class="tbl tbl-t">
+    <thead><tr><th style="width:24%">networkMode</th><th>رفتار</th><th>کاربرد</th></tr></thead>
+    <tbody>
+      <tr><td><code>online</code> (پیش‌فرض)</td><td>بدون شبکه متوقف می‌شود</td><td>اکثر Queryها</td></tr>
+      <tr><td><code>offlineFirst</code></td><td>یک بار امتحان می‌کند، بعد صف می‌شود</td><td>داده‌های کش‌شده در SW</td></tr>
+      <tr><td><code>always</code></td><td>همیشه اجرا؛ شبکه مهم نیست</td><td>داده‌های کاملاً محلی</td></tr>
+    </tbody>
+  </table>
+
+  <h2>DevTools حرفه‌ای</h2>
+  <p>افزونهٔ <code>ReactQueryDevtools</code> (که در فصل ۸ نصب کردیم) بیش از نمایش لیست است:</p>
+  <ul>
+    <li>وضعیت هر Query (fresh/stale/paused)، زمان آخرین fetch و تعداد observerها را می‌بینید.</li>
+    <li>دکمهٔ invalidate/refetch/reset/copy برای هر Query — دیباگ بدون دست زدن به کد.</li>
+    <li>ساختار درختی کلیدها نشان می‌دهد factory شما درست کار می‌کند یا کلیدها قاطی شده‌اند.</li>
+    <li>در production غیرفعال است؛ فقط dev bundle شامل آن است.</li>
+  </ul>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>صفحه‌بندی نرم = <code>placeholderData: keepPreviousData</code> + کلید پارامتری.</li>
+      <li>Infinite = initialPageParam + getNextPageParam (undefined یعنی تمام) + maxPages.</li>
+      <li>Suspense = useSuspenseQuery داخل مرز Suspense/ErrorBoundary؛ data همیشه هست.</li>
+      <li>کوئری داینامیک = useQueries با آرایهٔ پارامترها.</li>
+      <li>آفلاین با fetchStatus: 'paused' قابل مدیریت است؛ DevTools ابزار روزمرهٔ دیباگ کش است.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۱۲</div>
+    <p>۱) <code>PaginatedPosts</code> را طوری ارتقا دهید که صفحهٔ بعد را پیش‌واکشی کند (سرنخ: در onSuccessِ پایان fetch یا در effect با شرط <code>!isPlaceholderData</code>، <code>prefetchQuery</code> صفحهٔ بعد). ۲) نسخهٔ Infinite را با دکمه بسازید و بعد با IntersectionObserver خودکارش کنید. ۳) سناریوی آفلاین را تست کنید: DevTools → Network → Offline، بعد برگردید و رفتار paused→refetch را در DevTools ببینید.</p>
+  </div>
+</section>
+<section class="chapter part-both" id="ch13">
+  <div class="pgmark">CHAPTER-13</div>
+  <header class="ch-banner">
+    <div class="ch-num">۱۳</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش سوم · پروژهٔ ترکیبی</div>
+      <h1>پروژهٔ عملی ۲ — اپ کامل با Zustand و TanStack Query</h1>
+      <p class="ch-desc">اپ «پست‌بلاگ» را از صفر می‌سازیم: ورود کاربر، جستجو و صفحه‌بندی، انتشار/ویرایش/حذف خوش‌بینانه — با جداسازی تمیز UI State و Server State در یک پروژهٔ واحد.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>تقسیم کار نهایی بین Zustand و TanStack Query در یک پروژهٔ واقعی</li>
+      <li>اتصال auth (Zustand) به لایهٔ API و به کش (removal در خروج)</li>
+      <li>الگوی «فیلتر در استور → کلید در Query» برای جستجو و صفحه‌بندی</li>
+      <li>ترکیب همهٔ الگوها: mutation، invalidation، optimistic و prefetch</li>
+    </ul>
+  </div>
+
+  <h2>معماری: چه چیزی کجا می‌رود؟</h2>
+  <table class="tbl tbl-v">
+    <thead><tr><th>نیاز محصول</th><th>دسته</th><th>ابزار</th><th>جای سکونت</th></tr></thead>
+    <tbody>
+      <tr><td>پست‌ها، جزئیات، کامنت‌ها، کاربران</td><td>Server State</td><td>TanStack Query</td><td>کش QueryClient</td></tr>
+      <tr><td>توکن و پروفایل کاربر لاگین‌شده</td><td>Client (session)</td><td>Zustand + persist</td><td>useAuthStore</td></tr>
+      <tr><td>جستجو، صفحهٔ فعلی، مرتب‌سازی</td><td>UI/URL State</td><td>Zustand (+Router در واقعی)</td><td>usePostFiltersStore</td></tr>
+      <tr><td>باز بودن سایدبار/مودال، toastها</td><td>UI State</td><td>Zustand</td><td>useUIStore</td></tr>
+      <tr><td>تم روشن/تاریک</td><td>UI State</td><td>Zustand + persist</td><td>useThemeStore</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>الگوی ستارهٔ این فصل</div><p>«فیلترها در Zustand زندگی می‌کنند، ولی داده فقط از دروازهٔ کلیدِ Query می‌گذرد»: فیلتر جستجو State زندهٔ UI است، اما هر ترکیب فیلتر = یک کلید کوئری متفاوت = یک ورودی کش مستقل. هیچ دادهٔ سرور به استور فیلترها وارد نمی‌شود.</p></div>
+
+  <h2>ساختار پروژه</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">پروژهٔ blog-app</span><span class="cb-lang">text</span></div>
+    <pre><code class="language-bash">src/
+├── lib/
+│   └── api.js                  # fetch layer + توکن از useAuthStore.getState
+├── stores/
+│   ├── useAuthStore.js         # persist: token, user
+│   ├── usePostFiltersStore.js  # q, page, sort
+│   └── useUIStore.js           # theme, toast, sidebar
+├── features/posts/
+│   ├── keys.js                 # postKeys factory
+│   ├── queries.js              # queryOptions های آماده
+│   └── mutations.js            # هوک‌های mutation
+├── components/
+│   ├── PostList.jsx
+│   ├── PostCard.jsx
+│   ├── NewPostForm.jsx
+│   └── Header.jsx
+└── main.jsx                    # QueryClient + providers</code></pre>
+  </div>
+
+  <h2>۱) لایهٔ API + Auth Store</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/stores/useAuthStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+
+export const useAuthStore = create(
+  persist(
+    (set) =&gt; ({
+      token: null,
+      user: null,
+      setSession: ({ token, user }) =&gt; set({ token, user }),
+      clear: () =&gt; set({ token: null, user: null }),
+    }),
+    { name: 'auth', partialize: (s) =&gt; ({ token: s.token, user: s.user }) }
+  )
+)</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/lib/api.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { useAuthStore } from '../stores/useAuthStore'
+const BASE = 'https://jsonplaceholder.typicode.com'
+
+async function request(path, { method = 'GET', body } = {}) {
+  const headers = { 'Content-Type': 'application/json' }
+  // بیرونِ React: خواندن توکن از استور، نه از هوک
+  const token = useAuthStore.getState().token
+  if (token) headers.Authorization = `Bearer ${token}`
+
+  const res = await fetch(BASE + path, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  })
+  if (res.status === 401) {
+    useAuthStore.getState().clear() // نشست منقضی — یک‌جا و متمرکز
+    throw new Error('نشست منقضی شده؛ دوباره وارد شوید')
+  }
+  if (!res.ok) throw new Error(`API error ${res.status}`)
+  return res.status === 204 ? null : res.json()
+}
+
+export const api = {
+  posts: (params = '', signal) =&gt; request(`/posts${params}`, { signal }),
+  post: (id, signal) =&gt; request(`/posts/${id}`, { signal }),
+  addPost: (post) =&gt; request('/posts', { method: 'POST', body: post }),
+  updatePost: (id, patch) =&gt; request(`/posts/${id}`, { method: 'PATCH', body: patch }),
+  deletePost: (id) =&gt; request(`/posts/${id}`, { method: 'DELETE' }),
+  login: async (email) =&gt; {
+    // JSONPlaceholder لاگین ندارد؛ شبیه‌سازی: کاربر را از /users می‌یابیم
+    const users = await request(`/users?email=${encodeURIComponent(email)}`)
+    if (!users.length) throw new Error('کاربری با این ایمیل نیست')
+    return { user: users[0], token: `demo-token-${users[0].id}` }
+  },
+}</code></pre>
+  </div>
+
+  <h2>۲) فیلترها و کلیدها</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/stores/usePostFiltersStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+
+export const usePostFiltersStore = create((set) =&gt; ({
+  q: '',
+  page: 1,
+  setQ: (q) =&gt; set({ q, page: 1 }),  // جستجوی جدید یعنی برگشت به صفحهٔ ۱
+  nextPage: () =&gt; set((s) =&gt; ({ page: s.page + 1 })),
+  prevPage: () =&gt; set((s) =&gt; ({ page: Math.max(1, s.page - 1) })),
+}))</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/features/posts/keys.js و queries.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { queryOptions, keepPreviousData } from '@tanstack/react-query'
+import { api } from '../../lib/api'
+
+export const postKeys = {
+  all: ['posts'],
+  lists: () =&gt; [...postKeys.all, 'list'],
+  list: (filters) =&gt; [...postKeys.lists(), filters],
+  details: () =&gt; [...postKeys.all, 'detail'],
+  detail: (id) =&gt; [...postKeys.details(), id],
+}
+
+export const postQueries = {
+  list: (filters) =&gt;
+    queryOptions({
+      queryKey: postKeys.list(filters),
+      queryFn: ({ signal }) =&gt;
+        api.posts(`?_page=${filters.page}&amp;_limit=9`, signal),
+      placeholderData: keepPreviousData,
+      staleTime: 30_000,
+    }),
+  detail: (id) =&gt;
+    queryOptions({
+      queryKey: postKeys.detail(id),
+      queryFn: ({ signal }) =&gt; api.post(id, signal),
+    }),
+}</code></pre>
+  </div>
+
+  <h2>۳) Mutations در یک فایل</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/features/posts/mutations.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '../../lib/api'
+import { postKeys } from './keys'
+import { useUIStore } from '../../stores/useUIStore'
+
+export function useAddPost() {
+  const qc = useQueryClient()
+  const toast = useUIStore((s) =&gt; s.toast)
+
+  return useMutation({
+    mutationFn: (post) =&gt; api.addPost(post),
+    onMutate: async (post) =&gt; {
+      await qc.cancelQueries({ queryKey: postKeys.lists() })
+      const previous = qc.getQueryData(postKeys.list({ q: '', page: 1 }))
+      qc.setQueryData(postKeys.list({ q: '', page: 1 }), (old) =&gt;
+        old ? [{ id: Date.now(), ...post }, ...old] : old
+      )
+      return { previous }
+    },
+    onError: (_e, _v, ctx) =&gt; {
+      qc.setQueryData(postKeys.list({ q: '', page: 1 }), ctx?.previous)
+      toast('انتشار ناموفق بود')
+    },
+    onSuccess: () =&gt; toast('پست منتشر شد!'),
+    onSettled: () =&gt; qc.invalidateQueries({ queryKey: postKeys.all }),
+  })
+}
+
+export function useDeletePost() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id) =&gt; api.deletePost(id),
+    onMutate: async (id) =&gt; {
+      await qc.cancelQueries({ queryKey: postKeys.lists() })
+      const previous = qc.getQueryData(postKeys.list({ q: '', page: 1 }))
+      qc.setQueryData(postKeys.list({ q: '', page: 1 }), (old) =&gt;
+        old?.filter((p) =&gt; p.id !== id) ?? old
+      )
+      return { previous }
+    },
+    onError: (_e, _v, ctx) =&gt;
+      qc.setQueryData(postKeys.list({ q: '', page: 1 }), ctx?.previous),
+    onSettled: () =&gt; qc.invalidateQueries({ queryKey: postKeys.all }),
+  })
+}</code></pre>
+  </div>
+
+  <h2>۴) کامپوننت‌ها</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/PostList.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { postQueries } from '../features/posts/queries'
+import { usePostFiltersStore } from '../stores/usePostFiltersStore'
+import { PostCard } from './PostCard'
+
+export default function PostList() {
+  const q = usePostFiltersStore((s) =&gt; s.q)
+  const page = usePostFiltersStore((s) =&gt; s.page)
+  const setQ = usePostFiltersStore((s) =&gt; s.setQ)
+  const nextPage = usePostFiltersStore((s) =&gt; s.nextPage)
+  const prevPage = usePostFiltersStore((s) =&gt; s.prevPage)
+
+  // debounce سبک: کلید فقط با مقدار پایدار عوض شود
+  const debouncedQ = useDebounce(q, 300)
+
+  const { data, isPending, isError, isPlaceholderData } = useQuery(
+    postQueries.list({ q: debouncedQ, page })
+  )
+
+  const filtered = useMemo(
+    () =&gt; (data ?? []).filter((p) =&gt; p.title.toLowerCase().includes(debouncedQ.toLowerCase())),
+    [data, debouncedQ]
+  )
+
+  if (isPending) return &lt;p&gt;در حال بارگذاری پست‌ها...&lt;/p&gt;
+  if (isError) return &lt;p&gt;خطا در دریافت؛ بعداً دوباره تلاش کنید.&lt;/p&gt;
+
+  return (
+    &lt;section&gt;
+      &lt;input
+        value={q}
+        onChange={(e) =&gt; setQ(e.target.value)}
+        placeholder="جستجو در عنوان‌ها..."
+      /&gt;
+      &lt;div style={{ opacity: isPlaceholderData ? 0.6 : 1 }}&gt;
+        {filtered.map((p) =&gt; &lt;PostCard key={p.id} post={p} /&gt;)}
+      &lt;/div&gt;
+      &lt;nav&gt;
+        &lt;button onClick={prevPage}&gt;قبلی&lt;/button&gt;
+        &lt;button onClick={nextPage}&gt;بعدی&lt;/button&gt;
+      &lt;/nav&gt;
+    &lt;/section&gt;
+  )
+}</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/Header.jsx — ورود/خروج + اتصال به کش</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '../lib/api'
+import { useAuthStore } from '../stores/useAuthStore'
+
+export default function Header() {
+  const user = useAuthStore((s) =&gt; s.user)
+  const setSession = useAuthStore((s) =&gt; s.setSession)
+  const clearAuth = useAuthStore((s) =&gt; s.clear)
+  const qc = useQueryClient()
+  const [email, setEmail] = useState('')
+
+  const login = useMutation({
+    mutationFn: (mail) =&gt; api.login(mail),
+    onSuccess: (session) =&gt; setSession(session),
+  })
+
+  const logout = () =&gt; {
+    clearAuth()
+    qc.clear() // داده‌های سشن‌دار از کش هم بروند
+  }
+
+  return user ? (
+    &lt;header&gt;
+      &lt;span&gt;{user.name}&lt;/span&gt;
+      &lt;button onClick={logout}&gt;خروج&lt;/button&gt;
+    &lt;/header&gt;
+  ) : (
+    &lt;header&gt;
+      &lt;input value={email} onChange={(e) =&gt; setEmail(e.target.value)} placeholder="email" /&gt;
+      &lt;button disabled={login.isPending} onClick={() =&gt; login.mutate(email)}&gt;ورود&lt;/button&gt;
+    &lt;/header&gt;
+  )
+}</code></pre>
+  </div>
+
+  <h2>جمع‌بندی معماری پروژه</h2>
+  <div class="flow">
+    <div class="fnode" style="border-color:var(--z); background:var(--z-soft)"><b>Zustand</b>auth · فیلترها · UI · تم</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--v); background:var(--v-soft)"><b>فیلتر → کلید</b>useQuery(postQueries.list(filters))</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--t); background:var(--t-soft)"><b>TanStack Query</b>کش · invalidation · optimistic</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode"><b>api.js</b>توکن از getState()</div>
+  </div>
+  <ul class="checklist">
+    <li>هیچ پاسخ سروری در Zustand کپی نشد.</li>
+    <li>هیچ State UIای در کش Query ننشست.</li>
+    <li>توکن با <code>getState()</code> به لایهٔ API رسید؛ خروج کاربر کش را پاک کرد.</li>
+    <li>همهٔ mutationها invalidation دارند؛ افزودن/حذف خوش‌بینانه با rollback.</li>
+  </ul>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین بزرگ فصل ۱۳ — پروژهٔ شخصی</div>
+    <p>همین اپ را کامل اجرا کنید و سپس سه فیچر اضافه کنید: ۱) صفحهٔ جزئیات پست با کامنت‌ها (کوئری وابسته + prefetch با hover). ۲) ویرایش پست با مودال (PATCH خوش‌بینانه). ۳) تم تاریک با persist که مودال‌ها هم رعایتش کنند. خروجی این تمرین را در GitHub بگذارید — این دقیقاً همان پورتفولیویی است که در مصاحبه نشان می‌دهید.</p>
+  </div>
+</section>
+<section class="chapter part-both" id="ch14">
+  <div class="pgmark">CHAPTER-14</div>
+  <header class="ch-banner">
+    <div class="ch-num">۱۴</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش سوم · آمادگی حرفه‌ای</div>
+      <h1>حرفه‌ای شو — تست، دیباگ و آمادگی استخدام</h1>
+      <p class="ch-desc">تفاوت «کد می‌زنم» و «آمادهٔ تیم هستم» همین‌جاست: تست‌های استور و هوک‌ها، دیاگنوز سریع خطاهای معروف، آنتی‌پترن‌های code review و سؤالات رایج مصاحبه.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>راه‌اندازی Vitest و تست مستقیم استورهای Zustand</li>
+      <li>تست کامپوننت‌هایی که useQuery دارند (با QueryClient ایزوله)</li>
+      <li>دیاگنوز ۶ خطای معروف و راه‌حل‌شان</li>
+      <li>چک‌لیست code review و ۱۰ سؤال مصاحبه</li>
+    </ul>
+  </div>
+
+  <h2>راه‌اندازی تست</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">terminal</span><span class="cb-lang">bash</span></div>
+    <pre><code class="language-bash">npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">vite.config.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { defineConfig } from 'vite'
+
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './src/test/setup.js',
+  },
+})</code></pre>
+  </div>
+
+  <h2>تست استور Zustand — بدون React!</h2>
+  <p>زیباترین ویژگی استور خارج از React این است که تستش به رندر نیاز ندارد؛ مستقیم با API استور کار می‌کنید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useCartStore.test.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { describe, it, expect, beforeEach } from 'vitest'
+import { useCartStore } from './useCartStore'
+
+describe('useCartStore', () =&gt; {
+  beforeEach(() =&gt; {
+    // State تمیز قبل از هر تست — بدون رندر، بدون Provider
+    useCartStore.setState({ items: [], couponCode: null })
+  })
+
+  it('آیتم جدید را اضافه می‌کند', () =&gt; {
+    useCartStore.getState().addItem(1)
+    expect(useCartStore.getState().items).toEqual([{ id: 1, qty: 1 }])
+  })
+
+  it('افزودن دوباره فقط qty را زیاد می‌کند', () =&gt; {
+    const { addItem } = useCartStore.getState()
+    addItem(1)
+    addItem(1)
+    expect(useCartStore.getState().items).toEqual([{ id: 1, qty: 2 }])
+  })
+
+  it('تعداد صفر یعنی حذف', () =&gt; {
+    useCartStore.setState({ items: [{ id: 1, qty: 1 }] })
+    useCartStore.getState().setQty(1, 0)
+    expect(useCartStore.getState().items).toHaveLength(0)
+  })
+
+  it('کد نامعتبر را رد می‌کند', () =&gt; {
+    const result = useCartStore.getState().applyCoupon('NOPE')
+    expect(result.ok).toBe(false)
+    expect(useCartStore.getState().couponCode).toBeNull()
+  })
+})</code></pre>
+  </div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته</div><p>اگر استور persist دارد، در محیط تست jsdom همان localStorage واقعی است؛ با <code>localStorage.clear()</code> در beforeEach یا ساخت استور با <code>skipHydration</code> در تست‌ها، از نشت بین تست‌ها جلوگیری کنید.</p></div>
+
+  <h2>تست کامپوننت‌های Query — کلاینت ایزوله</h2>
+  <p>قانون طلایی: در تست‌ها هرگز از QueryClient اپ استفاده نکنید؛ برای هر تست یک کلاینت تازه بسازید (retry خاموش تا تست‌ها سریع باشند):</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/test/utils.jsx — wrapper مشترک</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { render } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+export function renderWithClient(ui) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  })
+  return render(
+    &lt;QueryClientProvider client={queryClient}&gt;{ui}&lt;/QueryClientProvider&gt;
+  )
+}</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/PostsList.test.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { describe, it, expect, vi } from 'vitest'
+import { screen, waitFor } from '@testing-library/react'
+import { renderWithClient } from '../test/utils'
+import { api } from '../lib/api'
+import PostsList from './PostsList'
+
+vi.mock('../lib/api', () =&gt; ({
+  api: { posts: vi.fn() },
+}))
+
+describe('PostsList', () =&gt; {
+  it('لیست پست‌ها را نشان می‌دهد', async () =&gt; {
+    vi.mocked(api.posts).mockResolvedValue([
+      { id: 1, title: 'سلام دنیا' },
+      { id: 2, title: 'Zustand چیست' },
+    ])
+    renderWithClient(&lt;PostsList /&gt;)
+
+    expect(screen.getByText(/بارگذاری/)).toBeInTheDocument()
+    await waitFor(() =&gt; {
+      expect(screen.getByText('سلام دنیا')).toBeInTheDocument()
+    })
+  })
+
+  it('پیام خطا را نشان می‌دهد', async () =&gt; {
+    vi.mocked(api.posts).mockRejectedValue(new Error('boom'))
+    renderWithClient(&lt;PostsList /&gt;)
+    await waitFor(() =&gt; expect(screen.getByText(/خطا/)).toBeInTheDocument())
+  })
+})</code></pre>
+  </div>
+  <p>دو الگوی مکمل: به‌جای mock کردن لایهٔ API می‌توانید مستقیم در کش بنویسید (<code>qc.setQueryData(['posts'], fakeData)</code>) تا کامپوننت بدون شبکه تست شود؛ و برای تست خود استورِ Mutation، از <code>useMutationState</code> یا فراخوانی مستقیم mutationFn استفاده کنید.</p>
+
+  <h2>کالبدشکافی شش خطای معروف</h2>
+  <table class="tbl">
+    <thead><tr><th style="width:40%">نشانه / پیام</th><th>علت و درمان</th></tr></thead>
+    <tbody>
+      <tr><td><code>No QueryClient set, use QueryClientProvider</code></td><td>هوک Query بیرون از Provider صدا شده. Provider را بالاترین‌جا (main) بگذارید.</td></tr>
+      <tr><td><code>Maximum update depth exceeded</code> با Zustand</td><td>سلکتور هر بار شیء/آرایهٔ جدید برمی‌گرداند (فصل ۴). سلکتور تکی یا useShallow.</td></tr>
+      <tr><td>همیشه رفرش می‌گیرد حتی تازه</td><td>staleTime پیش‌فرض صفر است؛ در defaultOptions تنظیم کنید.</td></tr>
+      <tr><td>داده بعد از mutation قدیمی می‌ماند</td><td>invalidation فراموش شده؛ یا کلید invalidate با کلید fetch متفاوت است — در DevTools کلیدها را مقایسه کنید.</td></tr>
+      <tr><td>opt update برمی‌گردد (آیتم حذف‌شده دوباره می‌آید)</td><td>cancelQueries قبل از setQueryData را جا انداخته‌اید؛ refetch در جریان دادهٔ قدیمی را می‌نویسد.</td></tr>
+      <tr><td>سبد بعد از رفرش لحظه‌ای خالی دیده می‌شود</td><td>hydration غیرهمزمان است؛ فلگ _hasHydrated (فصل ۵).</td></tr>
+    </tbody>
+  </table>
+
+  <h2>آنتی‌پترن‌هایی که در code review رد می‌شوند</h2>
+  <div class="callout co-danger">
+    <div class="co-title"><span class="dot"></span>فهرست ممنوعه</div>
+    <p>۱) کپی پاسخ سرور در Zustand («دو منبع حقیقت»). ۲) <code>useStore()</code> بدون سلکتور در کامپوننت‌های رندر-سنگین. ۳) ساخت object literal در سلکتور بدون useShallow. ۴) کلید رشته‌ای دست‌ساز به‌جای Factory. ۵) فراخوانی <code>invalidateQueries</code> بدون آرگومان (همه‌چیز را stale می‌کند — گاهی عمدی است، معمولاً تنبلی است). ۶) <code>mutateAsync</code> بدون try/catch. ۷) جهش مستقیم State بدون immer. ۸) fetch داخل useEffect برای دادهٔ سرور — جای آن useQuery است. ۹) نگه‌داشتن فرم‌های بزرگ در استور سراسری (فرم محلی بماند یا با RHF مدیریت شود). ۱۰) persist کردن همهٔ استورها «به‌اعلام حمایت از آینده».</p>
+  </div>
+
+  <h2>چک‌لیست code review این حوزه</h2>
+  <ul class="checklist">
+    <li>هر دادهٔ سرور فقط در کش Query است؛ Zustand فقط client state دارد؟</li>
+    <li>کلیدها با Factory ساخته شده‌اند و پارامترها داخل کلیدند؟</li>
+    <li>staleTime معنادار برای هر دامنه تعریف شده (نه همه صفر، نه همه بی‌نهایت)؟</li>
+    <li>mutationها rollback و onSettled دارند؟ خطا به کاربر نشان داده می‌شود؟</li>
+    <li>خروج کاربر کش را پاک می‌کند؟ توکن‌ها از getState خوانده می‌شوند؟</li>
+    <li>سلکتورها مقدار پایدار برمی‌گردانند؟ Profiler آرام است؟</li>
+    <li>تست استورها و کامپوننت‌های کلیدی پاس است؟</li>
+  </ul>
+
+  <h2>ده سؤال رایج مصاحبه (با پاسخ ۲۰ ثانیه‌ای)</h2>
+  <ol>
+    <li><b>چرا Zustand و نه Context؟</b> سلکتور بومی و مقایسهٔ مرجع، بدون Provider، با رندر حداقلی؛ Context برای تغییرات پرتعدا طراحی نشده است.</li>
+    <li><b>چرا دادهٔ سرور را در Redux/Zustand نمی‌گذاریم؟</b> چون مالکش سرور است؛ ما فقط کش می‌خواهیم با staleTime و invalidation — دقیقاً کار Query.</li>
+    <li><b>staleTime و gcTime چه فرقی دارند؟</b> اولی «چقدر داده معتبر محسوب می‌شود» و دومی «چقدر بعد از unmount در حافظه بماند».</li>
+    <li><b>رفتار refetch خودکار چه وقت‌هاست؟</b> mount، window focus، reconnect — هر سه شرطی که داده stale باشد.</li>
+    <li><b>optimistic update را شرح بده.</b> onMutate: cancel+snapshot+set، onError: rollback، onSettled: invalidate.</li>
+    <li><b>queryKey چرا آرایه است؟</b> برای هش پایدار و تطبیق سلسله‌مراتبی در invalidate.</li>
+    <li><b>چرا set تابعی بهتر از set شیءای است؟</b> برای آپدیت‌های وابسته به State فعلی؛ از stale شدن در آپدیت‌های متوالی جلوگیری می‌کند.</li>
+    <li><b>useShallow چه می‌کند؟</b> مقایسهٔ سطحی خروجی سلکتور تا رندر اضافه نشود؛ جایگزین equalityFn حذف‌شده در v5.</li>
+    <li><b>placeholderData و initialData فرقشان؟</b> اولی نمایشی است و status می‌ماند pending؛ دومی دادهٔ واقعی محسوب می‌شود.</li>
+    <li><b>درخواست‌های موازی تکراری چطور ددوپ می‌شوند؟</b> کلید یکسان → یک درخواست، همهٔ observerها همان داده.</li>
+  </ol>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>تست استور بدون رندر: setState/getState مستقیم + beforeEach تمیز.</li>
+      <li>تست Query با کلاینت ایزوله (retry: false) و mock لایهٔ API یا setQueryData.</li>
+      <li>شش خطای معروف را با علائمشان بشناسید؛ دیاگنوز سریع = اعتماد تیم.</li>
+      <li>فهرست ممنوعه و چک‌لیست review را در پروژه‌تان نصب کنید (ادبیات تیمی).</li>
+      <li>پاسخ‌های ۲۰ ثانیه‌ای مصاحبه را تمرین کنید تا روان بگویید.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۱۴</div>
+    <p>برای پروژهٔ فصل ۱۳ سه تست بنویسید: ۱) اکشن‌های سبد (add/double-add/qty-zero). ۲) کامپوننت PostList در دو حالت موفق و خطا. ۳) mutation حذف خوش‌بینانه: mock کنید deletePost یک بار reject شود و با RTL مطمئن شوید آیتم بعد از خطا دوباره در لیست است (rollback رخ داده).</p>
+  </div>
+</section>
+<section class="chapter part-ref" id="ch15">
+  <div class="pgmark">CHAPTER-15</div>
+  <header class="ch-banner">
+    <div class="ch-num">۱۵</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش چهارم · مرجع سریع</div>
+      <h1>چیت‌شیت، گلاساری و نقشهٔ راه</h1>
+      <p class="ch-desc">صفحه‌ای که باید چاپش کنید: خلاصهٔ دستورها، واژه‌نامهٔ فارسی-انگلیسی و مسیر ادامهٔ یادگیری بعد از این دوره.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>این فصل شامل</h3>
+    <ul>
+      <li>چیت‌شیت کامل Zustand و TanStack Query در دو بلاک کد</li>
+      <li>گلاساری ۲۶ اصطلاح کلیدی</li>
+      <li>نقشهٔ راه گام‌به‌گام ادامهٔ مسیر تا سطح Senior</li>
+    </ul>
+  </div>
+
+  <h2>چیت‌شیت Zustand</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">zustand-cheatsheet.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+import { persist, devtools } from 'zustand/middleware'
+import { immer } from 'zustand/middleware/immer'
+import { useShallow } from 'zustand/react/shallow'
+import { subscribeWithSelector } from 'zustand/middleware'
+
+// ---- ساخت استور (ترتیب میان‌افزار: devtools ← persist ← immer) ----
+const useStore = create(
+  devtools(
+    persist(
+      immer((set, get) =&gt; ({
+        // State
+        count: 0,
+        items: [],
+
+        // اکشن sync — تابع آپدیتر
+        inc: (by = 1) =&gt; set((s) =&gt; ({ count: s.count + by })),
+
+        // اکشن با immer (جهش امن)
+        addItem: (item) =&gt; set((s) =&gt; { s.items.push(item) }),
+
+        // اکشن async
+        load: async () =&gt; {
+          set({ status: 'loading' })
+          try {
+            const data = await api()
+            set({ data, status: 'success' })
+          } catch (e) {
+            set({ status: 'error', error: e.message })
+          }
+        },
+
+        // خواندن آخرین State با get
+        double: () =&gt; set({ count: get().count * 2 }),
+
+        // ریست
+        reset: () =&gt; set({ count: 0, items: [] }),
+      })),
+      { name: 'key', partialize: (s) =&gt; ({ count: s.count }) }
+    )
+  )
+)
+
+// ---- مصرف در کامپوننت ----
+const count  = useStore((s) =&gt; s.count)          // سلکتور تکی (پیش‌فرض)
+const { a, b } = useStore(useShallow((s) =&gt; ({ a: s.a, b: s.b }))) // چند فیلد
+
+// ---- بیرون React ----
+useStore.getState().inc()        // خواندن/اجرا بدون subscribe
+useStore.setState({ count: 5 })  // نوشتن مستقیم
+const unsub = useStore.subscribe((s) =&gt; console.log(s.count)) // گوش به همه
+useStore.persist.rehydrate()     // بازیابی دستی (SSR)
+
+// ---- TS: فرم کِرید ----
+// create&lt;State&gt;()((set) =&gt; ({ ... }))</code></pre>
+  </div>
+
+  <h2>چیت‌شیت TanStack Query</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">tanstack-query-cheatsheet.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { QueryClient, QueryClientProvider, useQuery, useMutation,
+         useQueryClient, keepPreviousData, useInfiniteQuery,
+         useSuspenseQuery } from '@tanstack/react-query'
+
+// ---- راه‌اندازی (یک‌بار) ----
+const qc = new QueryClient({
+  defaultOptions: { queries: { staleTime: 60_000, retry: 2 } },
+})
+&lt;QueryClientProvider client={qc}&gt;&lt;App /&gt;&lt;/QueryClientProvider&gt;
+
+// ---- Query Key Factory ----
+const postKeys = {
+  all: ['posts'],
+  lists: () =&gt; [...postKeys.all, 'list'],
+  list: (f) =&gt; [...postKeys.lists(), f],
+  detail: (id) =&gt; [...postKeys.all, 'detail', id],
+}
+
+// ---- خواندن ----
+const { data, isPending, isError, error, isFetching, isPlaceholderData } =
+  useQuery({
+    queryKey: postKeys.list({ page }),
+    queryFn: ({ signal }) =&gt; api.posts(page, signal),
+    placeholderData: keepPreviousData, // صفحه‌بندی نرم
+    enabled: !!userId,                 // کوئری وابسته
+    select: (d) =&gt; d.filter(Boolean),  // تبدیل
+    staleTime: 30_000,
+  })
+
+// اسکرول بی‌نهایت
+useInfiniteQuery({
+  queryKey: postKeys.lists(),
+  queryFn: ({ pageParam, signal }) =&gt; api.posts(pageParam, signal),
+  initialPageParam: 1,
+  getNextPageParam: (last, all, lastParam) =&gt; last.next ?? undefined,
+})
+
+// ---- تغییر + invalidation ----
+const mutation = useMutation({
+  mutationFn: (vars) =&gt; api.addPost(vars),
+  onSuccess: () =&gt; qc.invalidateQueries({ queryKey: postKeys.lists() }),
+})
+mutation.mutate({ title })
+
+// ---- Optimistic Update (حفظ کنید!) ----
+onMutate: async (v) =&gt; {
+  await qc.cancelQueries({ queryKey: postKeys.lists() })
+  const prev = qc.getQueryData(postKeys.list(f))
+  qc.setQueryData(postKeys.list(f), (old) =&gt; update(old, v))
+  return { prev }
+},
+onError: (_e, _v, ctx) =&gt; qc.setQueryData(postKeys.list(f), ctx.prev),
+onSettled: () =&gt; qc.invalidateQueries({ queryKey: postKeys.lists() }),
+
+// ---- ابزارهای دستوری ----
+qc.setQueryData(key, updater)     // نوشتن مستقیم در کش
+qc.getQueryData(key)              // خواندن کش
+qc.prefetchQuery({ queryKey, queryFn })   // پیش‌واکشی (خطاها بی‌صدا)
+qc.ensureQueryData({ queryKey })  // گرفتن مطمئن (لودرها)
+qc.removeQueries({ queryKey })    // حذف از کش
+qc.clear()                        // خروج کاربر</code></pre>
+  </div>
+
+  <h2>جدول تصمیم سریع: کجا بگذارم؟</h2>
+  <table class="tbl">
+    <thead><tr><th>نیاز</th><th>پاسخ کوتاه</th></tr></thead>
+    <tbody>
+      <tr><td>پاسخ API را نگه دارم؟</td><td><b>خیر</b> — کش Query</td></tr>
+      <tr><td>توکن و پروفایل کاربر؟</td><td>Zustand + persist</td></tr>
+      <tr><td>باز بودن مودال/تب فعال؟</td><td>useState محلی، اگر سراسری شد Zustand</td></tr>
+      <tr><td>فیلترها و صفحهٔ فعلی؟</td><td>Zustand (و URL) → کلید Query</td></tr>
+      <tr><td>مقدار محاسبه‌شده از State؟</td><td>useMemo — ذخیره نکن</td></tr>
+      <tr><td>مقدار پرتغییر بدون رندر؟</td><td>setState/getState ترانزیشن</td></tr>
+    </tbody>
+  </table>
+
+  <h2>گلاساری فارسی-انگلیسی</h2>
+  <table class="tbl glossary">
+    <thead><tr><th style="width:30%">اصطلاح</th><th>معادل و توضیح فارسی</th></tr></thead>
+    <tbody>
+      <tr><td>State</td><td>وضعیت — دادهٔ تغییرپذیری که UI از آن رندر می‌شود</td></tr>
+      <tr><td>Store</td><td>استور — ظرف مرکزی State و اکشن‌هایش</td></tr>
+      <tr><td>Action</td><td>اکشن — تابعی که State را تغییر می‌دهد</td></tr>
+      <tr><td>Selector</td><td>سلکتور — تابع انتخاب تکه‌ای از State برای subscribe</td></tr>
+      <tr><td>Re-render</td><td>رندر دوباره — اجرای دوبارهٔ کامپوننت پس از تغییر داده</td></tr>
+      <tr><td>Middleware</td><td>میان‌افزار — لایهٔ ارتقادهندهٔ رفتار استور (persist و...)</td></tr>
+      <tr><td>Persist</td><td>پایدارسازی — ذخیرهٔ دائمی State در localStorage</td></tr>
+      <tr><td>Hydration / Rehydrate</td><td>آب‌رسانی — بازیابی دادهٔ ذخیره‌شده به استور پس از لود</td></tr>
+      <tr><td>Immutability</td><td>تغییرناپذیری — ساخت نسخهٔ جدید به‌جای جهش دادهٔ موجود</td></tr>
+      <tr><td>Shallow Compare</td><td>مقایسهٔ سطحی — برابری کلید‌ها/مقادیر یک سطح</td></tr>
+      <tr><td>Prop Drilling</td><td>حفر props — عبور اجباری داده از کامپوننت‌های میانی</td></tr>
+      <tr><td>Server State</td><td>وضعیت سرور — داده‌ای که مالکش سرور است؛ ما فقط کش داریم</td></tr>
+      <tr><td>Client State</td><td>وضعیت کلاینت — داده‌ای که مرورگر مالک حقیقی آن است</td></tr>
+      <tr><td>Cache</td><td>کش — انبار موقت دادهٔ سرور در کلاینت</td></tr>
+      <tr><td>Stale / Fresh</td><td>کهنه / تازه — آیا دادهٔ کش معتبر محسوب می‌شود؟</td></tr>
+      <tr><td>staleTime</td><td>مدت تازگی — مهلتی که در آن refetch خودکار لازم نیست</td></tr>
+      <tr><td>gcTime (cacheTime)</td><td>زمان زنده‌ماندن کش پس از بی‌observer شدن</td></tr>
+      <tr><td>Invalidation</td><td>ابطال — stale کردن کش پس از mutation برای refetch</td></tr>
+      <tr><td>Refetch</td><td>بازگیری — گرفتن دوبارهٔ داده از سرور</td></tr>
+      <tr><td>Prefetch</td><td>پیش‌واکشی — گرفتن داده قبل از نیاز کاربر</td></tr>
+      <tr><td>Optimistic Update</td><td>به‌روزرسانی خوش‌بینانه — تغییر فوری UI قبل از جواب سرور</td></tr>
+      <tr><td>Rollback</td><td>بازگردانی — برگرداندن UI به snapshot پیش از خطا</td></tr>
+      <tr><td>Query Key</td><td>کلید کوئری — شناسهٔ یکتای داده در کش</td></tr>
+      <tr><td>Deduplication</td><td>حذف تکرار — یک درخواست برای کلید مشترک</td></tr>
+      <tr><td>AbortController / signal</td><td>لغو درخواست در جریان شبکه</td></tr>
+      <tr><td>Suspense</td><td>مکانیزم اعلامی React برای نمایش fallback در انتظار داده</td></tr>
+    </tbody>
+  </table>
+
+  <h2>نقشهٔ راه بعد از این دوره</h2>
+  <div class="road">
+    <div class="step z"><div class="s-no">۱</div><div class="s-body"><b>تثبیت با پروژهٔ واقعی (۲ هفته)</b><p>پروژهٔ فصل ۱۳ را به یک محصول کامل تبدیل کنید: auth کامل، کامنت‌ها، ویرایش، تست‌ها. این پورتفولیوی شماست.</p></div></div>
+    <div class="step z"><div class="s-no">۲</div><div class="s-body"><b>React Router + فرم‌ها (۱ هفته)</b><p>URL State را با React Router به معماری‌تان اضافه کنید؛ فرم‌های پیچیده را با React Hook Form + Zod بسازید.</p></div></div>
+    <div class="step t"><div class="s-no">۳</div><div class="s-body"><b>تست حرفه‌ای (۱ هفته)</b><p>Vitest + React Testing Library را عمیق کنید؛ Testing Trophy را بخوانید؛ CI (GitHub Actions) را برای پروژه‌تان فعال کنید.</p></div></div>
+    <div class="step t"><div class="s-no">۴</div><div class="s-body"><b>SSR و فریم‌ورک‌ها (۲-۳ هفته)</b><p>Next.js یا Remix: hydration/dehydration واقعی Query، Server Components و مرز دوبارهٔ Client/Server State.</p></div></div>
+    <div class="step v"><div class="s-no">۵</div><div class="s-body"><b>کیفیت و مقیاس (مستمر)</b><p>Performance (memoization، virtualization)، Accessibility، i18n، طراحی سیستم و code review — همان مهارت‌هایی که Senior را می‌سازند.</p></div></div>
+  </div>
+
+  <h2>منابع رسمی برای ادامه</h2>
+  <ul>
+    <li>مستندات Zustand: <code>zustand.docs.pmnd.rs</code> — کوتاه، دقیق و به‌روز.</li>
+    <li>مستندات TanStack Query: <code>tanstack.com/query</code> — بخش «Guides» و «Community Resources» را از دست ندهید.</li>
+    <li>DevTools: Redux DevTools (برای Zustand) و ReactQueryDevtools (برای Query) — روزانه استفاده کنید.</li>
+    <li>TkDodo's Blog: «Practical React Query» — بهترین مجموعه مقالات عملی Query؛ چند الگوی این کتاب از آنجاست.</li>
+  </ul>
+
+  <div class="callout co-tip">
+    <div class="co-title"><span class="dot"></span>کلام آخر</div>
+    <p>ابزارها عوض می‌شوند؛ معماری ذهنی نه. «مالکِ داده کیست؟» و «این یک کش است یا منبع حقیقت؟» — همین دو سؤال، در هر فریم‌ورک و کتابخانهٔ آینده، مسیر را روشن می‌کند. موفق باشید؛ و سبد خریدتان همیشه hydrated!</p>
+  </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<section class="chapter part-ref" id="ch15">
+  <div class="pgmark">CHAPTER-15</div>
+  <header class="ch-banner">
+    <div class="ch-num">۱۵</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش چهارم · مرجع سریع</div>
+      <h1>چیت‌شیت، گلاساری و نقشهٔ راه</h1>
+      <p class="ch-desc">صفحه‌ای که باید چاپش کنید: خلاصهٔ دستورها، واژه‌نامهٔ فارسی-انگلیسی و مسیر ادامهٔ یادگیری بعد از این دوره.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>این فصل شامل</h3>
+    <ul>
+      <li>چیت‌شیت کامل Zustand و TanStack Query در دو بلاک کد</li>
+      <li>گلاساری ۲۶ اصطلاح کلیدی</li>
+      <li>نقشهٔ راه گام‌به‌گام ادامهٔ مسیر تا سطح Senior</li>
+    </ul>
+  </div>
+
+  <h2>چیت‌شیت Zustand</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">zustand-cheatsheet.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+import { persist, devtools } from 'zustand/middleware'
+import { immer } from 'zustand/middleware/immer'
+import { useShallow } from 'zustand/react/shallow'
+import { subscribeWithSelector } from 'zustand/middleware'
+
+// ---- ساخت استور (ترتیب میان‌افزار: devtools ← persist ← immer) ----
+const useStore = create(
+  devtools(
+    persist(
+      immer((set, get) =&gt; ({
+        // State
+        count: 0,
+        items: [],
+
+        // اکشن sync — تابع آپدیتر
+        inc: (by = 1) =&gt; set((s) =&gt; ({ count: s.count + by })),
+
+        // اکشن با immer (جهش امن)
+        addItem: (item) =&gt; set((s) =&gt; { s.items.push(item) }),
+
+        // اکشن async
+        load: async () =&gt; {
+          set({ status: 'loading' })
+          try {
+            const data = await api()
+            set({ data, status: 'success' })
+          } catch (e) {
+            set({ status: 'error', error: e.message })
+          }
+        },
+
+        // خواندن آخرین State با get
+        double: () =&gt; set({ count: get().count * 2 }),
+
+        // ریست
+        reset: () =&gt; set({ count: 0, items: [] }),
+      })),
+      { name: 'key', partialize: (s) =&gt; ({ count: s.count }) }
+    )
+  )
+)
+
+// ---- مصرف در کامپوننت ----
+const count  = useStore((s) =&gt; s.count)          // سلکتور تکی (پیش‌فرض)
+const { a, b } = useStore(useShallow((s) =&gt; ({ a: s.a, b: s.b }))) // چند فیلد
+
+// ---- بیرون React ----
+useStore.getState().inc()        // خواندن/اجرا بدون subscribe
+useStore.setState({ count: 5 })  // نوشتن مستقیم
+const unsub = useStore.subscribe((s) =&gt; console.log(s.count)) // گوش به همه
+useStore.persist.rehydrate()     // بازیابی دستی (SSR)
+
+// ---- TS: فرم کِرید ----
+// create&lt;State&gt;()((set) =&gt; ({ ... }))</code></pre>
+  </div>
+
+  <h2>چیت‌شیت TanStack Query</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">tanstack-query-cheatsheet.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { QueryClient, QueryClientProvider, useQuery, useMutation,
+         useQueryClient, keepPreviousData, useInfiniteQuery,
+         useSuspenseQuery } from '@tanstack/react-query'
+
+// ---- راه‌اندازی (یک‌بار) ----
+const qc = new QueryClient({
+  defaultOptions: { queries: { staleTime: 60_000, retry: 2 } },
+})
+&lt;QueryClientProvider client={qc}&gt;&lt;App /&gt;&lt;/QueryClientProvider&gt;
+
+// ---- Query Key Factory ----
+const postKeys = {
+  all: ['posts'],
+  lists: () =&gt; [...postKeys.all, 'list'],
+  list: (f) =&gt; [...postKeys.lists(), f],
+  detail: (id) =&gt; [...postKeys.all, 'detail', id],
+}
+
+// ---- خواندن ----
+const { data, isPending, isError, error, isFetching, isPlaceholderData } =
+  useQuery({
+    queryKey: postKeys.list({ page }),
+    queryFn: ({ signal }) =&gt; api.posts(page, signal),
+    placeholderData: keepPreviousData, // صفحه‌بندی نرم
+    enabled: !!userId,                 // کوئری وابسته
+    select: (d) =&gt; d.filter(Boolean),  // تبدیل
+    staleTime: 30_000,
+  })
+
+// اسکرول بی‌نهایت
+useInfiniteQuery({
+  queryKey: postKeys.lists(),
+  queryFn: ({ pageParam, signal }) =&gt; api.posts(pageParam, signal),
+  initialPageParam: 1,
+  getNextPageParam: (last, all, lastParam) =&gt; last.next ?? undefined,
+})
+
+// ---- تغییر + invalidation ----
+const mutation = useMutation({
+  mutationFn: (vars) =&gt; api.addPost(vars),
+  onSuccess: () =&gt; qc.invalidateQueries({ queryKey: postKeys.lists() }),
+})
+mutation.mutate({ title })
+
+// ---- Optimistic Update (حفظ کنید!) ----
+onMutate: async (v) =&gt; {
+  await qc.cancelQueries({ queryKey: postKeys.lists() })
+  const prev = qc.getQueryData(postKeys.list(f))
+  qc.setQueryData(postKeys.list(f), (old) =&gt; update(old, v))
+  return { prev }
+},
+onError: (_e, _v, ctx) =&gt; qc.setQueryData(postKeys.list(f), ctx.prev),
+onSettled: () =&gt; qc.invalidateQueries({ queryKey: postKeys.lists() }),
+
+// ---- ابزارهای دستوری ----
+qc.setQueryData(key, updater)     // نوشتن مستقیم در کش
+qc.getQueryData(key)              // خواندن کش
+qc.prefetchQuery({ queryKey, queryFn })   // پیش‌واکشی (خطاها بی‌صدا)
+qc.ensureQueryData({ queryKey })  // گرفتن مطمئن (لودرها)
+qc.removeQueries({ queryKey })    // حذف از کش
+qc.clear()                        // خروج کاربر</code></pre>
+  </div>
+
+  <h2>جدول تصمیم سریع: کجا بگذارم؟</h2>
+  <table class="tbl">
+    <thead><tr><th>نیاز</th><th>پاسخ کوتاه</th></tr></thead>
+    <tbody>
+      <tr><td>پاسخ API را نگه دارم؟</td><td><b>خیر</b> — کش Query</td></tr>
+      <tr><td>توکن و پروفایل کاربر؟</td><td>Zustand + persist</td></tr>
+      <tr><td>باز بودن مودال/تب فعال؟</td><td>useState محلی، اگر سراسری شد Zustand</td></tr>
+      <tr><td>فیلترها و صفحهٔ فعلی؟</td><td>Zustand (و URL) → کلید Query</td></tr>
+      <tr><td>مقدار محاسبه‌شده از State؟</td><td>useMemo — ذخیره نکن</td></tr>
+      <tr><td>مقدار پرتغییر بدون رندر؟</td><td>setState/getState ترانزیشن</td></tr>
+    </tbody>
+  </table>
+
+  <h2>گلاساری فارسی-انگلیسی</h2>
+  <table class="tbl glossary">
+    <thead><tr><th style="width:30%">اصطلاح</th><th>معادل و توضیح فارسی</th></tr></thead>
+    <tbody>
+      <tr><td>State</td><td>وضعیت — دادهٔ تغییرپذیری که UI از آن رندر می‌شود</td></tr>
+      <tr><td>Store</td><td>استور — ظرف مرکزی State و اکشن‌هایش</td></tr>
+      <tr><td>Action</td><td>اکشن — تابعی که State را تغییر می‌دهد</td></tr>
+      <tr><td>Selector</td><td>سلکتور — تابع انتخاب تکه‌ای از State برای subscribe</td></tr>
+      <tr><td>Re-render</td><td>رندر دوباره — اجرای دوبارهٔ کامپوننت پس از تغییر داده</td></tr>
+      <tr><td>Middleware</td><td>میان‌افزار — لایهٔ ارتقادهندهٔ رفتار استور (persist و...)</td></tr>
+      <tr><td>Persist</td><td>پایدارسازی — ذخیرهٔ دائمی State در localStorage</td></tr>
+      <tr><td>Hydration / Rehydrate</td><td>آب‌رسانی — بازیابی دادهٔ ذخیره‌شده به استور پس از لود</td></tr>
+      <tr><td>Immutability</td><td>تغییرناپذیری — ساخت نسخهٔ جدید به‌جای جهش دادهٔ موجود</td></tr>
+      <tr><td>Shallow Compare</td><td>مقایسهٔ سطحی — برابری کلید‌ها/مقادیر یک سطح</td></tr>
+      <tr><td>Prop Drilling</td><td>حفر props — عبور اجباری داده از کامپوننت‌های میانی</td></tr>
+      <tr><td>Server State</td><td>وضعیت سرور — داده‌ای که مالکش سرور است؛ ما فقط کش داریم</td></tr>
+      <tr><td>Client State</td><td>وضعیت کلاینت — داده‌ای که مرورگر مالک حقیقی آن است</td></tr>
+      <tr><td>Cache</td><td>کش — انبار موقت دادهٔ سرور در کلاینت</td></tr>
+      <tr><td>Stale / Fresh</td><td>کهنه / تازه — آیا دادهٔ کش معتبر محسوب می‌شود؟</td></tr>
+      <tr><td>staleTime</td><td>مدت تازگی — مهلتی که در آن refetch خودکار لازم نیست</td></tr>
+      <tr><td>gcTime (cacheTime)</td><td>زمان زنده‌ماندن کش پس از بی‌observer شدن</td></tr>
+      <tr><td>Invalidation</td><td>ابطال — stale کردن کش پس از mutation برای refetch</td></tr>
+      <tr><td>Refetch</td><td>بازگیری — گرفتن دوبارهٔ داده از سرور</td></tr>
+      <tr><td>Prefetch</td><td>پیش‌واکشی — گرفتن داده قبل از نیاز کاربر</td></tr>
+      <tr><td>Optimistic Update</td><td>به‌روزرسانی خوش‌بینانه — تغییر فوری UI قبل از جواب سرور</td></tr>
+      <tr><td>Rollback</td><td>بازگردانی — برگرداندن UI به snapshot پیش از خطا</td></tr>
+      <tr><td>Query Key</td><td>کلید کوئری — شناسهٔ یکتای داده در کش</td></tr>
+      <tr><td>Deduplication</td><td>حذف تکرار — یک درخواست برای کلید مشترک</td></tr>
+      <tr><td>AbortController / signal</td><td>لغو درخواست در جریان شبکه</td></tr>
+      <tr><td>Suspense</td><td>مکانیزم اعلامی React برای نمایش fallback در انتظار داده</td></tr>
+    </tbody>
+  </table>
+
+  <h2>نقشهٔ راه بعد از این دوره</h2>
+  <div class="road">
+    <div class="step z"><div class="s-no">۱</div><div class="s-body"><b>تثبیت با پروژهٔ واقعی (۲ هفته)</b><p>پروژهٔ فصل ۱۳ را به یک محصول کامل تبدیل کنید: auth کامل، کامنت‌ها، ویرایش، تست‌ها. این پورتفولیوی شماست.</p></div></div>
+    <div class="step z"><div class="s-no">۲</div><div class="s-body"><b>React Router + فرم‌ها (۱ هفته)</b><p>URL State را با React Router به معماری‌تان اضافه کنید؛ فرم‌های پیچیده را با React Hook Form + Zod بسازید.</p></div></div>
+    <div class="step t"><div class="s-no">۳</div><div class="s-body"><b>تست حرفه‌ای (۱ هفته)</b><p>Vitest + React Testing Library را عمیق کنید؛ Testing Trophy را بخوانید؛ CI (GitHub Actions) را برای پروژه‌تان فعال کنید.</p></div></div>
+    <div class="step t"><div class="s-no">۴</div><div class="s-body"><b>SSR و فریم‌ورک‌ها (۲-۳ هفته)</b><p>Next.js یا Remix: hydration/dehydration واقعی Query، Server Components و مرز دوبارهٔ Client/Server State.</p></div></div>
+    <div class="step v"><div class="s-no">۵</div><div class="s-body"><b>کیفیت و مقیاس (مستمر)</b><p>Performance (memoization، virtualization)، Accessibility، i18n، طراحی سیستم و code review — همان مهارت‌هایی که Senior را می‌سازند.</p></div></div>
+  </div>
+
+  <h2>منابع رسمی برای ادامه</h2>
+  <ul>
+    <li>مستندات Zustand: <code>zustand.docs.pmnd.rs</code> — کوتاه، دقیق و به‌روز.</li>
+    <li>مستندات TanStack Query: <code>tanstack.com/query</code> — بخش «Guides» و «Community Resources» را از دست ندهید.</li>
+    <li>DevTools: Redux DevTools (برای Zustand) و ReactQueryDevtools (برای Query) — روزانه استفاده کنید.</li>
+    <li>TkDodo's Blog: «Practical React Query» — بهترین مجموعه مقالات عملی Query؛ چند الگوی این کتاب از آنجاست.</li>
+  </ul>
+
+  <div class="callout co-tip">
+    <div class="co-title"><span class="dot"></span>کلام آخر</div>
+    <p>ابزارها عوض می‌شوند؛ معماری ذهنی نه. «مالکِ داده کیست؟» و «این یک کش است یا منبع حقیقت؟» — همین دو سؤال، در هر فریم‌ورک و کتابخانهٔ آینده، مسیر را روشن می‌کند. موفق باشید؛ و سبد خریدتان همیشه hydrated!</p>
+  </div>
+</section>

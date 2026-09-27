@@ -1,0 +1,204 @@
+<section class="chapter part-tq" id="ch12">
+  <div class="pgmark">CHAPTER-12</div>
+  <header class="ch-banner">
+    <div class="ch-num">۱۲</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش دوم · TanStack Query</div>
+      <h1>امکانات پیشرفته — صفحه‌بندی، Infinite و Suspense</h1>
+      <p class="ch-desc">صفحه‌بندی نرم با placeholderData، اسکرول بی‌نهایت با useInfiniteQuery، Suspense خالص با useSuspenseQuery، کوئری‌های موازی داینامیک و اتصال به شبکهٔ آفلاین.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>صفحه‌بندی بدون فلش با <code>placeholderData: keepPreviousData</code></li>
+      <li><code>useInfiniteQuery</code> با <code>initialPageParam</code> و <code>getNextPageParam</code></li>
+      <li>رندر اعلامی با <code>useSuspenseQuery</code> و ErrorBoundary</li>
+      <li>کوئری‌های داینامیک با <code>useQueries</code> و رفتار آفلاین</li>
+    </ul>
+  </div>
+
+  <h2>صفحه‌بندی با UI ثابت</h2>
+  <p>مشکل کلاسیک صفحه‌بندی: با هر تغییر صفحه، لیست خالی و دوباره پر می‌شود؛ اسکرول می‌پرد و کاربر گیج می‌شود. راه‌حل: تا دادهٔ صفحهٔ جدید نیامده، دادهٔ صفحهٔ قبلی را «نمایشی» نگه دار:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/PaginatedPosts.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useState } from 'react'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { api } from '../lib/api'
+import { postKeys } from '../features/posts/keys'
+
+export default function PaginatedPosts() {
+  const [page, setPage] = useState(1)
+
+  const { data, isPlaceholderData, isFetching } = useQuery({
+    queryKey: postKeys.list({ page }),
+    queryFn: ({ signal }) =&gt; api.posts(`?_page=${page}&amp;_limit=10`, signal),
+    placeholderData: keepPreviousData, // ← ستارهٔ ماجرا
+    staleTime: 30_000,
+  })
+
+  return (
+    &lt;div style={{ opacity: isPlaceholderData ? 0.6 : 1 }}&gt;
+      &lt;ul&gt;{data?.map((p) =&gt; &lt;li key={p.id}&gt;{p.title}&lt;/li&gt;)}&lt;/ul&gt;
+      &lt;div&gt;
+        &lt;button onClick={() =&gt; setPage((p) =&gt; p - 1)} disabled={page === 1}&gt;قبلی&lt;/button&gt;
+        &lt;button onClick={() =&gt; setPage((p) =&gt; p + 1)}&gt;بعدی&lt;/button&gt;
+        {isFetching &amp;&amp; !isPlaceholderData &amp;&amp; &lt;span&gt;در حال آوردن صفحهٔ جدید...&lt;/span&gt;}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+  </div>
+  <p>نکته‌ها: <code>data</code> در حین fetch صفحهٔ بعد، هنوز صفحهٔ قبلی است (<code>isPlaceholderData: true</code>)؛ با opacity کم، حس «در حال تغییر» می‌دهیم بدون خالی‌شدن لیست. هر صفحه وقتی گرفته شد، در کشِ کلید خودش می‌ماند و برگشت به صفحهٔ قبل آنی است.</p>
+
+  <h2>useInfiniteQuery — اسکرول بی‌نهایت</h2>
+  <p>برای «بارگذاری بیشتر»، ساختار داده فرق می‌کند: پاسخ شامل چند صفحه و نشانگرِ صفحهٔ بعد (cursor) است. سه ورودی اجباری در نسخهٔ ۵:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/InfinitePosts.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useInfiniteQuery } from '@tanstack/react-query'
+import { api } from '../lib/api'
+import { postKeys } from '../features/posts/keys'
+
+export default function InfinitePosts() {
+  const { data, isPending, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: postKeys.lists(), // یا list({ q }) برای فیلترها
+      queryFn: ({ signal, pageParam }) =&gt; api.posts(`?_limit=10&amp;_page=${pageParam}`, signal),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage, allPages, lastPageParam) =&gt; {
+        // JSONPlaceholder: اگر صفحهٔ آخر کمتر از ۱۰ آیتم داشت یعنی تمام
+        return lastPage.length &lt; 10 ? undefined : lastPageParam + 1
+      },
+      maxPages: 5, // حداکثر ۵ صفحه در کش بماند (حافظهٔ موبایل!)
+    })
+
+  if (isPending) return &lt;p&gt;بارگذاری...&lt;/p&gt;
+  if (isError) return &lt;p&gt;خطا!&lt;/p&gt;
+
+  // data.pages آرایه‌ای از «پاسخ هر صفحه» است
+  const posts = data.pages.flat()
+
+  return (
+    &lt;div&gt;
+      {posts.map((p) =&gt; (
+        &lt;article key={p.id}&gt;&lt;h4&gt;{p.title}&lt;/h4&gt;&lt;/article&gt;
+      ))}
+      &lt;button
+        onClick={() =&gt; fetchNextPage()}
+        disabled={!hasNextPage || isFetchingNextPage}
+      &gt;
+        {isFetchingNextPage
+          ? 'در حال بارگذاری...'
+          : hasNextPage
+            ? 'بارگذاری بیشتر'
+            : 'همه را دیدید'}
+      &lt;/button&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+  </div>
+  <ul>
+    <li><strong><code>getNextPageParam</code>:</strong> از پاسخ آخرین صفحه بگویید صفحهٔ بعد چیست؛ برگرداندن <code>undefined</code> یعنی تمام (<code>hasNextPage: false</code>). اگر API شما cursor در پاسخ می‌دهد (<code>lastPage.nextCursor</code>)، همان را برگردانید.</li>
+    <li><strong><code>data.pages</code></strong> آرایهٔ صفحات است؛ با <code>data.pageParams</code> هم نشانگرها را دارید.</li>
+    <li><strong><code>maxPages</code></strong> (جدید در v5) کش صفحات قدیمی را می‌بُرد تا اپ در لیست‌های خیلی بلند از حافظه نترکد.</li>
+  </ul>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته — اتصال به IntersectionObserver</div><p>برای «اسکرول خودکار» به‌جای دکمه، در production با <code>@tanstack/react-virtual</code> یا یک div sentinel و IntersectionObserver ترکیب کنید: <code>if (entry.isIntersecting &amp;&amp; hasNextPage) fetchNextPage()</code>. دقت کنید <code>fetchNextPage</code> را در خود کالبک observer صدا می‌زنید، نه در رندر!</p></div>
+
+  <h2>useSuspenseQuery — رندر اعلامی</h2>
+  <p>اگر معماری team تان React 18+ و Suspense است، <code>useSuspenseQuery</code> کامپوننت را از تمام ifهای وضعیت خلاص می‌کند: داده همیشه تعریف‌شده است (بدون <code>data?.x</code>) و حالت‌های pending/error به مرزهای Suspense/ErrorBoundary منتقل می‌شوند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/PostDetailSuspense.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { Suspense } from 'react'
+import { useSuspenseQuery, ErrorBoundary } from '@tanstack/react-query'
+import { api } from '../lib/api'
+import { postKeys } from '../features/posts/keys'
+
+function PostDetail({ id }) {
+  const { data: post } = useSuspenseQuery({
+    queryKey: postKeys.detail(id),
+    queryFn: ({ signal }) =&gt; api.post(id, signal),
+  })
+  // اینجا data همیشه هست؛ هیچ isPendingی وجود ندارد
+  return &lt;h1&gt;{post.title}&lt;/h1&gt;
+}
+
+export default function Page({ id }) {
+  return (
+    &lt;ErrorBoundary fallbackRender={({ error }) =&gt; &lt;p&gt;خطا: {error.message}&lt;/p&gt;}&gt;
+      &lt;Suspense fallback={&lt;p&gt;در حال بارگذاری...&lt;/p&gt;}&gt;
+        &lt;PostDetail id={id} /&gt;
+      &lt;/Suspense&gt;
+    &lt;/ErrorBoundary&gt;
+  )
+}</code></pre>
+  </div>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — کلید باید زیر Suspense باشد</div><p>کامپوننتی که useSuspenseQuery دارد باید داخل مرز Suspense رندر شود، وگرنه کل مسیر تا نزدیک‌ترین Suspense بالا معلق می‌شود و کل صفحه لودینگ می‌گیرد. مرزها را دانه‌درشت نه، ولی مرتب بگذارید.</p></div>
+
+  <h2>کوئری‌های موازی و داینامیک: useQueries</h2>
+  <p>چند useQuery کنار هم خودبه‌خود موازی اجرا می‌شوند. اما وقتی «تعداد» کوئری‌ها داینامیک است (مثلاً جزئیات N کاربر انتخابی)، تعداد هوک‌ها ثابت نمی‌ماند — قانون هوک‌ها می‌شکند. راه‌حل رسمی:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">N کوئری با یک هوک</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useQueries } from '@tanstack/react-query'
+import { api } from '../lib/api'
+import { userKeys } from '../features/users/keys'
+
+function UserCards({ userIds }) {
+  const results = useQueries({
+    queries: userIds.map((id) =&gt; ({
+      queryKey: userKeys.detail(id),
+      queryFn: ({ signal }) =&gt; api.user(id, signal),
+      staleTime: 5 * 60_000,
+    })),
+  })
+
+  return (
+    &lt;div&gt;
+      {results.map((r, i) =&gt;
+        r.isPending ? (
+          &lt;p key={userIds[i]}&gt;...&lt;/p&gt;
+        ) : (
+          &lt;Card key={userIds[i]} user={r.data} /&gt;
+        )
+      )}
+    &lt;/div&gt;
+  )
+}</code></pre>
+  </div>
+
+  <h2>شبکهٔ ناپایدار: networkMode</h2>
+  <p>پیش‌فرض: بدون اینترنت، Queryها متوقف (<code>paused</code>) می‌شوند و با برگشتن شبکه دوباره اجرا می‌شوند — با <code>fetchStatus: 'paused'</code> می‌توانید بنر «آفلاین» نشان دهید. سه حالت:</p>
+  <table class="tbl tbl-t">
+    <thead><tr><th style="width:24%">networkMode</th><th>رفتار</th><th>کاربرد</th></tr></thead>
+    <tbody>
+      <tr><td><code>online</code> (پیش‌فرض)</td><td>بدون شبکه متوقف می‌شود</td><td>اکثر Queryها</td></tr>
+      <tr><td><code>offlineFirst</code></td><td>یک بار امتحان می‌کند، بعد صف می‌شود</td><td>داده‌های کش‌شده در SW</td></tr>
+      <tr><td><code>always</code></td><td>همیشه اجرا؛ شبکه مهم نیست</td><td>داده‌های کاملاً محلی</td></tr>
+    </tbody>
+  </table>
+
+  <h2>DevTools حرفه‌ای</h2>
+  <p>افزونهٔ <code>ReactQueryDevtools</code> (که در فصل ۸ نصب کردیم) بیش از نمایش لیست است:</p>
+  <ul>
+    <li>وضعیت هر Query (fresh/stale/paused)، زمان آخرین fetch و تعداد observerها را می‌بینید.</li>
+    <li>دکمهٔ invalidate/refetch/reset/copy برای هر Query — دیباگ بدون دست زدن به کد.</li>
+    <li>ساختار درختی کلیدها نشان می‌دهد factory شما درست کار می‌کند یا کلیدها قاطی شده‌اند.</li>
+    <li>در production غیرفعال است؛ فقط dev bundle شامل آن است.</li>
+  </ul>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>صفحه‌بندی نرم = <code>placeholderData: keepPreviousData</code> + کلید پارامتری.</li>
+      <li>Infinite = initialPageParam + getNextPageParam (undefined یعنی تمام) + maxPages.</li>
+      <li>Suspense = useSuspenseQuery داخل مرز Suspense/ErrorBoundary؛ data همیشه هست.</li>
+      <li>کوئری داینامیک = useQueries با آرایهٔ پارامترها.</li>
+      <li>آفلاین با fetchStatus: 'paused' قابل مدیریت است؛ DevTools ابزار روزمرهٔ دیباگ کش است.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۱۲</div>
+    <p>۱) <code>PaginatedPosts</code> را طوری ارتقا دهید که صفحهٔ بعد را پیش‌واکشی کند (سرنخ: در onSuccessِ پایان fetch یا در effect با شرط <code>!isPlaceholderData</code>، <code>prefetchQuery</code> صفحهٔ بعد). ۲) نسخهٔ Infinite را با دکمه بسازید و بعد با IntersectionObserver خودکارش کنید. ۳) سناریوی آفلاین را تست کنید: DevTools → Network → Offline، بعد برگردید و رفتار paused→refetch را در DevTools ببینید.</p>
+  </div>
+</section>

@@ -1,0 +1,193 @@
+<section class="chapter part-both" id="ch14">
+  <div class="pgmark">CHAPTER-14</div>
+  <header class="ch-banner">
+    <div class="ch-num">۱۴</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش سوم · آمادگی حرفه‌ای</div>
+      <h1>حرفه‌ای شو — تست، دیباگ و آمادگی استخدام</h1>
+      <p class="ch-desc">تفاوت «کد می‌زنم» و «آمادهٔ تیم هستم» همین‌جاست: تست‌های استور و هوک‌ها، دیاگنوز سریع خطاهای معروف، آنتی‌پترن‌های code review و سؤالات رایج مصاحبه.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>راه‌اندازی Vitest و تست مستقیم استورهای Zustand</li>
+      <li>تست کامپوننت‌هایی که useQuery دارند (با QueryClient ایزوله)</li>
+      <li>دیاگنوز ۶ خطای معروف و راه‌حل‌شان</li>
+      <li>چک‌لیست code review و ۱۰ سؤال مصاحبه</li>
+    </ul>
+  </div>
+
+  <h2>راه‌اندازی تست</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">terminal</span><span class="cb-lang">bash</span></div>
+    <pre><code class="language-bash">npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">vite.config.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { defineConfig } from 'vite'
+
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './src/test/setup.js',
+  },
+})</code></pre>
+  </div>
+
+  <h2>تست استور Zustand — بدون React!</h2>
+  <p>زیباترین ویژگی استور خارج از React این است که تستش به رندر نیاز ندارد؛ مستقیم با API استور کار می‌کنید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useCartStore.test.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { describe, it, expect, beforeEach } from 'vitest'
+import { useCartStore } from './useCartStore'
+
+describe('useCartStore', () =&gt; {
+  beforeEach(() =&gt; {
+    // State تمیز قبل از هر تست — بدون رندر، بدون Provider
+    useCartStore.setState({ items: [], couponCode: null })
+  })
+
+  it('آیتم جدید را اضافه می‌کند', () =&gt; {
+    useCartStore.getState().addItem(1)
+    expect(useCartStore.getState().items).toEqual([{ id: 1, qty: 1 }])
+  })
+
+  it('افزودن دوباره فقط qty را زیاد می‌کند', () =&gt; {
+    const { addItem } = useCartStore.getState()
+    addItem(1)
+    addItem(1)
+    expect(useCartStore.getState().items).toEqual([{ id: 1, qty: 2 }])
+  })
+
+  it('تعداد صفر یعنی حذف', () =&gt; {
+    useCartStore.setState({ items: [{ id: 1, qty: 1 }] })
+    useCartStore.getState().setQty(1, 0)
+    expect(useCartStore.getState().items).toHaveLength(0)
+  })
+
+  it('کد نامعتبر را رد می‌کند', () =&gt; {
+    const result = useCartStore.getState().applyCoupon('NOPE')
+    expect(result.ok).toBe(false)
+    expect(useCartStore.getState().couponCode).toBeNull()
+  })
+})</code></pre>
+  </div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته</div><p>اگر استور persist دارد، در محیط تست jsdom همان localStorage واقعی است؛ با <code>localStorage.clear()</code> در beforeEach یا ساخت استور با <code>skipHydration</code> در تست‌ها، از نشت بین تست‌ها جلوگیری کنید.</p></div>
+
+  <h2>تست کامپوننت‌های Query — کلاینت ایزوله</h2>
+  <p>قانون طلایی: در تست‌ها هرگز از QueryClient اپ استفاده نکنید؛ برای هر تست یک کلاینت تازه بسازید (retry خاموش تا تست‌ها سریع باشند):</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/test/utils.jsx — wrapper مشترک</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { render } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+export function renderWithClient(ui) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  })
+  return render(
+    &lt;QueryClientProvider client={queryClient}&gt;{ui}&lt;/QueryClientProvider&gt;
+  )
+}</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/components/PostsList.test.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { describe, it, expect, vi } from 'vitest'
+import { screen, waitFor } from '@testing-library/react'
+import { renderWithClient } from '../test/utils'
+import { api } from '../lib/api'
+import PostsList from './PostsList'
+
+vi.mock('../lib/api', () =&gt; ({
+  api: { posts: vi.fn() },
+}))
+
+describe('PostsList', () =&gt; {
+  it('لیست پست‌ها را نشان می‌دهد', async () =&gt; {
+    vi.mocked(api.posts).mockResolvedValue([
+      { id: 1, title: 'سلام دنیا' },
+      { id: 2, title: 'Zustand چیست' },
+    ])
+    renderWithClient(&lt;PostsList /&gt;)
+
+    expect(screen.getByText(/بارگذاری/)).toBeInTheDocument()
+    await waitFor(() =&gt; {
+      expect(screen.getByText('سلام دنیا')).toBeInTheDocument()
+    })
+  })
+
+  it('پیام خطا را نشان می‌دهد', async () =&gt; {
+    vi.mocked(api.posts).mockRejectedValue(new Error('boom'))
+    renderWithClient(&lt;PostsList /&gt;)
+    await waitFor(() =&gt; expect(screen.getByText(/خطا/)).toBeInTheDocument())
+  })
+})</code></pre>
+  </div>
+  <p>دو الگوی مکمل: به‌جای mock کردن لایهٔ API می‌توانید مستقیم در کش بنویسید (<code>qc.setQueryData(['posts'], fakeData)</code>) تا کامپوننت بدون شبکه تست شود؛ و برای تست خود استورِ Mutation، از <code>useMutationState</code> یا فراخوانی مستقیم mutationFn استفاده کنید.</p>
+
+  <h2>کالبدشکافی شش خطای معروف</h2>
+  <table class="tbl">
+    <thead><tr><th style="width:40%">نشانه / پیام</th><th>علت و درمان</th></tr></thead>
+    <tbody>
+      <tr><td><code>No QueryClient set, use QueryClientProvider</code></td><td>هوک Query بیرون از Provider صدا شده. Provider را بالاترین‌جا (main) بگذارید.</td></tr>
+      <tr><td><code>Maximum update depth exceeded</code> با Zustand</td><td>سلکتور هر بار شیء/آرایهٔ جدید برمی‌گرداند (فصل ۴). سلکتور تکی یا useShallow.</td></tr>
+      <tr><td>همیشه رفرش می‌گیرد حتی تازه</td><td>staleTime پیش‌فرض صفر است؛ در defaultOptions تنظیم کنید.</td></tr>
+      <tr><td>داده بعد از mutation قدیمی می‌ماند</td><td>invalidation فراموش شده؛ یا کلید invalidate با کلید fetch متفاوت است — در DevTools کلیدها را مقایسه کنید.</td></tr>
+      <tr><td>opt update برمی‌گردد (آیتم حذف‌شده دوباره می‌آید)</td><td>cancelQueries قبل از setQueryData را جا انداخته‌اید؛ refetch در جریان دادهٔ قدیمی را می‌نویسد.</td></tr>
+      <tr><td>سبد بعد از رفرش لحظه‌ای خالی دیده می‌شود</td><td>hydration غیرهمزمان است؛ فلگ _hasHydrated (فصل ۵).</td></tr>
+    </tbody>
+  </table>
+
+  <h2>آنتی‌پترن‌هایی که در code review رد می‌شوند</h2>
+  <div class="callout co-danger">
+    <div class="co-title"><span class="dot"></span>فهرست ممنوعه</div>
+    <p>۱) کپی پاسخ سرور در Zustand («دو منبع حقیقت»). ۲) <code>useStore()</code> بدون سلکتور در کامپوننت‌های رندر-سنگین. ۳) ساخت object literal در سلکتور بدون useShallow. ۴) کلید رشته‌ای دست‌ساز به‌جای Factory. ۵) فراخوانی <code>invalidateQueries</code> بدون آرگومان (همه‌چیز را stale می‌کند — گاهی عمدی است، معمولاً تنبلی است). ۶) <code>mutateAsync</code> بدون try/catch. ۷) جهش مستقیم State بدون immer. ۸) fetch داخل useEffect برای دادهٔ سرور — جای آن useQuery است. ۹) نگه‌داشتن فرم‌های بزرگ در استور سراسری (فرم محلی بماند یا با RHF مدیریت شود). ۱۰) persist کردن همهٔ استورها «به‌اعلام حمایت از آینده».</p>
+  </div>
+
+  <h2>چک‌لیست code review این حوزه</h2>
+  <ul class="checklist">
+    <li>هر دادهٔ سرور فقط در کش Query است؛ Zustand فقط client state دارد؟</li>
+    <li>کلیدها با Factory ساخته شده‌اند و پارامترها داخل کلیدند؟</li>
+    <li>staleTime معنادار برای هر دامنه تعریف شده (نه همه صفر، نه همه بی‌نهایت)؟</li>
+    <li>mutationها rollback و onSettled دارند؟ خطا به کاربر نشان داده می‌شود؟</li>
+    <li>خروج کاربر کش را پاک می‌کند؟ توکن‌ها از getState خوانده می‌شوند؟</li>
+    <li>سلکتورها مقدار پایدار برمی‌گردانند؟ Profiler آرام است؟</li>
+    <li>تست استورها و کامپوننت‌های کلیدی پاس است؟</li>
+  </ul>
+
+  <h2>ده سؤال رایج مصاحبه (با پاسخ ۲۰ ثانیه‌ای)</h2>
+  <ol>
+    <li><b>چرا Zustand و نه Context؟</b> سلکتور بومی و مقایسهٔ مرجع، بدون Provider، با رندر حداقلی؛ Context برای تغییرات پرتعدا طراحی نشده است.</li>
+    <li><b>چرا دادهٔ سرور را در Redux/Zustand نمی‌گذاریم؟</b> چون مالکش سرور است؛ ما فقط کش می‌خواهیم با staleTime و invalidation — دقیقاً کار Query.</li>
+    <li><b>staleTime و gcTime چه فرقی دارند؟</b> اولی «چقدر داده معتبر محسوب می‌شود» و دومی «چقدر بعد از unmount در حافظه بماند».</li>
+    <li><b>رفتار refetch خودکار چه وقت‌هاست؟</b> mount، window focus، reconnect — هر سه شرطی که داده stale باشد.</li>
+    <li><b>optimistic update را شرح بده.</b> onMutate: cancel+snapshot+set، onError: rollback، onSettled: invalidate.</li>
+    <li><b>queryKey چرا آرایه است؟</b> برای هش پایدار و تطبیق سلسله‌مراتبی در invalidate.</li>
+    <li><b>چرا set تابعی بهتر از set شیءای است؟</b> برای آپدیت‌های وابسته به State فعلی؛ از stale شدن در آپدیت‌های متوالی جلوگیری می‌کند.</li>
+    <li><b>useShallow چه می‌کند؟</b> مقایسهٔ سطحی خروجی سلکتور تا رندر اضافه نشود؛ جایگزین equalityFn حذف‌شده در v5.</li>
+    <li><b>placeholderData و initialData فرقشان؟</b> اولی نمایشی است و status می‌ماند pending؛ دومی دادهٔ واقعی محسوب می‌شود.</li>
+    <li><b>درخواست‌های موازی تکراری چطور ددوپ می‌شوند؟</b> کلید یکسان → یک درخواست، همهٔ observerها همان داده.</li>
+  </ol>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>تست استور بدون رندر: setState/getState مستقیم + beforeEach تمیز.</li>
+      <li>تست Query با کلاینت ایزوله (retry: false) و mock لایهٔ API یا setQueryData.</li>
+      <li>شش خطای معروف را با علائمشان بشناسید؛ دیاگنوز سریع = اعتماد تیم.</li>
+      <li>فهرست ممنوعه و چک‌لیست review را در پروژه‌تان نصب کنید (ادبیات تیمی).</li>
+      <li>پاسخ‌های ۲۰ ثانیه‌ای مصاحبه را تمرین کنید تا روان بگویید.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۱۴</div>
+    <p>برای پروژهٔ فصل ۱۳ سه تست بنویسید: ۱) اکشن‌های سبد (add/double-add/qty-zero). ۲) کامپوننت PostList در دو حالت موفق و خطا. ۳) mutation حذف خوش‌بینانه: mock کنید deletePost یک بار reject شود و با RTL مطمئن شوید آیتم بعد از خطا دوباره در لیست است (rollback رخ داده).</p>
+  </div>
+</section>

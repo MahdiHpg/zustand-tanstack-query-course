@@ -1,0 +1,198 @@
+<section class="chapter part-zustand" id="ch03">
+  <div class="pgmark">CHAPTER-03</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۳</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش اول · Zustand</div>
+      <h1>عمق Zustand — set، get و کار با استور از هر جا</h1>
+      <p class="ch-desc">قدرت واقعی Zustand وقتی آشکار می‌شود که بفهمید استور فقط یک شیء زندهٔ خارج از React است: از اکشن‌های async تا خواندن و نوشتن State داخل توابع معمولی جاوااسکریپت.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>پارامتر <code>get</code> در اکشن‌ها و حالت <code>replace</code> در <code>set</code></li>
+      <li>نوشتن اکشن‌های async با الگوی loading/error</li>
+      <li>API کامل استور: <code>getState</code>، <code>setState</code>، <code>subscribe</code> — بیرون از React</li>
+      <li>الگوی <code>reset</code> و استخراج State اولیه</li>
+    </ul>
+  </div>
+
+  <h2>پارامتر get: خواندن آخرین نسخهٔ State داخل اکشن</h2>
+  <p>تا حالا همهٔ اکشن‌ها فقط <code>set</code> را دیسکت می‌کردند. اما <code>create</code> دو پارامتر به شما می‌دهد: <code>(set, get)</code>. <code>get</code> همان لحظه، <em>آخرین نسخهٔ</em> State را برمی‌گرداند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useWishlistStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+
+export const useWishlistStore = create((set, get) =&gt; ({
+  items: [],
+
+  // toggle با get: اول بخوان، بعد تصمیم بگیر
+  toggle: (product) =&gt; {
+    const exists = get().items.some((i) =&gt; i.id === product.id)
+    if (exists) {
+      set({ items: get().items.filter((i) =&gt; i.id !== product.id) })
+    } else {
+      set({ items: [...get().items, product] })
+    }
+  },
+
+  clear: () =&gt; set({ items: [] }),
+}))</code></pre>
+  </div>
+  <p>همین کار را می‌شد داخل <code>set((state) =&gt; ...)</code> هم کرد؛ تفاوت ظریف اینجاست: اگر اکشن چند <code>set</code> پشت‌سرهم داشته باشد، <code>get()</code> همیشه نسخهٔ تازه را می‌دهد اما پارامتر <code>state</code> داخل یک <code>set</code> فقط نسخهٔ همان لحظه است. در اکشن‌های چندمرحله‌ای (مخصوصاً async) <code>get</code> انتخاب مطمئن‌تری است.</p>
+
+  <h3>حالت کم‌کاربرد اما مهم: replace</h3>
+  <p><code>set</code> یک آرگومان دوم دارد. اگر <code>true</code> بدهید، به‌جای merge، کل State را جایگزین می‌کند:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">replace — کل State عوض می‌شود</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">set({ items: [] }, true) // اکشن‌ها هم حذف می‌شوند! تقریباً هرگز این کار را نکنید
+
+// کاربرد درستِ replace: ریست کامل به State اولیه — فصل ادامه دارد</code></pre>
+  </div>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار</div><p><code>set(obj, true)</code> کل استور (از جمله اکشن‌ها) را با آن شیء عوض می‌کند. اگر اکشن‌ها را در شیء جدید نیاورده باشید، عملاً استور را می‌سوزانید. ۹۹٪ موارد باید replace نزنید.</p></div>
+
+  <h2>اکشن‌های async: بارگذاری داده با loading و error</h2>
+  <p>اکشن‌ها توابع معمولی هستند؛ پس می‌توانند <code>async</code> باشند. الگوی استاندارد برای فراخوانی API داخل استور:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useNotificationsStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+
+export const useNotificationsStore = create((set, get) =&gt; ({
+  items: [],
+  status: 'idle', // idle | loading | success | error
+  error: null,
+
+  fetchAll: async () =&gt; {
+    if (get().status === 'loading') return // جلوگیری از درخواست موازی
+    set({ status: 'loading', error: null })
+    try {
+      const res = await fetch('/api/notifications')
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const items = await res.json()
+      set({ items, status: 'success' })
+    } catch (err) {
+      set({ status: 'error', error: err.message })
+    }
+  },
+
+  markAllRead: async () =&gt; {
+    const ids = get().items.filter((n) =&gt; !n.read).map((n) =&gt; n.id)
+    await fetch('/api/notifications/read', {
+      method: 'POST',
+      body: JSON.stringify({ ids }),
+    })
+    set((s) =&gt; ({
+      items: s.items.map((n) =&gt; ({ ...n, read: true })),
+    }))
+  },
+}))</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/Notifications.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import { useEffect } from 'react'
+import { useNotificationsStore } from './store/useNotificationsStore'
+
+export default function Notifications() {
+  const items = useNotificationsStore((s) =&gt; s.items)
+  const status = useNotificationsStore((s) =&gt; s.status)
+  const fetchAll = useNotificationsStore((s) =&gt; s.fetchAll)
+
+  useEffect(() =&gt; {
+    fetchAll()
+  }, [fetchAll])
+
+  if (status === 'loading') return &lt;p&gt;در حال بارگذاری...&lt;/p&gt;
+  if (status === 'error') return &lt;p&gt;خطا در دریافت اعلان‌ها&lt;/p&gt;
+  return &lt;ul&gt;{items.map((n) =&gt; &lt;li key={n.id}&gt;{n.text}&lt;/li&gt;)}&lt;/ul&gt;
+}</code></pre>
+  </div>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — این کد را در پروژهٔ واقعی برای دادهٔ سرور ننویسید!</div><p>الگوی بالا برای «فراخوانی‌های دستورالعملی» (مثلاً ثبت لاگ، ارسال فرم به API خارج از کش) مناسب است، اما برای <em>داده‌ای که از سرور می‌خوانید و در UI نشان می‌دهید</em>، نوشتن دستی loading/error/caching یعنی بازاختراع TanStack Query به شکل شکسته. از فصل ۸ به بعد، خواندن داده فقط با Query انجام می‌شود و این الگو را در جای درستش می‌بینیم.</p></div>
+
+  <h2>استور، فراتر از کامپوننت: getState و setState</h2>
+  <p>هوکی که <code>create</code> برمی‌گرداند، خودش چند متد اضافه دارد که استور را از «دنیای بیرون React» قابل استفاده می‌کند:</p>
+  <table class="tbl">
+    <thead><tr><th style="width:32%">متد</th><th>کار</th><th>رندر می‌کند؟</th></tr></thead>
+    <tbody>
+      <tr><td><code>useXStore.getState()</code></td><td>خواندن لحظه‌ای State (بدون subscribe)</td><td>خیر</td></tr>
+      <tr><td><code>useXStore.setState(partial)</code></td><td>نوشتن مستقیم State از بیرون اکشن‌ها</td><td>بله (برای مشترکین)</td></tr>
+      <tr><td><code>useXStore.subscribe(fn)</code></td><td>گوش دادن به هر تغییر (بازگشت unsubscribe)</td><td>خیر</td></tr>
+      <tr><td><code>useXStore.destroy()</code></td><td>پاک‌سازی استور (به‌ندرت، در تست‌ها)</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p>کاربردهای واقعی‌ای که در پروژه‌های شرکت‌ها هر روز می‌بینید:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/lib/api.js — اتصال استور به لایهٔ شبکه</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { useAuthStore } from '../store/useAuthStore'
+
+// ۱) خواندن توکن در interceptor — جایی که هوک نداریم!
+api.interceptors.request.use((config) =&gt; {
+  const token = useAuthStore.getState().token
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+api.interceptors.response.use(
+  (res) =&gt; res,
+  (err) =&gt; {
+    // ۲) نوشتن مستقیم از بیرون: 401 یعنی نشست منقضی شده
+    if (err.response?.status === 401) {
+      useAuthStore.getState().logout()
+    }
+    return Promise.reject(err)
+  }
+)</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">گوش دادن به تغییرات — بدون رندر</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">// داخل App.jsx — یک بار برای همیشه
+useEffect(() =&gt; {
+  const unsubscribe = useCartStore.subscribe((state) =&gt; {
+    // مثال: گزارش‌گیری، sync با سرور، هشدار سبد پر
+    if (state.items.length &gt; 20) console.warn('سبد خیلی پر شد!')
+  })
+  return unsubscribe // پاک‌سازی هنگام unmount
+}, [])</code></pre>
+  </div>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته</div><p>« getState در event handler» یکی از رایج‌ترین الگوهای بهینه‌سازی است: وقتی در <code>onClick</code> به مقدار فعلی نیاز دارید ولی نمی‌خواهید تغییراتش باعث رندر شود، به‌جای subscribe به آن در کامپوننت، همان لحظه <code>getState()</code> بخوانید. (کاملش در فصل ۴ زیر عنوان «Transient Updates».)</p></div>
+
+  <h2>الگوی reset: استخراج State اولیه</h2>
+  <p>با رشد استور، «ریست به اول» سخت می‌شود. راه استاندارد، بیرون کشیدن State اولیه در یک ثابت است:</p>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/store/useFiltersStore.js</span><span class="cb-lang">js</span></div>
+    <pre><code class="language-js">import { create } from 'zustand'
+
+const initialState = {
+  query: '',
+  category: 'all',
+  minPrice: 0,
+  sort: 'newest',
+}
+
+export const useFiltersStore = create((set) =&gt; ({
+  ...initialState,
+  setQuery: (query) =&gt; set({ query }),
+  setCategory: (category) =&gt; set({ category }),
+  setSort: (sort) =&gt; set({ sort }),
+  reset: () =&gt; set({ ...initialState }), // شیء تازه؛ نه replace
+}))</code></pre>
+  </div>
+  <p>دو نکته: اول اینکه <code>reset</code> با merge ساده انجام شد (بدون <code>true</code>)، چون اکشن‌ها جزء State هستند و باید بمانند. دوم اینکه استور فیلترها نمونهٔ خوبی از مرز Client State و URL State است — در پروژهٔ فصل ۱۳ بحثش می‌کنیم.</p>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li><code>get()</code> آخرین نسخهٔ State را داخل اکشن می‌دهد؛ برای اکشن‌های چندمرحله‌ای و async.</li>
+      <li><code>set(partial, true)</code> کل State را جایگزین می‌کند — تقریباً هرگز لازم نیست.</li>
+      <li>اکشن async با الگوی <code>idle → loading → success/error</code> نوشته می‌شود؛ اما برای «دادهٔ سرور» جای این الگو TanStack Query است.</li>
+      <li><code>getState</code>/<code>setState</code>/<code>subscribe</code> استور را به لایه‌های غیر React (interceptor، روتر، توابع کمکی) وصل می‌کنند.</li>
+      <li>ریست استاندارد = استخراج <code>initialState</code> + اکشن <code>reset</code> با merge ساده.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۳</div>
+    <p>استور <code>useAuthStore</code> بسازید با فیلدهای <code>token</code> و <code>user</code> و اکشن‌های <code>login(email, password)</code> (async با delay ساختگی ۵۰۰ میلی‌ثانیه و الگوی loading)، <code>logout</code> و <code>reset</code>. بعد یک تابع <code>api</code> ساختگی بنویسید که با <code>getState()</code> توکن را بخواند و اگر توکن نبود، Promise reject کند. خروجی را در کنسول با subscribe دنبال کنید و ببینید هر اکشن چه تغییری می‌سازد.</p>
+  </div>
+</section>

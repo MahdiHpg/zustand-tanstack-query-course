@@ -1,0 +1,143 @@
+<section class="chapter part-tq" id="ch08">
+  <div class="pgmark">CHAPTER-08</div>
+  <header class="ch-banner">
+    <div class="ch-num">۰۸</div>
+    <div class="ch-titles">
+      <div class="ch-part">بخش دوم · TanStack Query</div>
+      <h1>TanStack Query و دنیای Server State</h1>
+      <p class="ch-desc">چرا دادهٔ سرور با State معمولی فرق دارد؟ در این فصل مرز Client State و Server State را قطعی می‌کنیم، معماری کش TanStack Query را می‌شناسیم و پروژه را آماده می‌کنیم.</p>
+    </div>
+  </header>
+
+  <div class="ch-goals">
+    <h3>در این فصل یاد می‌گیرید</h3>
+    <ul>
+      <li>پنج ویژگی Server State که آن را از Client State جدا می‌کند</li>
+      <li>نصب و راه‌اندازی <code>QueryClientProvider</code> و تنظیمات پیش‌فرض تیمی</li>
+      <li>نقشهٔ معماری: queryKey، queryFn، کش، observer و garbage collection</li>
+      <li>واژگان کلیدی که تا آخر دوره بارها می‌بینید</li>
+    </ul>
+  </div>
+
+  <h2>چرا نمی‌توان دادهٔ سرور را مثل State معمولی مدیریت کرد؟</h2>
+  <p>سبد خرید مال شماست: فقط شما آن را می‌بینید و فقط شما تغییرش می‌دهید. اما «لیست محصولات» را نه — هر لحظه ممکن است سرور آن را عوض کند، همکار دیگری تغییرش داده باشد و شما اصلاً خبر ندارید. این تفاوتِ ماهوی است، نه فنی. پنج ویژگی Server State:</p>
+  <ol>
+    <li><strong>دور و مشترک:</strong> جای ذخیرهٔ اصلی جای دیگری است و ممکن است بدون اطلاع شما تغییر کند.</li>
+    <li><strong>به‌روزرسانی‌پذیر از بیرون:</strong> دیگر کاربران، پنل ادمین، حتی زمان (موجودی و قیمت‌ها).</li>
+    <li><strong>نیازمند چرخهٔ async:</strong> هر دسترسی یعنی شبکه با تأخیر، خطا و تلاش مجدد.</li>
+    <li><strong>نیازمند حالت‌های فرآیندی:</strong> در حال بارگذاری، خطا، موفقیت، stale/fresh — State معمولی این مفاهیم را ندارد.</li>
+    <li><strong>کِش‌شدنی اما قابل کهنگی:</strong> نسخهٔ فعلی فقط یک snapshot است؛ ممکن است کهنه شود.</li>
+  </ol>
+  <table class="tbl tbl-t">
+    <thead><tr><th>ویژگی</th><th>Client State (Zustand)</th><th>Server State (TanStack Query)</th></tr></thead>
+    <tbody>
+      <tr><td>مالک داده</td><td>مرورگر کاربر</td><td>سرور / دیتابیس</td></tr>
+      <tr><td>ماهیت ذخیره</td><td>منبع حقیقت (Source of Truth)</td><td>کش (Cache) از دادهٔ دیگران</td></tr>
+      <tr><td>تغییر</td><td>با اکشن‌های خودمان</td><td>با mutation + invalidation</td></tr>
+      <tr><td>قابلیت کهنگی</td><td>معنا ندارد</td><td>مفهوم محوری (stale/fresh)</td></tr>
+      <tr><td>ری‌فرش خودکار</td><td>معنا ندارد</td><td>با فوکوس، ری‌کانکت و interval</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-danger"><div class="co-title"><span class="dot"></span>ممنوع — دو منبع حقیقت</div><p>هرگز پاسخ سرور را در Zustand کپی نکنید (<code>useUserStore.setState({ profile: data })</code>). از آن لحظه دو نسخه از یک داده دارید و دیر یا زود ناهماهنگ می‌شوند و باگ‌های «گاهی درست است، گاهی نه» می‌سازید. دادهٔ سرور فقط در کش Query زندگی می‌کند.</p></div>
+
+  <h2>نصب و راه‌اندازی</h2>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">terminal</span><span class="cb-lang">bash</span></div>
+    <pre><code class="language-bash">npm install @tanstack/react-query
+npm install -D @tanstack/react-query-devtools</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="cb-head"><span class="cb-file">src/main.jsx</span><span class="cb-lang">jsx</span></div>
+    <pre><code class="language-jsx">import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import App from './App'
+
+// ۱) یک QueryClient برای کل اپ — بیرون از کامپوننت بسازید
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,              // داده تا ۱ دقیقه «تازه» محسوب شود
+      retry: 2,                        // دو بار تلاش مجدد قبل از اعلام خطا
+      refetchOnWindowFocus: true,      // برگشت به تب = بررسی تازگی
+    },
+  },
+})
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  &lt;React.StrictMode&gt;
+    &lt;QueryClientProvider client={queryClient}&gt;
+      &lt;App /&gt;
+      &lt;ReactQueryDevtools initialIsOpen={false} /&gt;
+    &lt;/QueryClientProvider&gt;
+  &lt;/React.StrictMode&gt;
+)</code></pre>
+  </div>
+  <p><code>QueryClient</code> مغز متفکر است: کش، پیکربندی و ابزارهای دستوری (invalidate، prefetch و...) همه در آن‌اند و به‌صورت یکتا در کل اپ وجود دارد. <code>QueryClientProvider</code> همان Provider است که در Zustand نداشتیم — اینجا برای اشتراک یک client واحد لازم است.</p>
+  <div class="callout co-tip"><div class="co-title"><span class="dot"></span>نکته — تنظیمات پیش‌فرض، جایی که تصمیم‌های تیمی گرفته می‌شود</div><p>به‌جای اینکه هر <code>useQuery</code> جداگانه staleTime بدهد، در <code>defaultOptions</code> یک‌بار برای کل اپ تعیین کنید و فقط در موارد استثنا، سطح Query بازنویسی کنید. این همان کاری است که در code review از شما خواسته می‌شود.</p></div>
+
+  <h2>معماری کش: پنج بازیگر اصلی</h2>
+  <div class="flow">
+    <div class="fnode" style="border-color:var(--t); background:var(--t-soft)"><b>useQuery</b>observer در کامپوننت</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--t); background:var(--t-soft)"><b>QueryCache</b>انبار همهٔ Queryها</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode"><b>Query</b>یک کلید منحصربه‌فرد</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode"><b>queryFn</b>پرومیس از API</div>
+    <div class="farrow">⇐</div>
+    <div class="fnode" style="border-color:var(--line)"><b>Server</b>REST / GraphQL</div>
+  </div>
+  <p>هر <code>useQuery</code> یک <strong>observer</strong> به یک Query در کش اضافه می‌کند. Query با <strong>queryKey</strong> هویت می‌گیرد (همان کلید دیکشنری). داده‌ای که queryFn برمی‌گرداند در همان Query ذخیره می‌شود. وقتی آخرین observer حذف شود (کامپوننت unmount)، داده تا پایان <strong>gcTime</strong> (پیش‌فرض ۵ دقیقه) برای استفاده‌های بعدی زنده می‌ماند و بعد از حافظه پاک می‌شود. دو زمان کلیدی:</p>
+  <table class="tbl tbl-t">
+    <thead><tr><th style="width:20%">پارامتر</th><th style="width:26%">پیش‌فرض</th><th>معنا</th></tr></thead>
+    <tbody>
+      <tr><td><code>staleTime</code></td><td><code>0</code></td><td>چه مدت داده «تازه» است؛ در این مدت هیچ رفرشی به‌صورت خودکار رخ نمی‌دهد (پیش‌فرض ۰ یعنی بلافاصله stale).</td></tr>
+      <tr><td><code>gcTime</code></td><td><code>5 دقیقه</code></td><td>چند وقت پس از بی‌observer شدن، داده از حافظه پاک شود. (در نسخهٔ ۴ به اسم <code>cacheTime</code> بود.)</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-warn"><div class="co-title"><span class="dot"></span>هشدار — stale یعنی «ممکن است کهنه باشد»، نه «غیرقابل استفاده»</div><p>دادهٔ stale فوراً از کش رندر می‌شود؛ فقط در پس‌زمینه هم fetch تازه اجرا می‌شود و وقتی رسید، UI بی‌دردسر آپدیت می‌شود. الگوی «نمایش فوری کش + به‌روزرسانی در پس‌زمینه» همان چیزی است که اپ‌ها را «سریع» حس می‌کند.</p></div>
+
+  <h2>واژگانی که تا آخر دوره همراه‌ماند</h2>
+  <ul>
+    <li><strong>Query:</strong> خواندن اعلامی از دادهٔ سرور (GET-مانند) با کلید یکتا.</li>
+    <li><strong>Mutation:</strong> تغییر دادهٔ سرور (POST/PUT/DELETE) — اعلامی نیست؛ خودتان اجرایش می‌کنید.</li>
+    <li><strong>Invalidation:</strong> بعد از mutation، علامت‌گذاری Queryهای مرتبط به stale تا دوباره گرفته شوند — جایگزین دستی sync کردن.</li>
+    <li><strong>Refetch:</strong> گرفتن دوبارهٔ داده؛ خودکار (فوکوس/ری‌کانکت/interval) یا دستی.</li>
+    <li><strong>Optimistic Update:</strong> قبل از جواب سرور، UI را آپدیت کن؛ اگر شکست، برگرد (فصل ۱۰).</li>
+  </ul>
+
+  <h2>از نسخهٔ ۴ به ۵ — اگر جایی کد قدیمی دیدید</h2>
+  <table class="tbl">
+    <thead><tr><th>در نسخهٔ ۴</th><th>در نسخهٔ ۵</th></tr></thead>
+    <tbody>
+      <tr><td><code>useQuery({ ... }, queryFn)</code> یا آرگومان‌های جدا</td><td>فقط شیء: <code>useQuery({ queryKey, queryFn })</code></td></tr>
+      <tr><td><code>isLoading</code> = هنوز داده‌ای نیست</td><td><code>isPending</code>؛ <code>isLoading</code> حالا = در حال fetch بدون دادهٔ اولیه</td></tr>
+      <tr><td><code>cacheTime</code></td><td><code>gcTime</code></td></tr>
+      <tr><td><code>keepPreviousData: true</code></td><td><code>placeholderData: keepPreviousData</code> (فصل ۱۲)</td></tr>
+      <tr><td><code>useQuery(…, { enabled })</code></td><td>همه در یک شیء: <code>useQuery({ ..., enabled })</code></td></tr>
+      <tr><td><code>isFetchingNextPage</code> بدون تایپ</td><td>همان است ولی همهٔ هوک‌ها تایپ عمومی بهتر دارند و TS-only شد</td></tr>
+    </tbody>
+  </table>
+
+  <h2>پروژهٔ بخش دوم</h2>
+  <p>در ادامهٔ دوره یک API عمومی به اسم <strong>JSONPlaceholder</strong> را مبنای تمرین می‌کنیم (<code>https://jsonplaceholder.typicode.com</code>) — سرورِ آزمایشی با endpointهای <code>/posts</code>، <code>/users</code> و <code>/comments</code> که همیشه در دسترس است و writeهای ساختگی انجام می‌دهد. برای پروژهٔ فصل ۱۳ همین را به‌عنوان Backend استفاده می‌کنیم؛ در پروژه‌های واقعی فقط آدرس عوض می‌شود.</p>
+  <div class="callout co-note"><div class="co-title"><span class="dot"></span>یادداشت</div><p>TanStack Query فریم‌ورک‌محور نیست: هستهٔ آن (<code>@tanstack/query-core</code>) با Vue و Solid و Svelte هم کار می‌کند. هر چیزی که اینجا یاد می‌گیرید، دانش قابل‌حمل است.</p></div>
+
+  <div class="ch-summary">
+    <h3>جمع‌بندی فصل</h3>
+    <ul>
+      <li>Server State داده‌ای است که مالکش شما نیست؛ مدیریتش یعنی مدیریت یک کش.</li>
+      <li>معماری: observer (useQuery) → QueryCache → Query (با queryKey) → queryFn → سرور.</li>
+      <li><code>staleTime</code> = مدت تازگی؛ <code>gcTime</code> = مدت زنده‌ماندن بعد از unmount.</li>
+      <li>تنظیمات پیش‌فرض را یک‌جا در <code>defaultOptions</code> بدهید.</li>
+      <li>دادهٔ سرور هرگز به Zustand کپی نمی‌شود.</li>
+    </ul>
+  </div>
+
+  <div class="callout co-exercise">
+    <div class="co-title"><span class="dot"></span>تمرین فصل ۸</div>
+    <p>پروژهٔ Vite بخش اول را با <code>@tanstack/react-query</code> راه‌اندازی کنید: QueryClient با staleTime ۳۰ ثانیه و DevTools. در App یک کامپوننت آزمایشی بسازید که با <code>fetch</code> آدرس <code>https://jsonplaceholder.typicode.com/users</code> را صدا بزند (فعلاً همان useEffect قدیمی — فصل بعد اصلش می‌کنیم) و خروجی را در کنسول چاپ کند. فقط مطمئن شوید اپ بدون خطا بالا می‌آید.</p>
+  </div>
+</section>
