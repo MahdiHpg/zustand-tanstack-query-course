@@ -1,5 +1,6 @@
-# ⚡ دوره صفر تا صد Zustand و TanStack Query — مدیریت جامع State کلاینت و سرور در React
+﻿# ⚡ دوره صفر تا صد Zustand و TanStack Query — مدیریت جامع State کلاینت و سرور در React
 
+> 🤖 **تولید شده توسط هوش مصنوعی:** این دوره به‌طور کامل توسط مدل **GLM-5.3-Flash** تولید و تدوین شده است.
 > **نسخه دوره:** مدرن — با آخرین نسخه React 19، Zustand v5 و TanStack Query v5
 > **پیش‌نیاز:** آشنایی با React و هوک‌های پایه نظیر `useState` و `useEffect`
 
