@@ -47,3 +47,19 @@
 
 نسخه کتاب کامل و فرمت‌شده این دوره به شکل PDF آماده استفاده است:
 - **`دوره-صفر-تا-صد-Zustand-TanStackQuery.pdf`**
+
+---
+
+## 🏷️ کلمات کلیدی و برچسب‌های سئو (SEO Keywords & Tags)
+
+> **تگ‌های پیشنهادی برای مخزن گیت‌هاب (Topics):**
+> `react, zustand, tanstack-query, react-query, state-management, typescript, nextjs, persian-tutorial, farsi, آموزش-ری‌اکت`
+
+**کلمات کلیدی جستجو:**  
+آموزش Zustand و TanStack Query به فارسی, مدیریت state در ری اکت, آموزش React Query v5, جایگزین رداکس با زاستند, کتاب آموزش ری اکت pdf
+
+---
+
+## 📥 دانلود مستقیم نسخه چاپی و PDF کتاب
+
+برای دسترسی و دانلود مستقیم فایل PDF کامل این دوره آموزشی، به بخش **[Releases](../../releases)** همین ریپازیتوری مراجعه کنید یا فایل PDF قرار داده شده در ریشه مخزن را دریافت نمایید.
